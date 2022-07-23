@@ -2,6 +2,7 @@
 pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
  * This is a standard ERC1155 contract but also supporting escrow
@@ -89,7 +90,7 @@ abstract contract EscrowPoweredERC1155 is ERC1155 {
             require(
                 _tokenAmounts[index] != 0,
                 string(abi.encodePacked(
-                    "EscrowPoweredERC1155: token in position ", index, " must not have amount of 0"
+                    "EscrowPoweredERC1155: token in position ", Strings.toString(index), " must not have amount of 0"
                 ))
             );
         }
@@ -135,7 +136,7 @@ abstract contract EscrowPoweredERC1155 is ERC1155 {
             require(
                 _tokenAmounts[index] != 0,
                 string(abi.encodePacked(
-                    "EscrowPoweredERC1155: token in position ", index, " must not have amount of 0"
+                    "EscrowPoweredERC1155: token in position ", Strings.toString(index), " must not have amount of 0"
                 ))
             );
         }
