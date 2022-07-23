@@ -415,5 +415,68 @@ contract("SampleEscrowPoweredERC1155", function (accounts) {
       [new BN("50000000000000000"), new BN("100000000000000000")], web3.utils.asciiToHex("test"),
       {from: accounts[1]}
     );
+  });
+
+  it("must be able to break any deal", async function() {
+    console.log("0. Break by emitter, after creation (deal: 4)");
+    await contract.dealStart(
+      accounts[0], accounts[1], [new BN("1"), new BN("2")],
+      [new BN("50000000000000000"), new BN("100000000000000000")],
+      {from: accounts[0]}
+    );
+    let tx = await contract.dealBreak(new BN("4"), {from: accounts[0]});
+    expectEvent(tx, "DealBroken", [new BN("4"), accounts[0]]);
+    console.log("2. Break by receiver, after creation (deal: 5)");
+    await contract.dealStart(
+      accounts[0], accounts[1], [new BN("1"), new BN("2")],
+      [new BN("50000000000000000"), new BN("100000000000000000")],
+      {from: accounts[0]}
+    );
+    tx = await contract.dealBreak(new BN("5"), {from: accounts[1]});
+    expectEvent(tx, "DealBroken", [new BN("5"), accounts[1]]);
+    console.log("3. Break-attempt by third party, after creation (deal: 6)");
+    await contract.dealStart(
+      accounts[0], accounts[1], [new BN("1"), new BN("2")],
+      [new BN("50000000000000000"), new BN("100000000000000000")],
+      {from: accounts[0]}
+    );
+    await expectRevert(
+      contract.dealBreak(new BN("6"), {from: accounts[4]}),
+      revertReason("EscrowPoweredERC1155: caller is not emitter/receiver nor approved")
+    );
+    console.log("4. Break by emitter, after acceptance (deal: 7)");
+    await contract.dealStart(
+      accounts[0], accounts[1], [new BN("1"), new BN("2")],
+      [new BN("50000000000000000"), new BN("100000000000000000")],
+      {from: accounts[0]}
+    );
+    await contract.dealAccept(new BN("7"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[1]});
+    tx = await contract.dealBreak(new BN("7"), {from: accounts[0]});
+    expectEvent(tx, "DealBroken", [new BN("7"), accounts[0]]);
+    console.log("5. Break by receiver, after acceptance (deal: 8)");
+    await contract.dealStart(
+      accounts[0], accounts[1], [new BN("1"), new BN("2")],
+      [new BN("50000000000000000"), new BN("100000000000000000")],
+      {from: accounts[0]}
+    );
+    await contract.dealAccept(new BN("8"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[1]});
+    tx = await contract.dealBreak(new BN("8"), {from: accounts[1]});
+    expectEvent(tx, "DealBroken", [new BN("8"), accounts[1]]);
+    console.log("6. Break-attempt by third party, after acceptance (deal: 9)");
+    await contract.dealStart(
+      accounts[0], accounts[1], [new BN("1"), new BN("2")],
+      [new BN("50000000000000000"), new BN("100000000000000000")],
+      {from: accounts[0]}
+    );
+    await contract.dealAccept(new BN("9"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[1]});
+    await expectRevert(
+      contract.dealBreak(new BN("9"), {from: accounts[4]}),
+      revertReason("EscrowPoweredERC1155: caller is not emitter/receiver nor approved")
+    );
+    console.log("6. Break-attempt an already-confirmed deal - it will be invalid (deal: 1)");
+    await expectRevert(
+      contract.dealBreak(new BN("1"), {from: accounts[0]}),
+      revertReason("EscrowPoweredERC1155: invalid deal")
+    );
   })
 });
