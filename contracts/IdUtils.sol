@@ -9,15 +9,15 @@ pragma solidity >=0.8 <0.9.0;
  * system itself only use the latter 64 bits (the space
  * they would use for a "brand" is always 0).
  */
-abstract contract LingrIdUtils {
+library IdUtils {
     // This mask is used to clear the first flag (to make an NFT id).
-    uint256 constant NFT_FILTER = 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    uint256 constant NFT_FILTER = (1 << 255) - 1;
 
     // This mask is used to set the second flag (to make a non-brand NFT id).
-    uint256 constant NFT_NONBRAND_SET = 0x4000000000000000000000000000000000000000000000000000000000000000;
+    uint256 constant NFT_NONBRAND_SET = (1 << 254);
 
     // This mask is used to set the first flag (to make a brand FT).
-    uint256 constant FT_SET = 0x8000000000000000000000000000000000000000000000000000000000000000;
+    uint256 constant FT_SET = (1 << 255);
 
     /**
      * Constructs a NFT id. While all the ids for the fungible tokens
