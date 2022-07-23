@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
  * features to safely exchange goods (and only goods - no native
  * token will be exchanged here) between two parties.
  */
-contract EscrowPoweredERC1155 is ERC1155 {
+abstract contract EscrowPoweredERC1155 is ERC1155 {
     /**
      * The escrow subsystem has deals, and each deal has a state,
      * either rejected or ongoing. The "broken" state is a catch-all
@@ -62,12 +62,16 @@ contract EscrowPoweredERC1155 is ERC1155 {
      */
     mapping(uint256 => Deal) public deals;
 
+    constructor(string memory _uri) ERC1155(_uri) {}
+
     /**
      * Starting a deal requires the sender to be the _emitter address
      * or an address the sender can operate on their behalf. Also, the
      * objects data must be non-empty, and no element must be 0.
      */
-    function dealStart(address _emitter, address _receiver, uint256[] _tokenIds, uint256[] _tokenAmounts) public
+    function dealStart(
+        address _emitter, address _receiver, uint256[] memory _tokenIds, uint256[] memory _tokenAmounts
+    ) public
     {
         require(
             _emitter != address(0) && _receiver != address(0),
@@ -84,7 +88,9 @@ contract EscrowPoweredERC1155 is ERC1155 {
         for(uint256 index = 0; index < _tokenAmounts.length; index++) {
             require(
                 _tokenAmounts[index] != 0,
-                abi.encodePacked("EscrowPoweredERC1155: token in position ", index, " must not have amount of 0")
+                string(abi.encodePacked(
+                    "EscrowPoweredERC1155: token in position ", index, " must not have amount of 0"
+                ))
             );
         }
 
@@ -92,7 +98,7 @@ contract EscrowPoweredERC1155 is ERC1155 {
         currentDealIndex += 1;
         deals[currentDealIndex] = Deal({
             emitter: _emitter, receiver: _receiver, emitterTokenIds: _tokenIds, emitterTokenAmounts: _tokenAmounts,
-            state: DealState.CREATED
+            state: DealState.CREATED, receiverTokenIds: new uint256[](0), receiverTokenAmounts: new uint256[](0)
         });
         // Then, emit the event.
         emit DealStarted(currentDealIndex, _emitter, _receiver, _tokenIds, _tokenAmounts);
@@ -104,7 +110,7 @@ contract EscrowPoweredERC1155 is ERC1155 {
      * and the deal to be in the appropriate state. Also, the objects data
      * must be non-empty and no element must be 0.
      */
-    function dealAccept(uint256 _dealIndex, uint256[] _tokenIds, uint256[] _tokenAmounts) public
+    function dealAccept(uint256 _dealIndex, uint256[] memory _tokenIds, uint256[] memory _tokenAmounts) public
     {
         Deal storage deal = deals[_dealIndex];
         address receiver = deal.receiver;
@@ -128,7 +134,9 @@ contract EscrowPoweredERC1155 is ERC1155 {
         for(uint256 index = 0; index < _tokenAmounts.length; index++) {
             require(
                 _tokenAmounts[index] != 0,
-                abi.encodePacked("EscrowPoweredERC1155: token in position ", index, " must not have amount of 0")
+                string(abi.encodePacked(
+                    "EscrowPoweredERC1155: token in position ", index, " must not have amount of 0"
+                ))
             );
         }
 

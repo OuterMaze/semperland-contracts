@@ -1,5 +1,5 @@
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
-
 
 /**
  * This class defines methods to build the ID of a token,
@@ -26,14 +26,14 @@ abstract contract LingrIdUtils {
      * still leaves with a lot of available ids. This one is not meant
      * to make brands, but arbitrary ids.
      */
-    function nftId(uint256 id) public view returns (uint256) {
+    function nftId(uint256 id) public pure returns (uint256) {
         return (NFT_FILTER & id) | NFT_NONBRAND_SET;
     }
 
     /**
      * Constructs a brand token id. It is the same as the generated address.
      */
-    function brandId(address brand) public view returns (uint256) {
+    function brandId(address brand) public pure returns (uint256) {
         return uint256(uint160(brand));
     }
 
@@ -44,7 +44,7 @@ abstract contract LingrIdUtils {
      * with no issue at all). All the tokens constructed with this
      * method are fungible tokens.
      */
-    function brandTokenId(address brand, uint64 index) public view returns (uint256) {
+    function brandTokenId(address brand, uint64 index) public pure returns (uint256) {
         return uint256(uint160(brand)) << 64 | uint256(index) | FT_SET;
     }
 
@@ -54,7 +54,7 @@ abstract contract LingrIdUtils {
      * are only used as system tokens. This tokens ids are all meant to
      * be used for fungible tokens.
      */
-    function systemTokenId(uint64 index) public view returns (uint256) {
+    function systemTokenId(uint64 index) public pure returns (uint256) {
         return uint256(index) | FT_SET;
     }
 }
