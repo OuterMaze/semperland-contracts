@@ -141,7 +141,7 @@ abstract contract EscrowPoweredERC1155 is ERC1155 {
         }
 
         // Set the receiver acceptance and offer.
-        deal.state == DealState.ACCEPTED;
+        deal.state = DealState.ACCEPTED;
         deal.receiverTokenIds = _tokenIds;
         deal.receiverTokenAmounts = _tokenAmounts;
         // Then, emit the event.
