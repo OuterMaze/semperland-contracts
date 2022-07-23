@@ -478,5 +478,5 @@ contract("SampleEscrowPoweredERC1155", function (accounts) {
       contract.dealBreak(new BN("1"), {from: accounts[0]}),
       revertReason("EscrowPoweredERC1155: invalid deal")
     );
-  })
+  });
 });
