@@ -194,7 +194,7 @@ abstract contract BrandRegistry is Context, NativePayable {
      * internally, when the actual brand transfer is done (brands
      * can only be transferred, but never burnt).
      */
-    function _setOwner(address _brandId, address _newOwner) internal {
+    function _setBrandOwner(address _brandId, address _newOwner) internal {
         if (brands[_brandId].owner != address(0)) brands[_brandId].owner = _newOwner;
     }
 
