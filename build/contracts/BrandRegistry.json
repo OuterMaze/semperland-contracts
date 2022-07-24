@@ -1,0 +1,1798 @@
+{
+  "contractName": "BrandRegistry",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newCost",
+          "type": "uint256"
+        }
+      ],
+      "name": "BrandRegistrationCostUpdated",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "brandRegistrationCost",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "newCost",
+          "type": "uint256"
+        }
+      ],
+      "name": "setBrandRegistrationCost",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newCost\",\"type\":\"uint256\"}],\"name\":\"BrandRegistrationCostUpdated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"brandRegistrationCost\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newCost\",\"type\":\"uint256\"}],\"name\":\"setBrandRegistrationCost\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"events\":{\"BrandRegistrationCostUpdated(uint256)\":{\"notice\":\"An event for when the brand registration cost is updated.\"}},\"kind\":\"user\",\"methods\":{\"brandRegistrationCost()\":{\"notice\":\"The cost to register a new brand. This can be changed in the future and must be able to be known in the ABI for the users to be aware of the statistic.\"},\"setBrandRegistrationCost(uint256)\":{\"notice\":\"Sets the new brand registration cost.\"}},\"notice\":\"A Brand registry will keep track of the brands being registered. Those brands will hold the metadata, and this trait will hold the mean to register such brand with its metadata.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/lingr/BrandRegistry.sol\":\"BrandRegistry\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92\",\"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3\"]},\"project:/contracts/lingr/BrandRegistry.sol\":{\"keccak256\":\"0x487f5bc01f2ef0508bf6dafd2890da826518dca8a82834b38d40468999157120\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8c983d9d5b306287edd9e53284f9b64aa0a67f049731d42f5d34fdef05a2b7ad\",\"dweb:/ipfs/QmasULVdTf3TgbMRse4N5sP3nA9RsXBr3e9qZLurmYVYAp\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8 <0.9.0;\n\nimport \"@openzeppelin/contracts/utils/Context.sol\";\n\n/**\n * A Brand registry will keep track of the brands being registered.\n * Those brands will hold the metadata, and this trait will hold\n * the mean to register such brand with its metadata.\n */\nabstract contract BrandRegistry is Context {\n    /**\n     * The cost to register a new brand. This can be changed in\n     * the future and must be able to be known in the ABI for the\n     * users to be aware of the statistic.\n     */\n    uint256 public brandRegistrationCost;\n\n    /**\n     * This is the whole brand metadata. It only has aesthetics,\n     * name and descriptions.\n     */\n    struct BrandMetadata {\n        /**\n         * The name of the brand. It matches the \"name\" field\n         * of the metadata. This field is immutable.\n         */\n        string name;\n\n        /**\n         * The description of the brand. It matches the\n         * \"description\" field of the metadata. This field\n         * is immutable.\n         */\n        string description;\n\n        /**\n         * The challenge URL of the brand. It matches the\n         * \"properties.challengeUrl\" field. This field is\n         * optional and mutable.\n         */\n        string challengeUrl;\n\n        /**\n         * The URL of the brand. It matches the \"image\" field\n         * of the metadata. This field is mutable.\n         */\n        string image;\n\n        /**\n         * The icon of the brand (16x16). It matches the\n         * \"properties.icon16x16\" field of the metadata.\n         * This field is optional and mutable.\n         */\n        string icon16;\n\n        /**\n         * The icon of the brand (32x32). It matches the\n         * \"properties.icon32x32\" field of the metadata.\n         * This field is optional and mutable.\n         */\n        string icon32;\n\n        /**\n         * The icon of the brand (64x64). It matches the\n         * \"properties.icon64x64\" field of the metadata.\n         * This field is optional and mutable.\n         */\n        string icon64;\n    }\n\n    /**\n     * Tells whether the specified user can set the registration\n     * cost, or not.\n     */\n    function _canSetBrandRegistrationCost(address _sender) internal virtual view returns (bool);\n\n    /**\n     * An event for when the brand registration cost is updated.\n     */\n    event BrandRegistrationCostUpdated(uint256 newCost);\n\n    /**\n     * Sets the new brand registration cost.\n     */\n    function setBrandRegistrationCost(uint256 newCost) public {\n        require(\n            _canSetBrandRegistrationCost(_msgSender()),\n            \"BrandRegistry: not allowed to set the brand registration cost\"\n        );\n        require(\n            newCost >= (1 ether) / 100,\n            \"BrandRegistry: the brand registry cost must not be less than 0.01 native tokens\"\n        );\n        brandRegistrationCost = newCost;\n    }\n}\n",
+  "sourcePath": "/home/luismasuelli/Projects/OuterMaze/lingr-contracts/contracts/lingr/BrandRegistry.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/lingr/BrandRegistry.sol",
+    "exportedSymbols": {
+      "BrandRegistry": [
+        364
+      ],
+      "Context": [
+        21
+      ]
+    },
+    "id": 365,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 292,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:29:3"
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/Context.sol",
+        "file": "@openzeppelin/contracts/utils/Context.sol",
+        "id": 293,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 365,
+        "sourceUnit": 22,
+        "src": "63:51:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": true,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 295,
+              "name": "Context",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 21,
+              "src": "346:7:3"
+            },
+            "id": 296,
+            "nodeType": "InheritanceSpecifier",
+            "src": "346:7:3"
+          }
+        ],
+        "canonicalName": "BrandRegistry",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 294,
+          "nodeType": "StructuredDocumentation",
+          "src": "116:194:3",
+          "text": " A Brand registry will keep track of the brands being registered.\n Those brands will hold the metadata, and this trait will hold\n the mean to register such brand with its metadata."
+        },
+        "fullyImplemented": false,
+        "id": 364,
+        "linearizedBaseContracts": [
+          364,
+          21
+        ],
+        "name": "BrandRegistry",
+        "nameLocation": "329:13:3",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "documentation": {
+              "id": 297,
+              "nodeType": "StructuredDocumentation",
+              "src": "360:184:3",
+              "text": " The cost to register a new brand. This can be changed in\n the future and must be able to be known in the ABI for the\n users to be aware of the statistic."
+            },
+            "functionSelector": "3e49d925",
+            "id": 299,
+            "mutability": "mutable",
+            "name": "brandRegistrationCost",
+            "nameLocation": "564:21:3",
+            "nodeType": "VariableDeclaration",
+            "scope": 364,
+            "src": "549:36:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 298,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "549:7:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "BrandRegistry.BrandMetadata",
+            "id": 321,
+            "members": [
+              {
+                "constant": false,
+                "id": 302,
+                "mutability": "mutable",
+                "name": "name",
+                "nameLocation": "880:4:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "873:11:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 301,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "873:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 305,
+                "mutability": "mutable",
+                "name": "description",
+                "nameLocation": "1066:11:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "1059:18:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 304,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1059:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 308,
+                "mutability": "mutable",
+                "name": "challengeUrl",
+                "nameLocation": "1268:12:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "1261:19:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 307,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1261:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 311,
+                "mutability": "mutable",
+                "name": "image",
+                "nameLocation": "1435:5:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "1428:12:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 310,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1428:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 314,
+                "mutability": "mutable",
+                "name": "icon16",
+                "nameLocation": "1643:6:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "1636:13:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 313,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1636:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 317,
+                "mutability": "mutable",
+                "name": "icon32",
+                "nameLocation": "1852:6:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "1845:13:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 316,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1845:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 320,
+                "mutability": "mutable",
+                "name": "icon64",
+                "nameLocation": "2061:6:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "2054:13:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 319,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2054:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "BrandMetadata",
+            "nameLocation": "710:13:3",
+            "nodeType": "StructDefinition",
+            "scope": 364,
+            "src": "703:1371:3",
+            "visibility": "public"
+          },
+          {
+            "documentation": {
+              "id": 322,
+              "nodeType": "StructuredDocumentation",
+              "src": "2080:97:3",
+              "text": " Tells whether the specified user can set the registration\n cost, or not."
+            },
+            "id": 329,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_canSetBrandRegistrationCost",
+            "nameLocation": "2191:28:3",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 325,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 324,
+                  "mutability": "mutable",
+                  "name": "_sender",
+                  "nameLocation": "2228:7:3",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 329,
+                  "src": "2220:15:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 323,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2220:7:3",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2219:17:3"
+            },
+            "returnParameters": {
+              "id": 328,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 327,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 329,
+                  "src": "2268:4:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 326,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2268:4:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2267:6:3"
+            },
+            "scope": 364,
+            "src": "2182:92:3",
+            "stateMutability": "view",
+            "virtual": true,
+            "visibility": "internal"
+          },
+          {
+            "anonymous": false,
+            "documentation": {
+              "id": 330,
+              "nodeType": "StructuredDocumentation",
+              "src": "2280:76:3",
+              "text": " An event for when the brand registration cost is updated."
+            },
+            "id": 334,
+            "name": "BrandRegistrationCostUpdated",
+            "nameLocation": "2367:28:3",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 333,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 332,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "newCost",
+                  "nameLocation": "2404:7:3",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 334,
+                  "src": "2396:15:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 331,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2396:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2395:17:3"
+            },
+            "src": "2361:52:3"
+          },
+          {
+            "body": {
+              "id": 362,
+              "nodeType": "Block",
+              "src": "2538:370:3",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "arguments": [],
+                            "expression": {
+                              "argumentTypes": [],
+                              "id": 342,
+                              "name": "_msgSender",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 11,
+                              "src": "2598:10:3",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_internal_view$__$returns$_t_address_$",
+                                "typeString": "function () view returns (address)"
+                              }
+                            },
+                            "id": 343,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "2598:12:3",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          ],
+                          "id": 341,
+                          "name": "_canSetBrandRegistrationCost",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 329,
+                          "src": "2569:28:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_bool_$",
+                            "typeString": "function (address) view returns (bool)"
+                          }
+                        },
+                        "id": 344,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2569:42:3",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4272616e6452656769737472793a206e6f7420616c6c6f77656420746f2073657420746865206272616e6420726567697374726174696f6e20636f7374",
+                        "id": 345,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2625:63:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_ac149febefe0fe8cd121fb90e2b18018ecbda70aa23b09149319d5ddabcf1b1f",
+                          "typeString": "literal_string \"BrandRegistry: not allowed to set the brand registration cost\""
+                        },
+                        "value": "BrandRegistry: not allowed to set the brand registration cost"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_ac149febefe0fe8cd121fb90e2b18018ecbda70aa23b09149319d5ddabcf1b1f",
+                          "typeString": "literal_string \"BrandRegistry: not allowed to set the brand registration cost\""
+                        }
+                      ],
+                      "id": 340,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "2548:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 346,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2548:150:3",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 347,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2548:150:3"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 354,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 349,
+                          "name": "newCost",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 337,
+                          "src": "2729:7:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": ">=",
+                        "rightExpression": {
+                          "commonType": {
+                            "typeIdentifier": "t_rational_10000000000000000_by_1",
+                            "typeString": "int_const 10000000000000000"
+                          },
+                          "id": 353,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "leftExpression": {
+                            "components": [
+                              {
+                                "hexValue": "31",
+                                "id": 350,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "kind": "number",
+                                "lValueRequested": false,
+                                "nodeType": "Literal",
+                                "src": "2741:7:3",
+                                "subdenomination": "ether",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_rational_1000000000000000000_by_1",
+                                  "typeString": "int_const 1000000000000000000"
+                                },
+                                "value": "1"
+                              }
+                            ],
+                            "id": 351,
+                            "isConstant": false,
+                            "isInlineArray": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "TupleExpression",
+                            "src": "2740:9:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_1000000000000000000_by_1",
+                              "typeString": "int_const 1000000000000000000"
+                            }
+                          },
+                          "nodeType": "BinaryOperation",
+                          "operator": "/",
+                          "rightExpression": {
+                            "hexValue": "313030",
+                            "id": 352,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "2752:3:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_100_by_1",
+                              "typeString": "int_const 100"
+                            },
+                            "value": "100"
+                          },
+                          "src": "2740:15:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_10000000000000000_by_1",
+                            "typeString": "int_const 10000000000000000"
+                          }
+                        },
+                        "src": "2729:26:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4272616e6452656769737472793a20746865206272616e6420726567697374727920636f7374206d757374206e6f74206265206c657373207468616e20302e3031206e617469766520746f6b656e73",
+                        "id": 355,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2769:81:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_3fc96514d6fd4b4aaa425c018dcd5bfe829187a6ca00ca4ebf460313c45eb6d2",
+                          "typeString": "literal_string \"BrandRegistry: the brand registry cost must not be less than 0.01 native tokens\""
+                        },
+                        "value": "BrandRegistry: the brand registry cost must not be less than 0.01 native tokens"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_3fc96514d6fd4b4aaa425c018dcd5bfe829187a6ca00ca4ebf460313c45eb6d2",
+                          "typeString": "literal_string \"BrandRegistry: the brand registry cost must not be less than 0.01 native tokens\""
+                        }
+                      ],
+                      "id": 348,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "2708:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 356,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2708:152:3",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 357,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2708:152:3"
+                },
+                {
+                  "expression": {
+                    "id": 360,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 358,
+                      "name": "brandRegistrationCost",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 299,
+                      "src": "2870:21:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 359,
+                      "name": "newCost",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 337,
+                      "src": "2894:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "2870:31:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 361,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2870:31:3"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 335,
+              "nodeType": "StructuredDocumentation",
+              "src": "2419:56:3",
+              "text": " Sets the new brand registration cost."
+            },
+            "functionSelector": "43779197",
+            "id": 363,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setBrandRegistrationCost",
+            "nameLocation": "2489:24:3",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 338,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 337,
+                  "mutability": "mutable",
+                  "name": "newCost",
+                  "nameLocation": "2522:7:3",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 363,
+                  "src": "2514:15:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 336,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2514:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2513:17:3"
+            },
+            "returnParameters": {
+              "id": 339,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2538:0:3"
+            },
+            "scope": 364,
+            "src": "2480:428:3",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 365,
+        "src": "311:2599:3",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:2879:3"
+  },
+  "legacyAST": {
+    "absolutePath": "project:/contracts/lingr/BrandRegistry.sol",
+    "exportedSymbols": {
+      "BrandRegistry": [
+        364
+      ],
+      "Context": [
+        21
+      ]
+    },
+    "id": 365,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 292,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:29:3"
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/Context.sol",
+        "file": "@openzeppelin/contracts/utils/Context.sol",
+        "id": 293,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 365,
+        "sourceUnit": 22,
+        "src": "63:51:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": true,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 295,
+              "name": "Context",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 21,
+              "src": "346:7:3"
+            },
+            "id": 296,
+            "nodeType": "InheritanceSpecifier",
+            "src": "346:7:3"
+          }
+        ],
+        "canonicalName": "BrandRegistry",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 294,
+          "nodeType": "StructuredDocumentation",
+          "src": "116:194:3",
+          "text": " A Brand registry will keep track of the brands being registered.\n Those brands will hold the metadata, and this trait will hold\n the mean to register such brand with its metadata."
+        },
+        "fullyImplemented": false,
+        "id": 364,
+        "linearizedBaseContracts": [
+          364,
+          21
+        ],
+        "name": "BrandRegistry",
+        "nameLocation": "329:13:3",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "documentation": {
+              "id": 297,
+              "nodeType": "StructuredDocumentation",
+              "src": "360:184:3",
+              "text": " The cost to register a new brand. This can be changed in\n the future and must be able to be known in the ABI for the\n users to be aware of the statistic."
+            },
+            "functionSelector": "3e49d925",
+            "id": 299,
+            "mutability": "mutable",
+            "name": "brandRegistrationCost",
+            "nameLocation": "564:21:3",
+            "nodeType": "VariableDeclaration",
+            "scope": 364,
+            "src": "549:36:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 298,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "549:7:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "BrandRegistry.BrandMetadata",
+            "id": 321,
+            "members": [
+              {
+                "constant": false,
+                "id": 302,
+                "mutability": "mutable",
+                "name": "name",
+                "nameLocation": "880:4:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "873:11:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 301,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "873:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 305,
+                "mutability": "mutable",
+                "name": "description",
+                "nameLocation": "1066:11:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "1059:18:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 304,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1059:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 308,
+                "mutability": "mutable",
+                "name": "challengeUrl",
+                "nameLocation": "1268:12:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "1261:19:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 307,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1261:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 311,
+                "mutability": "mutable",
+                "name": "image",
+                "nameLocation": "1435:5:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "1428:12:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 310,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1428:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 314,
+                "mutability": "mutable",
+                "name": "icon16",
+                "nameLocation": "1643:6:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "1636:13:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 313,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1636:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 317,
+                "mutability": "mutable",
+                "name": "icon32",
+                "nameLocation": "1852:6:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "1845:13:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 316,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1845:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 320,
+                "mutability": "mutable",
+                "name": "icon64",
+                "nameLocation": "2061:6:3",
+                "nodeType": "VariableDeclaration",
+                "scope": 321,
+                "src": "2054:13:3",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 319,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2054:6:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "BrandMetadata",
+            "nameLocation": "710:13:3",
+            "nodeType": "StructDefinition",
+            "scope": 364,
+            "src": "703:1371:3",
+            "visibility": "public"
+          },
+          {
+            "documentation": {
+              "id": 322,
+              "nodeType": "StructuredDocumentation",
+              "src": "2080:97:3",
+              "text": " Tells whether the specified user can set the registration\n cost, or not."
+            },
+            "id": 329,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_canSetBrandRegistrationCost",
+            "nameLocation": "2191:28:3",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 325,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 324,
+                  "mutability": "mutable",
+                  "name": "_sender",
+                  "nameLocation": "2228:7:3",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 329,
+                  "src": "2220:15:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 323,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2220:7:3",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2219:17:3"
+            },
+            "returnParameters": {
+              "id": 328,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 327,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 329,
+                  "src": "2268:4:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 326,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2268:4:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2267:6:3"
+            },
+            "scope": 364,
+            "src": "2182:92:3",
+            "stateMutability": "view",
+            "virtual": true,
+            "visibility": "internal"
+          },
+          {
+            "anonymous": false,
+            "documentation": {
+              "id": 330,
+              "nodeType": "StructuredDocumentation",
+              "src": "2280:76:3",
+              "text": " An event for when the brand registration cost is updated."
+            },
+            "id": 334,
+            "name": "BrandRegistrationCostUpdated",
+            "nameLocation": "2367:28:3",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 333,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 332,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "newCost",
+                  "nameLocation": "2404:7:3",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 334,
+                  "src": "2396:15:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 331,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2396:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2395:17:3"
+            },
+            "src": "2361:52:3"
+          },
+          {
+            "body": {
+              "id": 362,
+              "nodeType": "Block",
+              "src": "2538:370:3",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "arguments": [],
+                            "expression": {
+                              "argumentTypes": [],
+                              "id": 342,
+                              "name": "_msgSender",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 11,
+                              "src": "2598:10:3",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_internal_view$__$returns$_t_address_$",
+                                "typeString": "function () view returns (address)"
+                              }
+                            },
+                            "id": 343,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "2598:12:3",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          ],
+                          "id": 341,
+                          "name": "_canSetBrandRegistrationCost",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 329,
+                          "src": "2569:28:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_bool_$",
+                            "typeString": "function (address) view returns (bool)"
+                          }
+                        },
+                        "id": 344,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2569:42:3",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4272616e6452656769737472793a206e6f7420616c6c6f77656420746f2073657420746865206272616e6420726567697374726174696f6e20636f7374",
+                        "id": 345,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2625:63:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_ac149febefe0fe8cd121fb90e2b18018ecbda70aa23b09149319d5ddabcf1b1f",
+                          "typeString": "literal_string \"BrandRegistry: not allowed to set the brand registration cost\""
+                        },
+                        "value": "BrandRegistry: not allowed to set the brand registration cost"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_ac149febefe0fe8cd121fb90e2b18018ecbda70aa23b09149319d5ddabcf1b1f",
+                          "typeString": "literal_string \"BrandRegistry: not allowed to set the brand registration cost\""
+                        }
+                      ],
+                      "id": 340,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "2548:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 346,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2548:150:3",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 347,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2548:150:3"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 354,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 349,
+                          "name": "newCost",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 337,
+                          "src": "2729:7:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": ">=",
+                        "rightExpression": {
+                          "commonType": {
+                            "typeIdentifier": "t_rational_10000000000000000_by_1",
+                            "typeString": "int_const 10000000000000000"
+                          },
+                          "id": 353,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "leftExpression": {
+                            "components": [
+                              {
+                                "hexValue": "31",
+                                "id": 350,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "kind": "number",
+                                "lValueRequested": false,
+                                "nodeType": "Literal",
+                                "src": "2741:7:3",
+                                "subdenomination": "ether",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_rational_1000000000000000000_by_1",
+                                  "typeString": "int_const 1000000000000000000"
+                                },
+                                "value": "1"
+                              }
+                            ],
+                            "id": 351,
+                            "isConstant": false,
+                            "isInlineArray": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "TupleExpression",
+                            "src": "2740:9:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_1000000000000000000_by_1",
+                              "typeString": "int_const 1000000000000000000"
+                            }
+                          },
+                          "nodeType": "BinaryOperation",
+                          "operator": "/",
+                          "rightExpression": {
+                            "hexValue": "313030",
+                            "id": 352,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "2752:3:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_100_by_1",
+                              "typeString": "int_const 100"
+                            },
+                            "value": "100"
+                          },
+                          "src": "2740:15:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_10000000000000000_by_1",
+                            "typeString": "int_const 10000000000000000"
+                          }
+                        },
+                        "src": "2729:26:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4272616e6452656769737472793a20746865206272616e6420726567697374727920636f7374206d757374206e6f74206265206c657373207468616e20302e3031206e617469766520746f6b656e73",
+                        "id": 355,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2769:81:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_3fc96514d6fd4b4aaa425c018dcd5bfe829187a6ca00ca4ebf460313c45eb6d2",
+                          "typeString": "literal_string \"BrandRegistry: the brand registry cost must not be less than 0.01 native tokens\""
+                        },
+                        "value": "BrandRegistry: the brand registry cost must not be less than 0.01 native tokens"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_3fc96514d6fd4b4aaa425c018dcd5bfe829187a6ca00ca4ebf460313c45eb6d2",
+                          "typeString": "literal_string \"BrandRegistry: the brand registry cost must not be less than 0.01 native tokens\""
+                        }
+                      ],
+                      "id": 348,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "2708:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 356,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2708:152:3",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 357,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2708:152:3"
+                },
+                {
+                  "expression": {
+                    "id": 360,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 358,
+                      "name": "brandRegistrationCost",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 299,
+                      "src": "2870:21:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 359,
+                      "name": "newCost",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 337,
+                      "src": "2894:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "2870:31:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 361,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2870:31:3"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 335,
+              "nodeType": "StructuredDocumentation",
+              "src": "2419:56:3",
+              "text": " Sets the new brand registration cost."
+            },
+            "functionSelector": "43779197",
+            "id": 363,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setBrandRegistrationCost",
+            "nameLocation": "2489:24:3",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 338,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 337,
+                  "mutability": "mutable",
+                  "name": "newCost",
+                  "nameLocation": "2522:7:3",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 363,
+                  "src": "2514:15:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 336,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2514:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2513:17:3"
+            },
+            "returnParameters": {
+              "id": 339,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2538:0:3"
+            },
+            "scope": 364,
+            "src": "2480:428:3",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 365,
+        "src": "311:2599:3",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:2879:3"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.10+commit.fc410830.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.3",
+  "updatedAt": "2022-07-24T15:52:08.011Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "events": {
+      "BrandRegistrationCostUpdated(uint256)": {
+        "notice": "An event for when the brand registration cost is updated."
+      }
+    },
+    "kind": "user",
+    "methods": {
+      "brandRegistrationCost()": {
+        "notice": "The cost to register a new brand. This can be changed in the future and must be able to be known in the ABI for the users to be aware of the statistic."
+      },
+      "setBrandRegistrationCost(uint256)": {
+        "notice": "Sets the new brand registration cost."
+      }
+    },
+    "notice": "A Brand registry will keep track of the brands being registered. Those brands will hold the metadata, and this trait will hold the mean to register such brand with its metadata.",
+    "version": 1
+  }
+}

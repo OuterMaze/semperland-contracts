@@ -1,4 +1,4 @@
-const SampleEscrowPoweredERC1155 = artifacts.require("SampleEscrowPoweredERC1155");
+const SampleERC1155WithSafeExchange = artifacts.require("SampleERC1155WithSafeExchange");
 
 const {
   BN,           // Big Number support
@@ -12,11 +12,11 @@ const {
  * Ethereum client
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
-contract("SampleEscrowPoweredERC1155", function (accounts) {
+contract("SampleERC1155WithSafeExchange", function (accounts) {
   var contract = null;
 
   before(async function () {
-    contract = await SampleEscrowPoweredERC1155.new({ from: accounts[0] });
+    contract = await SampleERC1155WithSafeExchange.new({ from: accounts[0] });
   });
 
   async function expectBalances(ids, amounts, account) {
@@ -159,7 +159,7 @@ contract("SampleEscrowPoweredERC1155", function (accounts) {
       accounts[0], accounts[1], [new BN("1"), new BN("2")],
       [new BN("50000000000000000"), new BN("100000000000000000")],
       {from: accounts[1]}
-    ), revertReason("EscrowPoweredERC1155: caller is not emitter nor approved"));
+    ), revertReason("SafeExchange: caller is not emitter nor approved"));
     // 0.b. Good operator.
     console.log("0.b. Good operator");
     let tx = await contract.dealStart(
@@ -199,7 +199,7 @@ contract("SampleEscrowPoweredERC1155", function (accounts) {
     console.log("4.a. Wrong operator");
     await expectRevert(
       contract.dealAccept(new BN("2"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[0]}),
-      revertReason("EscrowPoweredERC1155: caller is not receiver nor approved")
+      revertReason("SafeExchange: caller is not receiver nor approved")
     );
     // 4.b. Good operator.
     console.log("4.b. Good operator");
@@ -236,7 +236,7 @@ contract("SampleEscrowPoweredERC1155", function (accounts) {
     console.log("8.a. Wrong operator");
     await expectRevert(
       contract.dealConfirm(new BN("2"), {from: accounts[1]}),
-      revertReason("EscrowPoweredERC1155: caller is not emitter nor approved")
+      revertReason("SafeExchange: caller is not emitter nor approved")
     );
     // 8.b. Good operator.
     console.log("8.b. Good operator");
@@ -272,21 +272,21 @@ contract("SampleEscrowPoweredERC1155", function (accounts) {
     console.log("0. Direct usage, and many errors");
     await expectRevert(contract.dealStart(
       accounts[0], constants.ZERO_ADDRESS, [], [], {from: accounts[0]}
-    ), revertReason("EscrowPoweredERC1155: transfer from/to the zero address"));
+    ), revertReason("SafeExchange: transfer from/to the zero address"));
     await expectRevert(contract.dealStart(
         constants.ZERO_ADDRESS, accounts[1], [], [], {from: accounts[0]}
-    ), revertReason("EscrowPoweredERC1155: transfer from/to the zero address"));
+    ), revertReason("SafeExchange: transfer from/to the zero address"));
     await expectRevert(contract.dealStart(
       accounts[0], accounts[1], [], [], {from: accounts[0]}
-    ), revertReason("EscrowPoweredERC1155: token ids and amounts length mismatch or 0"));
+    ), revertReason("SafeExchange: token ids and amounts length mismatch or 0"));
     await expectRevert(contract.dealStart(
       accounts[0], accounts[1], [new BN("1"), new BN("2")], [new BN("100000000000000000")], {from: accounts[0]}
-    ), revertReason("EscrowPoweredERC1155: token ids and amounts length mismatch or 0"));
+    ), revertReason("SafeExchange: token ids and amounts length mismatch or 0"));
     await expectRevert(contract.dealStart(
       accounts[0], accounts[1], [new BN("1"), new BN("2")],
       [new BN("0"), new BN("100000000000000000")],
       {from: accounts[0]}
-    ), revertReason("EscrowPoweredERC1155: token in position 0 must not have amount of 0"));
+    ), revertReason("SafeExchange: token in position 0 must not have amount of 0"));
     let tx = await contract.dealStart(
       accounts[0], accounts[1], [new BN("1"), new BN("2")],
       [new BN("50000000000000000"), new BN("100000000000000000")],
@@ -327,27 +327,27 @@ contract("SampleEscrowPoweredERC1155", function (accounts) {
     console.log("4. Then, the deal must be accepted by the receiver");
     await expectRevert(
       contract.dealAccept(new BN("3"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[0]}),
-      revertReason("EscrowPoweredERC1155: caller is not receiver nor approved")
+      revertReason("SafeExchange: caller is not receiver nor approved")
     );
     await expectRevert(
       contract.dealAccept(new BN("4"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[1]}),
-      revertReason("EscrowPoweredERC1155: invalid deal")
+      revertReason("SafeExchange: invalid deal")
     );
     await expectRevert(
       contract.dealAccept(new BN("3"), [new BN("3"), new BN("1")], [new BN("150000000000000000")], {from: accounts[1]}),
-      revertReason("EscrowPoweredERC1155: token ids and amounts length mismatch or 0")
+      revertReason("SafeExchange: token ids and amounts length mismatch or 0")
     );
     await expectRevert(
       contract.dealAccept(new BN("3"), [], [], {from: accounts[1]}),
-      revertReason("EscrowPoweredERC1155: token ids and amounts length mismatch or 0")
+      revertReason("SafeExchange: token ids and amounts length mismatch or 0")
     );
     await expectRevert(
       contract.dealConfirm(new BN("3"), {from: accounts[0]}),
-      revertReason("EscrowPoweredERC1155: deal is not in just-accepted state")
+      revertReason("SafeExchange: deal is not in just-accepted state")
     );
     await expectRevert(
       contract.dealAccept(new BN("3"), [new BN("3")], [new BN("0")], {from: accounts[1]}),
-      revertReason("EscrowPoweredERC1155: token in position 0 must not have amount of 0")
+      revertReason("SafeExchange: token in position 0 must not have amount of 0")
     );
     tx = await contract.dealAccept(new BN("3"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[1]});
     // 5. The balances must be unchanged, on both accounts.
@@ -380,15 +380,15 @@ contract("SampleEscrowPoweredERC1155", function (accounts) {
     console.log("8. Them, the deal must be confirmed by the emitter");
     await expectRevert(
       contract.dealConfirm(new BN("4"), {from: accounts[0]}),
-      revertReason("EscrowPoweredERC1155: invalid deal")
+      revertReason("SafeExchange: invalid deal")
     );
     await expectRevert(
       contract.dealConfirm(new BN("3"), {from: accounts[1]}),
-      revertReason("EscrowPoweredERC1155: caller is not emitter nor approved")
+      revertReason("SafeExchange: caller is not emitter nor approved")
     );
     await expectRevert(
       contract.dealAccept(new BN("3"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[1]}),
-      revertReason("EscrowPoweredERC1155: deal is not in just-created state")
+      revertReason("SafeExchange: deal is not in just-created state")
     );
     tx = await contract.dealConfirm(new BN("3"), {from: accounts[0]});
     // 9. An event must have been triggered.
@@ -442,7 +442,7 @@ contract("SampleEscrowPoweredERC1155", function (accounts) {
     );
     await expectRevert(
       contract.dealBreak(new BN("6"), {from: accounts[4]}),
-      revertReason("EscrowPoweredERC1155: caller is not emitter/receiver nor approved")
+      revertReason("SafeExchange: caller is not emitter/receiver nor approved")
     );
     console.log("4. Break by emitter, after acceptance (deal: 7)");
     await contract.dealStart(
@@ -471,12 +471,12 @@ contract("SampleEscrowPoweredERC1155", function (accounts) {
     await contract.dealAccept(new BN("9"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[1]});
     await expectRevert(
       contract.dealBreak(new BN("9"), {from: accounts[4]}),
-      revertReason("EscrowPoweredERC1155: caller is not emitter/receiver nor approved")
+      revertReason("SafeExchange: caller is not emitter/receiver nor approved")
     );
     console.log("6. Break-attempt an already-confirmed deal - it will be invalid (deal: 1)");
     await expectRevert(
       contract.dealBreak(new BN("1"), {from: accounts[0]}),
-      revertReason("EscrowPoweredERC1155: invalid deal")
+      revertReason("SafeExchange: invalid deal")
     );
   });
 });

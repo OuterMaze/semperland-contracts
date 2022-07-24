@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
- * This is a standard ERC1155 contract but also supporting escrow
- * features to safely exchange goods (and only goods - no native
- * token will be exchanged here) between two parties.
+ * These are features to implement a safe exchange in another
+ * contract inheriting this one.
  */
-abstract contract EscrowPoweredERC1155 is ERC1155 {
+abstract contract SafeExchange is Context {
     /**
-     * The escrow subsystem has deals, and each deal has a state,
+     * The deals subsystem has deals, and each deal has a state,
      * either rejected or ongoing. The "broken" state is a catch-all
-     * state for when the escrow is cancelled / rejected by any party.
+     * state for when the deal is cancelled / rejected by any party.
      */
     enum DealState { CREATED, ACCEPTED }
 
@@ -63,8 +62,6 @@ abstract contract EscrowPoweredERC1155 is ERC1155 {
      */
     mapping(uint256 => Deal) public deals;
 
-    constructor(string memory _uri) ERC1155(_uri) {}
-
     /**
      * Starting a deal requires the sender to be the _emitter address
      * or an address the sender can operate on their behalf. Also, the
@@ -76,21 +73,21 @@ abstract contract EscrowPoweredERC1155 is ERC1155 {
     {
         require(
             _emitter != address(0) && _receiver != address(0),
-            "EscrowPoweredERC1155: transfer from/to the zero address"
+            "SafeExchange: transfer from/to the zero address"
         );
         require(
-            _emitter == _msgSender() || isApprovedForAll(_emitter, _msgSender()),
-            "EscrowPoweredERC1155: caller is not emitter nor approved"
+            _emitter == _msgSender() || _isApproved(_emitter, _msgSender()),
+            "SafeExchange: caller is not emitter nor approved"
         );
         require(
             _tokenIds.length == _tokenAmounts.length && _tokenIds.length != 0,
-            "EscrowPoweredERC1155: token ids and amounts length mismatch or 0"
+            "SafeExchange: token ids and amounts length mismatch or 0"
         );
         for(uint256 index = 0; index < _tokenAmounts.length; index++) {
             require(
                 _tokenAmounts[index] != 0,
                 string(abi.encodePacked(
-                    "EscrowPoweredERC1155: token in position ", Strings.toString(index), " must not have amount of 0"
+                    "SafeExchange: token in position ", Strings.toString(index), " must not have amount of 0"
                 ))
             );
         }
@@ -117,26 +114,26 @@ abstract contract EscrowPoweredERC1155 is ERC1155 {
         address receiver = deal.receiver;
         require(
             receiver != address(0),
-            "EscrowPoweredERC1155: invalid deal"
+            "SafeExchange: invalid deal"
         );
         require(
-            receiver == _msgSender() || isApprovedForAll(receiver, _msgSender()),
-            "EscrowPoweredERC1155: caller is not receiver nor approved"
+            receiver == _msgSender() || _isApproved(receiver, _msgSender()),
+            "SafeExchange: caller is not receiver nor approved"
         );
         require(
             _tokenIds.length == _tokenAmounts.length && _tokenIds.length != 0,
-            "EscrowPoweredERC1155: token ids and amounts length mismatch or 0"
+            "SafeExchange: token ids and amounts length mismatch or 0"
         );
         DealState state = deal.state;
         require(
             state == DealState.CREATED,
-            "EscrowPoweredERC1155: deal is not in just-created state"
+            "SafeExchange: deal is not in just-created state"
         );
         for(uint256 index = 0; index < _tokenAmounts.length; index++) {
             require(
                 _tokenAmounts[index] != 0,
                 string(abi.encodePacked(
-                    "EscrowPoweredERC1155: token in position ", Strings.toString(index), " must not have amount of 0"
+                    "SafeExchange: token in position ", Strings.toString(index), " must not have amount of 0"
                 ))
             );
         }
@@ -160,27 +157,25 @@ abstract contract EscrowPoweredERC1155 is ERC1155 {
         address emitter = deal.emitter;
         require(
             emitter != address(0),
-            "EscrowPoweredERC1155: invalid deal"
+            "SafeExchange: invalid deal"
         );
         require(
-            emitter == _msgSender() || isApprovedForAll(emitter, _msgSender()),
-            "EscrowPoweredERC1155: caller is not emitter nor approved"
+            emitter == _msgSender() || _isApproved(emitter, _msgSender()),
+            "SafeExchange: caller is not emitter nor approved"
         );
         DealState state = deal.state;
         require(
             state == DealState.ACCEPTED,
-            "EscrowPoweredERC1155: deal is not in just-accepted state"
+            "SafeExchange: deal is not in just-accepted state"
         );
 
         // Do the exchange. This exchange might fail (it will when the elements
         // are not present in the required amounts in both accounts).
-        _safeBatchTransferFrom(
-            deal.emitter, deal.receiver, deal.emitterTokenIds, deal.emitterTokenAmounts,
-            "EscrowPoweredERC1155: deal executed"
+        _batchTransfer(
+            _dealIndex, deal.emitter, deal.receiver, deal.emitterTokenIds, deal.emitterTokenAmounts
         );
-        _safeBatchTransferFrom(
-            deal.receiver, deal.emitter, deal.receiverTokenIds, deal.receiverTokenAmounts,
-            "EscrowPoweredERC1155: deal executed"
+        _batchTransfer(
+            _dealIndex, deal.receiver, deal.emitter, deal.receiverTokenIds, deal.receiverTokenAmounts
         );
         // Now, trigger the event and clear the deal.
         emit DealConfirmed(_dealIndex, deal.emitter, deal.receiver);
@@ -199,16 +194,29 @@ abstract contract EscrowPoweredERC1155 is ERC1155 {
         address sender = _msgSender();
         require(
             emitter != address(0),
-            "EscrowPoweredERC1155: invalid deal"
+            "SafeExchange: invalid deal"
         );
         require(
-            emitter == sender || isApprovedForAll(emitter, sender) ||
-            receiver == sender || isApprovedForAll(receiver, sender),
-            "EscrowPoweredERC1155: caller is not emitter/receiver nor approved"
+            emitter == sender || _isApproved(emitter, sender) ||
+            receiver == sender || _isApproved(receiver, sender),
+            "SafeExchange: caller is not emitter/receiver nor approved"
         );
 
         // Now, trigger the event and clear the deal.
         emit DealBroken(_dealIndex, sender);
         delete deals[_dealIndex];
     }
+
+    /**
+     * Tells whether a sender is approved for a given party
+     * to perform this contract's operations on their behalf.
+     */
+    function _isApproved(address _party, address _sender) internal virtual view returns (bool);
+
+    /**
+     * Does a batch transfer of the tokens from one party to the other.
+     */
+    function _batchTransfer(
+        uint256 _dealIndex, address _from, address _to, uint256[] memory _tokenIds, uint256[] memory _tokenAmounts
+    ) internal virtual;
 }
