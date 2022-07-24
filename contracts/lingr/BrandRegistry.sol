@@ -288,4 +288,37 @@ abstract contract BrandRegistry is Context, NativePayable {
             '","icon32x32":"', brand.icon32x32, '","icon64x64":"', brand.icon64x64, '"}}'
         ))));
     }
+
+    // ********** Brand registration earnings management goes here **********
+
+    /**
+     * Tells whether the sender can withdraw the earnings from brand registration.
+     */
+    function _canWithdrawBrandRegistrationEarnings(address _sender) internal view virtual returns (bool);
+
+    /**
+     * This event is triggered when brand earnings were withdrawn successfully.
+     */
+    event BrandEarningsWithdrawn(address indexed withdrawnBy, uint256 amount);
+
+    /**
+     * Allows the sender to withdraw brand registration earnings.
+     */
+    function withdrawBrandRegistrationEarnings(uint256 amount) public {
+        address sender = _msgSender();
+        require(
+            _canWithdrawBrandRegistrationEarnings(sender),
+            "BrandRegistry: earnings cannot be withdrawn by this sender"
+        );
+        require(
+            amount > 0,
+            "BrandRegistry: earnings amount must not be 0"
+        );
+        require(
+            brandRegistrationCurrentEarnings >= amount,
+            "BrandRegistry: earnings amount is less than the requested amount"
+        );
+        brandRegistrationCurrentEarnings -= amount;
+        payable(sender).transfer(amount);
+    }
 }
