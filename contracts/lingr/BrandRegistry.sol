@@ -2,13 +2,15 @@
 pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/utils/Base64.sol";
+import "../NativePayable.sol";
 
 /**
  * A Brand registry will keep track of the brands being registered.
  * Those brands will hold the metadata, and this trait will hold
  * the mean to register such brand with its metadata.
  */
-abstract contract BrandRegistry is Context {
+abstract contract BrandRegistry is Context, NativePayable {
     /**
      * The cost to register a new brand. This can be changed in
      * the future and must be able to be known in the ABI for the
@@ -21,6 +23,11 @@ abstract contract BrandRegistry is Context {
      * name and descriptions.
      */
     struct BrandMetadata {
+        /**
+         * The owner of the brand (cached).
+         */
+        address owner;
+
         /**
          * The name of the brand. It matches the "name" field
          * of the metadata. This field is immutable.
@@ -52,22 +59,42 @@ abstract contract BrandRegistry is Context {
          * "properties.icon16x16" field of the metadata.
          * This field is optional and mutable.
          */
-        string icon16;
+        string icon16x16;
 
         /**
          * The icon of the brand (32x32). It matches the
          * "properties.icon32x32" field of the metadata.
          * This field is optional and mutable.
          */
-        string icon32;
+        string icon32x32;
 
         /**
          * The icon of the brand (64x64). It matches the
          * "properties.icon64x64" field of the metadata.
          * This field is optional and mutable.
          */
-        string icon64;
+        string icon64x64;
     }
+
+    /**
+     * All the registered brands are here. Each brand will have
+     * a non-empty name and non-empty description. Brands can
+     * only be added - never deleted / unregistered.
+     */
+    mapping(address => BrandMetadata) brands;
+
+    /**
+     * The count of registered brands.
+     */
+    uint256 brandsCount;
+
+    /**
+     * Tells the current earnings, not yet withdrawn, from brand
+     * registrations.
+     */
+    uint256 public brandRegistrationCurrentEarnings;
+
+    // ********** Brand management goes here **********
 
     /**
      * Tells whether the specified user can set the registration
@@ -83,15 +110,182 @@ abstract contract BrandRegistry is Context {
     /**
      * Sets the new brand registration cost.
      */
-    function setBrandRegistrationCost(uint256 newCost) public {
+    function setBrandRegistrationCost(uint256 _newCost) public {
         require(
             _canSetBrandRegistrationCost(_msgSender()),
             "BrandRegistry: not allowed to set the brand registration cost"
         );
         require(
-            newCost >= (1 ether) / 100,
+            _newCost >= (1 ether) / 100,
             "BrandRegistry: the brand registry cost must not be less than 0.01 native tokens"
         );
-        brandRegistrationCost = newCost;
+        brandRegistrationCost = _newCost;
+    }
+
+    // ********** Brand registration & management goes here **********
+
+    /**
+     * Mints the new brand id, giving it to a particular address as owner.
+     */
+    function _mintBrandFor(address _brandId, address _owner) internal virtual;
+
+    /**
+     * Tells whether a particular user is the owner of the brand id.
+     */
+    function _isBrandOwnerApproved(address _brandOwner, address _sender) internal view virtual returns (bool);
+
+    /**
+     * This event is triggered when a brand is registered. The new
+     * address is also included, along some reference data.
+     */
+    event BrandRegistered(
+        address indexed registeredBy, address indexed brandId, string name, string description,
+        uint256 price
+    );
+
+    /**
+     * Given the appropriate metadata, mints a new brand. The image url
+     * is mandatory, but about:blank may be used if it is missing or one
+     * image is not yet ready. The icons are optional. An empty string
+     * or about:blank should be used if not needed. Ensure all the urls
+     * are empty (as permitted) or valid urls, and the name and description
+     * have only json-string-friendly character, no backslash, and no double
+     * quotes or the metadata might fail to be assembled into valid JSON,
+     * also taking special care with the name and description, since they
+     * cannot be changed later.
+     */
+    function registerBrand(
+        string memory _name, string memory _description, string memory _image, string memory _challengeUrl,
+        string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
+    ) public payable hasNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost) {
+        address sender = _msgSender();
+        require(bytes(_name).length != 0, "BrandRegistry: use a non-empty name");
+        require(bytes(_description).length != 0, "BrandRegistry: use a non-empty description");
+        require(bytes(_image).length != 0, "BrandRegistry: use a non-empty image url");
+
+        // 1. Annotate the non-withdrawn earnings with the new amount.
+        brandRegistrationCurrentEarnings += msg.value;
+
+        // 2. Increment the counter and generate the new brand address.
+        brandsCount += 1;
+        address brandId = address(uint160(uint256(keccak256(
+            abi.encodePacked(
+                bytes1(0xd6), bytes1(0x94), address(this), sender,
+                bytes32(brandRegistrationCurrentEarnings)
+            )
+        ))));
+
+        // 3. Register the brand.
+        brands[brandId] = BrandMetadata({
+            name: _name, description: _description, challengeUrl: _challengeUrl,
+            image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
+            icon64x64: _icon64x64, owner: sender
+        });
+
+        // 4. Mint the brand into the economic system for the sender.
+        _mintBrandFor(brandId, sender);
+
+        // 5. Trigger the event.
+        emit BrandRegistered(sender, brandId, _name, _description, msg.value);
+    }
+
+    /**
+     * Sets the owner of a brand. This method is meant to be called
+     * internally, when the actual brand transfer is done (brands
+     * can only be transferred, but never burnt).
+     */
+    function _setOwner(address _brandId, address _newOwner) internal {
+        if (brands[_brandId].owner != address(0)) brands[_brandId].owner = _newOwner;
+    }
+
+    /**
+     * This modifiers limits the action so that only owners or
+     * approved operators can invoke it.
+     */
+    modifier _onlyBrandOwnerOrApproved(address _brandId) {
+        address owner = brands[_brandId].owner;
+        address sender = _msgSender();
+        require(
+            owner == address(0) || sender == owner || _isBrandOwnerApproved(owner, sender),
+            "BrandRegistry: caller is not brand owner nor approved"
+        );
+        _;
+    }
+
+    /**
+     * Updates the brand image. Only the owner of the brand or an
+     * approved account can invoke this method. Ensure the _image is
+     * empty or a valid URL, or metadata might fail to be assembled
+     * into valid JSON.
+     */
+    function updateBrandImage(address _brandId, string memory _image) public _onlyBrandOwnerOrApproved(_brandId) {
+        require(bytes(_image).length != 0, "BrandRegistry: use a non-empty image url");
+        brands[_brandId].image = _image;
+    }
+
+    /**
+     * Updates the brand's challenge url. Only the owner of the brand
+     * or an approved account can invoke this method. Ensure the url
+     * is empty or a valid URL, or metadata might fail to be assembled
+     * into valid JSON.
+     */
+    function updateBrandChallengeUrl(
+        address _brandId, string memory _challengeUrl
+    ) public _onlyBrandOwnerOrApproved(_brandId) {
+        brands[_brandId].challengeUrl = _challengeUrl;
+    }
+
+    /**
+     * Updates the brand's 16x16 icon url. Only the owner of the brand
+     * or an approved account can invoke this method. Ensure the _icon
+     * is empty or a valid URL, or metadata might fail to be assembled
+     * into valid JSON.
+     */
+    function updateBrandIcon16x16Url(
+        address _brandId, string memory _icon
+    ) public _onlyBrandOwnerOrApproved(_brandId) {
+        brands[_brandId].icon16x16 = _icon;
+    }
+
+    /**
+     * Updates the brand's 32x32 icon url. Only the owner of the brand
+     * or an approved account can invoke this method. Ensure the _icon
+     * is empty or a valid URL, or metadata might fail to be assembled
+     * into valid JSON.
+     */
+    function updateBrandIcon32x32Url(
+        address _brandId, string memory _icon
+    ) public _onlyBrandOwnerOrApproved(_brandId) {
+        brands[_brandId].icon32x32 = _icon;
+    }
+
+    /**
+     * Updates the brand's 64x64 icon url. Only the owner of the brand
+     * or an approved account can invoke this method. Ensure the _icon
+     * is empty or a valid URL, or metadata might fail to be assembled
+     * into valid JSON.
+     */
+    function updateBrandIcon64x64Url(
+        address _brandId, string memory _icon
+    ) public _onlyBrandOwnerOrApproved(_brandId) {
+        brands[_brandId].icon64x64 = _icon;
+    }
+
+    /**
+     * Assembles the whole metadata for a brand. WARNING: This method
+     * will consume a lot of gas if invoked inside a transaction, so
+     * it is recommended to invoke this method in the context of a
+     * CALL, and never in the context of a SEND (even as part of other
+     * contract's code).
+     */
+    function brandMetadata(address _brandId) public view returns (string memory) {
+        BrandMetadata storage brand = brands[_brandId];
+        if (brand.owner == address(0)) return "";
+
+        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(abi.encodePacked(
+            '{"name":"', brand.name, '","description":"', brand.description, '","image":"', brand.image,
+            '","properties":{"challengeUrl":"',brand.challengeUrl,'","icon16x16":"', brand.icon16x16,
+            '","icon32x32":"', brand.icon32x32, '","icon64x64":"', brand.icon64x64, '"}}'
+        ))));
     }
 }
