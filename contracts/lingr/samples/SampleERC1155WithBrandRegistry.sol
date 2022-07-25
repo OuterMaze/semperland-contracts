@@ -27,4 +27,32 @@ contract SampleERC1155WithBrandRegistry is ERC1155, BrandRegistry {
     function _canWithdrawBrandRegistrationEarnings(address _sender) internal view override returns (bool) {
         return owner == _sender;
     }
+
+    function _safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) internal override {
+        super._safeTransferFrom(from, to, id, amount, data);
+        if (id < (1 << 160)) {
+            _setBrandOwner(address(uint160(id)), to);
+        }
+    }
+
+    function _safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal override {
+        super._safeBatchTransferFrom(from, to, ids, amounts, data);
+        for(uint256 index = 0; index < amounts.length; index++) {
+            if (ids[index] < (1 << 160) && amounts[index] != 0) {
+                _setBrandOwner(address(uint160(ids[index])), to);
+            }
+        }
+    }
 }
