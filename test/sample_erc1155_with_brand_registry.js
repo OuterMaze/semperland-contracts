@@ -180,4 +180,26 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   });
 
   // **** Now, let's focus only on the brands (creation and update) validation *****
+
+  // 12. Test the JSON metadata for brand 1.
+  // 13. Change brand image (using addresses[1]).
+  // 14. Test the JSON metadata for brand 1.
+  // 15. This must revert: Change brand image (using addresses[0]).
+  // 16. Test the JSON metadata for brand 1 (it must be the same as 14.).
+  // 17. Change brand challenge (using addresses[1]).
+  // 18. Test the JSON metadata for brand 1.
+  // 19. This must revert: Change brand challenge (using addresses[0]).
+  // 20. Test the JSON metadata for brand 1 (it must be the same as 18.).
+  // 21. Change brand icon 16 (using addresses[1]).
+  // 22. Test the JSON metadata for brand 1.
+  // 23. This must revert: Change brand icon 16 (using addresses[0]).
+  // 24. Test the JSON metadata for brand 1 (it must be the same as 22.).
+  // 25. Change brand icon 32 (using addresses[1]).
+  // 26. Test the JSON metadata for brand 1.
+  // 27. This must revert: Change brand icon 32 (using addresses[0]).
+  // 28. Test the JSON metadata for brand 1 (it must be the same as 26.).
+  // 28. Change brand icon 64 (using addresses[1]).
+  // 30. Test the JSON metadata for brand 1.
+  // 31. This must revert: Change brand icon 64 (using addresses[0]).
+  // 32. Test the JSON metadata for brand 1 (it must be the same as 30.).
 });
