@@ -120,6 +120,7 @@ abstract contract BrandRegistry is Context, NativePayable {
             "BrandRegistry: the brand registry cost must not be less than 0.01 native tokens"
         );
         brandRegistrationCost = _newCost;
+        emit BrandRegistrationCostUpdated(_newCost);
     }
 
     // ********** Brand registration & management goes here **********
@@ -171,7 +172,7 @@ abstract contract BrandRegistry is Context, NativePayable {
         address brandId = address(uint160(uint256(keccak256(
             abi.encodePacked(
                 bytes1(0xd6), bytes1(0x94), address(this), sender,
-                bytes32(brandRegistrationCurrentEarnings)
+                bytes32(brandsCount)
             )
         ))));
 
