@@ -101,8 +101,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
 
     await expectEvent(
       await contract.registerBrand(
-        "My Brand 1", "My awesome brand 1", "http://example.com/brand1.png", "http://example.com/challenge.json",
-        "http://example.com/ico16x16.png", "http://example.com/ico32x32.png", "http://example.com/ico64x64.png",
+        "My Brand 1", "My awesome brand 1", "http://example.com/brand1.png", "http://example.com/ico16x16.png",
+        "http://example.com/ico32x32.png", "http://example.com/ico64x64.png",
         {from: accounts[1], value: new BN("2000000000000000000")}
       ), "BrandRegistered",
       {"registeredBy": accounts[1], "brandId": hash, "name": "My Brand 1",
@@ -115,8 +115,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   it("must not allow to create a brand using another price but 2", async function() {
     await expectRevert(
       contract.registerBrand(
-        "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/challenge2.json",
-        "http://example.com/ico16x16-2.png", "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
+        "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/ico16x16-2.png",
+        "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
         {from: accounts[1], value: new BN("2000000000000000001")}
       ),
       revertReason(
@@ -127,8 +127,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
 
     await expectRevert(
       contract.registerBrand(
-        "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/challenge2.json",
-        "http://example.com/ico16x16-2.png", "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
+        "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/ico16x16-2.png",
+        "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
         {from: accounts[1], value: new BN("1999999999999999999")}
       ),
       revertReason(
@@ -155,8 +155,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
 
     await expectEvent(
       await contract.registerBrand(
-        "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/challenge2.json",
-        "http://example.com/ico16x16-2.png", "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
+        "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/ico16x16-2.png",
+        "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
         {from: accounts[1], value: new BN("4000000000000000000")}
         ), "BrandRegistered",
         {"registeredBy": accounts[1], "brandId": hash, "name": "My Brand 2",
@@ -169,8 +169,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   it("must not allow to create a brand using another price but 2", async function() {
     await expectRevert(
       contract.registerBrand(
-        "My Brand 3", "My awesome brand 3", "http://example.com/brand3.png", "http://example.com/challenge3.json",
-        "http://example.com/ico16x16-3.png", "http://example.com/ico32x32-3.png", "http://example.com/ico64x64-3.png",
+        "My Brand 3", "My awesome brand 3", "http://example.com/brand3.png", "http://example.com/ico16x16-3.png",
+        "http://example.com/ico32x32-3.png", "http://example.com/ico64x64-3.png",
         {from: accounts[1], value: new BN("4000000000000000001")}
       ),
       revertReason(
@@ -181,8 +181,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
 
     await expectRevert(
       contract.registerBrand(
-        "My Brand 3", "My awesome brand 3", "http://example.com/brand3.png", "http://example.com/challenge3.json",
-        "http://example.com/ico16x16-3.png", "http://example.com/ico32x32-3.png", "http://example.com/ico64x64-3.png",
+        "My Brand 3", "My awesome brand 3", "http://example.com/brand3.png", "http://example.com/ico16x16-3.png",
+        "http://example.com/ico32x32-3.png", "http://example.com/ico64x64-3.png",
         {from: accounts[1], value: new BN("3999999999999999999")}
       ),
       revertReason(
@@ -215,7 +215,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
       "name":"My Brand 1",
       "description":"My awesome brand 1","image":"http://example.com/brand1.png",
       "properties":{
-        "challengeUrl":"http://example.com/challenge.json",
+        "challengeUrl":"about:blank",
         "icon16x16":"http://example.com/ico16x16.png",
         "icon32x32":"http://example.com/ico32x32.png",
         "icon64x64":"http://example.com/ico64x64.png"
@@ -252,7 +252,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
       "name":"My Brand 1",
       "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
       "properties":{
-        "challengeUrl":"http://example.com/challenge.json",
+        "challengeUrl":"about:blank",
         "icon16x16":"http://example.com/ico16x16.png",
         "icon32x32":"http://example.com/ico32x32.png",
         "icon64x64":"http://example.com/ico64x64.png"

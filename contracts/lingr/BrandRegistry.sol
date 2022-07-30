@@ -155,10 +155,10 @@ abstract contract BrandRegistry is Context, NativePayable {
      * also taking special care with the name and description, since they
      * cannot be changed later.
      */
-    function registerBrand(
-        string memory _name, string memory _description, string memory _image, string memory _challengeUrl,
+    function _registerBrand(
+        string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
-    ) public payable hasNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost) {
+    ) internal {
         address sender = _msgSender();
         require(bytes(_name).length != 0, "BrandRegistry: use a non-empty name");
         require(bytes(_description).length != 0, "BrandRegistry: use a non-empty description");
@@ -178,7 +178,7 @@ abstract contract BrandRegistry is Context, NativePayable {
 
         // 3. Register the brand.
         brands[brandId] = BrandMetadata({
-            name: _name, description: _description, challengeUrl: _challengeUrl,
+            name: _name, description: _description, challengeUrl: "about:blank",
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
             icon64x64: _icon64x64, owner: sender
         });
@@ -188,6 +188,18 @@ abstract contract BrandRegistry is Context, NativePayable {
 
         // 5. Trigger the event.
         emit BrandRegistered(sender, brandId, _name, _description, msg.value);
+    }
+
+    /**
+     * Registers a new brand, when the appropriate price is paid for it.
+     * For more details on how this method works, check _registerBrand's
+     * inline documentation.
+     */
+    function registerBrand(
+        string memory _name, string memory _description, string memory _image,
+        string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
+    ) public payable hasNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost) {
+        _registerBrand(_name, _description, _image, _icon16x16, _icon32x32, _icon64x64);
     }
 
     /**
