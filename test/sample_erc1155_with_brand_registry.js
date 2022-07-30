@@ -356,8 +356,6 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     });
   });
 
-  // TODO ERC1155-related tests: transferring the brand and setting operators.
-
   it("must consider My Brand 1 as existing", async function() {
     let brandId1 = web3.utils.soliditySha3(
       "0xd6", "0x94", contract.address, accounts[1], 1
@@ -389,5 +387,25 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
       !await contract.brandExists(brandId3),
       "The brand " + brandId3 + " must NOT exist"
     );
+  });
+
+  // TODO ERC1155-related tests: transferring the brand and setting operators.
+
+  it("must transfer the brand, and only validate the new owner", async function () {
+    let brandId1 = "0x" + web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    ).substr(26);
+    console.log("Brand id: ", brandId1);
+    // A transfer is done, with this brand, to brand 0.
+    await contract.safeTransferFrom(
+      accounts[1], accounts[0], new BN(brandId1), 1, web3.utils.asciiToHex("test transfer"), {from: accounts[1]}
+    );
+    // The old owner (1) must fail.
+    await expectRevert(
+      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[1]}),
+      revertReason("BrandRegistry: caller is not brand owner nor approved")
+    );
+    // And the new owner (0) must succeed.
+    await contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[0]});
   });
 });
