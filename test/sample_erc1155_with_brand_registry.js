@@ -355,4 +355,39 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
       }
     });
   });
+
+  // TODO ERC1155-related tests: transferring the brand and setting operators.
+
+  it("must consider My Brand 1 as existing", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+    assert.isTrue(
+      await contract.brandExists(brandId1),
+      "The brand " + brandId1 + " must exist"
+    );
+  });
+
+  it("must consider My Brand 2 as existing", async function() {
+    let brandId2 = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 2
+    );
+    brandId2 = web3.utils.toChecksumAddress("0x" + brandId2.substr(26));
+    assert.isTrue(
+      await contract.brandExists(brandId2),
+      "The brand " + brandId2 + " must exist"
+    );
+  });
+
+  it("must consider My Brand 3 as NOT existing", async function() {
+    let brandId3 = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 3
+    );
+    brandId3 = web3.utils.toChecksumAddress("0x" + brandId3.substr(26));
+    assert.isTrue(
+      !await contract.brandExists(brandId3),
+      "The brand " + brandId3 + " must NOT exist"
+    );
+  });
 });
