@@ -207,7 +207,7 @@ abstract contract BrandRegistry is Context, NativePayable {
         address owner = brands[_brandId].owner;
         address sender = _msgSender();
         require(
-            owner == address(0) || sender == owner || _isBrandOwnerApproved(owner, sender),
+            sender == owner || _isBrandOwnerApproved(owner, sender),
             "BrandRegistry: caller is not brand owner nor approved"
         );
         _;
@@ -299,6 +299,13 @@ abstract contract BrandRegistry is Context, NativePayable {
             '","properties":{"challengeUrl":"',brand.challengeUrl,'","icon16x16":"', brand.icon16x16,
             '","icon32x32":"', brand.icon32x32, '","icon64x64":"', brand.icon64x64, '"}}'
         ))));
+    }
+
+    /**
+     * Tells whether an address corresponds to a registered brand or not.
+     */
+    function brandExists(address _brandId) public view returns (bool) {
+        return brands[_brandId].owner != address(0);
     }
 
     // ********** Brand registration earnings management goes here **********
