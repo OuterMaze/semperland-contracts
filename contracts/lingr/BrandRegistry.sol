@@ -214,6 +214,12 @@ abstract contract BrandRegistry is Context, NativePayable {
     }
 
     /**
+     * This event is triggered when a brand is registered. The new
+     * address is also included, along some reference data.
+     */
+    event BrandUpdated(address indexed updatedBy, address indexed brandId);
+
+    /**
      * Updates the brand image. Only the owner of the brand or an
      * approved account can invoke this method. Ensure the _image is
      * empty or a valid URL, or metadata might fail to be assembled
@@ -222,6 +228,7 @@ abstract contract BrandRegistry is Context, NativePayable {
     function updateBrandImage(address _brandId, string memory _image) public _onlyBrandOwnerOrApproved(_brandId) {
         require(bytes(_image).length != 0, "BrandRegistry: use a non-empty image url");
         brands[_brandId].image = _image;
+        emit BrandUpdated(_msgSender(), _brandId);
     }
 
     /**
@@ -234,6 +241,7 @@ abstract contract BrandRegistry is Context, NativePayable {
         address _brandId, string memory _challengeUrl
     ) public _onlyBrandOwnerOrApproved(_brandId) {
         brands[_brandId].challengeUrl = _challengeUrl;
+        emit BrandUpdated(_msgSender(), _brandId);
     }
 
     /**
@@ -246,6 +254,7 @@ abstract contract BrandRegistry is Context, NativePayable {
         address _brandId, string memory _icon
     ) public _onlyBrandOwnerOrApproved(_brandId) {
         brands[_brandId].icon16x16 = _icon;
+        emit BrandUpdated(_msgSender(), _brandId);
     }
 
     /**
@@ -258,6 +267,7 @@ abstract contract BrandRegistry is Context, NativePayable {
         address _brandId, string memory _icon
     ) public _onlyBrandOwnerOrApproved(_brandId) {
         brands[_brandId].icon32x32 = _icon;
+        emit BrandUpdated(_msgSender(), _brandId);
     }
 
     /**
@@ -270,6 +280,7 @@ abstract contract BrandRegistry is Context, NativePayable {
         address _brandId, string memory _icon
     ) public _onlyBrandOwnerOrApproved(_brandId) {
         brands[_brandId].icon64x64 = _icon;
+        emit BrandUpdated(_msgSender(), _brandId);
     }
 
     /**
@@ -279,7 +290,7 @@ abstract contract BrandRegistry is Context, NativePayable {
      * CALL, and never in the context of a SEND (even as part of other
      * contract's code).
      */
-    function brandMetadata(address _brandId) public view returns (string memory) {
+    function brandMetadataURI(address _brandId) public view returns (string memory) {
         BrandMetadata storage brand = brands[_brandId];
         if (brand.owner == address(0)) return "";
 

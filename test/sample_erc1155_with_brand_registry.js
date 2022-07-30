@@ -35,6 +35,19 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     return message + " -- Reason given: " + message;
   }
 
+  function btoa(raw) {
+    return new Buffer(raw).toString("base64");
+  }
+
+  function atob(encoded) {
+    return new Buffer(encoded, 'base64').toString("ascii");
+  }
+
+  function jsonUrl(payload) {
+    new Buffer("pija");
+    return "data:application/json;base64," + btoa(JSON.stringify(payload));
+  }
+
   // 2. Test the price to be 10 ether.
   it("must have a price of 10 ether", async function() {
     let cost = await contract.brandRegistrationCost();
@@ -127,8 +140,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   // 9. Set a new price o 4 ether, using account 0.
   it("must allow the account 0 to set the brand registration price to 4 ether", async function () {
     await expectEvent(
-        await contract.setBrandRegistrationCost(new BN("4000000000000000000"), { from: accounts[0] }),
-        "BrandRegistrationCostUpdated", {"newCost": new BN("4000000000000000000")}
+      await contract.setBrandRegistrationCost(new BN("4000000000000000000"), { from: accounts[0] }),
+      "BrandRegistrationCostUpdated", {"newCost": new BN("4000000000000000000")}
     );
   });
 
@@ -181,25 +194,165 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
 
   // **** Now, let's focus only on the brands (creation and update) validation *****
 
+  async function expectMetadata(brandId, payload) {
+    let metadataURI = await contract.brandMetadataURI(brandId);
+    let payloadJSON = JSON.stringify(payload);
+    assert.isTrue(
+      metadataURI === jsonUrl(payload),
+      "the metadata URI is " + metadataURI + ", which does not correspond to payload: " + payloadJSON +
+      ", but instead seems to correspond to payload: " + atob(metadataURI.substr(29))
+    )
+  }
+
   // 12. Test the JSON metadata for brand 1.
+  it("must have the appropriate metadata for brand with id for brand 1", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+        "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+
+    await expectMetadata(brandId1, {
+      "name":"My Brand 1",
+      "description":"My awesome brand 1","image":"http://example.com/brand1.png",
+      "properties":{
+        "challengeUrl":"http://example.com/challenge.json",
+        "icon16x16":"http://example.com/ico16x16.png",
+        "icon32x32":"http://example.com/ico32x32.png",
+        "icon64x64":"http://example.com/ico64x64.png"
+      }
+    });
+  })
+
+  async function changeAndTest(callback, owner, notOwner, brandId, expectedPayloadAfterChange) {
+    let tx = await callback(brandId, owner);
+    // console.log("Transaction receipt is:", tx);
+    await expectEvent(
+      tx, "BrandUpdated", [owner, brandId]
+    );
+    await expectMetadata(brandId, expectedPayloadAfterChange);
+    await expectRevert(
+      callback(brandId, notOwner), revertReason("BrandRegistry: caller is not brand owner nor approved")
+    );
+    await expectMetadata(brandId, expectedPayloadAfterChange);
+  }
+
   // 13. Change brand image (using addresses[1]).
   // 14. Test the JSON metadata for brand 1.
   // 15. This must revert: Change brand image (using addresses[0]).
   // 16. Test the JSON metadata for brand 1 (it must be the same as 14.).
+  it("must change the image URL appropriately and reflect it in the metadata", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+        "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+
+    await changeAndTest(async function(brandId, user) {
+      return await contract.updateBrandImage(brandId, "http://example.com/brand1-bazinga.png", {from: user});
+    }, accounts[1], accounts[0], brandId1, {
+      "name":"My Brand 1",
+      "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
+      "properties":{
+        "challengeUrl":"http://example.com/challenge.json",
+        "icon16x16":"http://example.com/ico16x16.png",
+        "icon32x32":"http://example.com/ico32x32.png",
+        "icon64x64":"http://example.com/ico64x64.png"
+      }
+    });
+  });
+
   // 17. Change brand challenge (using addresses[1]).
   // 18. Test the JSON metadata for brand 1.
   // 19. This must revert: Change brand challenge (using addresses[0]).
   // 20. Test the JSON metadata for brand 1 (it must be the same as 18.).
+  it("must change the challenge URL appropriately and reflect it in the metadata", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+        "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+
+    await changeAndTest(async function(brandId, user) {
+      return await contract.updateBrandChallengeUrl(brandId, "http://example.com/challenge-bazinga.json", {from: user});
+    }, accounts[1], accounts[0], brandId1, {
+      "name":"My Brand 1",
+      "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
+      "properties":{
+        "challengeUrl":"http://example.com/challenge-bazinga.json",
+        "icon16x16":"http://example.com/ico16x16.png",
+        "icon32x32":"http://example.com/ico32x32.png",
+        "icon64x64":"http://example.com/ico64x64.png"
+      }
+    });
+  });
+
   // 21. Change brand icon 16 (using addresses[1]).
   // 22. Test the JSON metadata for brand 1.
   // 23. This must revert: Change brand icon 16 (using addresses[0]).
   // 24. Test the JSON metadata for brand 1 (it must be the same as 22.).
+  it("must change the 16x16 icon URL appropriately and reflect it in the metadata", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+        "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+
+    await changeAndTest(async function(brandId, user) {
+      return  await contract.updateBrandIcon16x16Url(brandId, "http://example.com/ico16x16-bazinga.png", {from: user});
+    }, accounts[1], accounts[0], brandId1, {
+      "name":"My Brand 1",
+      "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
+      "properties":{
+        "challengeUrl":"http://example.com/challenge-bazinga.json",
+        "icon16x16":"http://example.com/ico16x16-bazinga.png",
+        "icon32x32":"http://example.com/ico32x32.png",
+        "icon64x64":"http://example.com/ico64x64.png"
+      }
+    });
+  });
+
   // 25. Change brand icon 32 (using addresses[1]).
   // 26. Test the JSON metadata for brand 1.
   // 27. This must revert: Change brand icon 32 (using addresses[0]).
   // 28. Test the JSON metadata for brand 1 (it must be the same as 26.).
-  // 28. Change brand icon 64 (using addresses[1]).
+  it("must change the 32x32 icon URL appropriately and reflect it in the metadata", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+        "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+
+    await changeAndTest(async function(brandId, user) {
+      return await contract.updateBrandIcon32x32Url(brandId, "http://example.com/ico32x32-bazinga.png", {from: user});
+    }, accounts[1], accounts[0], brandId1, {
+      "name":"My Brand 1",
+      "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
+      "properties":{
+        "challengeUrl":"http://example.com/challenge-bazinga.json",
+        "icon16x16":"http://example.com/ico16x16-bazinga.png",
+        "icon32x32":"http://example.com/ico32x32-bazinga.png",
+        "icon64x64":"http://example.com/ico64x64.png"
+      }
+    });
+  });
+
+  // 29. Change brand icon 64 (using addresses[1]).
   // 30. Test the JSON metadata for brand 1.
   // 31. This must revert: Change brand icon 64 (using addresses[0]).
   // 32. Test the JSON metadata for brand 1 (it must be the same as 30.).
+  it("must change the 64x64 icon URL appropriately and reflect it in the metadata", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+        "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+
+    await changeAndTest(async function(brandId, user) {
+      return await contract.updateBrandIcon64x64Url(brandId, "http://example.com/ico64x64-bazinga.png", {from: user});
+    }, accounts[1], accounts[0], brandId1, {
+      "name":"My Brand 1",
+      "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
+      "properties":{
+        "challengeUrl":"http://example.com/challenge-bazinga.json",
+        "icon16x16":"http://example.com/ico16x16-bazinga.png",
+        "icon32x32":"http://example.com/ico32x32-bazinga.png",
+        "icon64x64":"http://example.com/ico64x64-bazinga.png"
+      }
+    });
+  });
 });
