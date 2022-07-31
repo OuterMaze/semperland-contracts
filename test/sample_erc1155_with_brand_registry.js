@@ -471,4 +471,69 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   });
 
   // TODO tests related to withdrawing earnings from brand registration.
+
+  it("must have an earnings balance of 6 tokens", async function() {
+    let balance = await contract.brandRegistrationCurrentEarnings();
+    assert.isTrue(
+      balance.cmp(new BN("6000000000000000000")) === 0,
+      "the current registration earnings are " + balance.toString() + " but they should be 6000000000000000000"
+    );
+  });
+
+  it("must not allow the account 1 to withdraw earnings (3 tokens)", async function() {
+    await expectRevert(
+      contract.withdrawBrandRegistrationEarnings(new BN("3000000000000000000"), {from: accounts[1]}),
+      "BrandRegistry: earnings cannot be withdrawn by this sender"
+    );
+  });
+
+  it("must not allow the account 0 to withdraw more than 6 tokens", async function() {
+    await expectRevert(
+      contract.withdrawBrandRegistrationEarnings(new BN("6000000000000000001"), {from: accounts[0]}),
+      "BrandRegistry: earnings amount is less than the requested amount"
+    );
+  });
+
+  it("must not allow the account 0 to withdraw 0 tokens", async function() {
+    await expectRevert(
+      contract.withdrawBrandRegistrationEarnings(new BN("0"), {from: accounts[0]}),
+      "earnings amount must not be 0"
+    );
+  });
+
+  it("must allow the account 0 to withdraw 3 tokens", async function() {
+    await contract.withdrawBrandRegistrationEarnings(new BN("3000000000000000000"), {from: accounts[0]});
+  });
+
+  it("must have an earnings balance of 3 tokens", async function() {
+    let balance = await contract.brandRegistrationCurrentEarnings();
+    assert.isTrue(
+      balance.cmp(new BN("3000000000000000000")) === 0,
+      "the current registration earnings are " + balance.toString() + " but they should be 3000000000000000000"
+    );
+  });
+
+  it("must not allow the account 0 to withdraw more than 3 tokens", async function() {
+    await expectRevert(
+        contract.withdrawBrandRegistrationEarnings(new BN("3000000000000000001"), {from: accounts[0]}),
+        "BrandRegistry: earnings amount is less than the requested amount"
+    );
+  });
+
+  it("must allow the account 0 to withdraw 3 tokens", async function() {
+    await contract.withdrawBrandRegistrationEarnings(new BN("3000000000000000000"), {from: accounts[0]});
+  });
+
+  it("must have an earnings balance of 0 tokens", async function() {
+    let balance = await contract.brandRegistrationCurrentEarnings();
+    assert.isTrue(
+      balance.cmp(new BN("0")) === 0,
+      "the current registration earnings are " + balance.toString() + " but they should be 0"
+    );
+    let nativeBalance = new BN(await web3.eth.getBalance(contract.address));
+    assert.isTrue(
+      nativeBalance.cmp(new BN(0)) === 0,
+      "the current native balance must be 0, but it is " + nativeBalance.toString()
+    );
+  });
 });
