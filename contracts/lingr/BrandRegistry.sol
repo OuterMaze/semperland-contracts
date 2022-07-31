@@ -214,6 +214,45 @@ abstract contract BrandRegistry is Context, NativePayable {
     }
 
     /**
+     * Tells whether the specified user can set the brand social
+     * commitment to a brand, or not. Brands with that flag set
+     * are (1) non-commercial and (2) aligned to this metaverse's
+     * social commitment views.
+     */
+    function _canSetBrandCommitment(address _sender) internal virtual view returns (bool);
+
+    /**
+     * This event is triggered when a brand is updated with respect
+     * to its social commitment (this is: to tell a brand is socially
+     * committed according to the metaverse's views or not). Special
+     * benefits (in particular, with respect to assets loading on
+     * customers) are given in clients to socially committed brands.
+     */
+    event BrandSocialCommitmentUpdated(address indexed updatedBy, address indexed brand, bool committed);
+
+    /**
+     * Updates whether a brand is socially committed or not.
+     */
+    function updateBrandSocialCommitment(address _brandId, bool _committed) public {
+        // Require the flag to exist.
+        address owner = brands[_brandId].owner;
+        require(owner != address(0), "BrandRegistry: non-existing brand");
+
+        // Require the sender to be allowed to set brands' commitment.
+        address sender = _msgSender();
+        require(
+            _canSetBrandCommitment(sender),
+            "BrandRegistry: not allowed to set brands' social commitment"
+        );
+
+        // Update the commitment flag.
+        brands[_brandId].committed = _committed;
+
+        // Emit the related event.
+        emit BrandSocialCommitmentUpdated(sender, _brandId, _committed);
+    }
+
+    /**
      * Sets the owner of a brand. This method is meant to be called
      * internally, when the actual brand transfer is done (brands
      * can only be transferred, but never burnt).
@@ -224,13 +263,14 @@ abstract contract BrandRegistry is Context, NativePayable {
 
     /**
      * This modifiers limits the action so that only owners or
-     * approved operators can invoke it.
+     * approved operators can invoke it (it also implies that
+     * the brand itself must exist).
      */
     modifier _onlyBrandOwnerOrApprovedEditor(address _brandId) {
         address owner = brands[_brandId].owner;
         address sender = _msgSender();
         require(
-            sender == owner || _isBrandOwnerApprovedEditor(owner, sender),
+            owner != address(0) && (sender == owner || _isBrandOwnerApprovedEditor(owner, sender)),
             "BrandRegistry: caller is not brand owner nor approved"
         );
         _;

@@ -28,6 +28,10 @@ contract SampleERC1155WithBrandRegistry is ERC1155, BrandRegistry {
         return owner == _sender;
     }
 
+    function _canSetBrandCommitment(address _sender) internal view override returns (bool) {
+        return owner == _sender;
+    }
+
     function _safeTransferFrom(
         address from,
         address to,
