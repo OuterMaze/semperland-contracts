@@ -20,7 +20,7 @@ contract SampleERC1155WithBrandRegistry is ERC1155, BrandRegistry {
         _mint(_owner, uint256(uint160(_brandId)), 1, "SampleERC1155WithBrandRegistry: test _mintBrandFor");
     }
 
-    function _isBrandOwnerApproved(address _brandOwner, address _sender) internal view override returns (bool) {
+    function _isBrandOwnerApprovedEditor(address _brandOwner, address _sender) internal view override returns (bool) {
         return isApprovedForAll(_brandOwner, _sender);
     }
 

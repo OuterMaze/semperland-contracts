@@ -143,7 +143,7 @@ abstract contract BrandRegistry is Context, NativePayable {
     /**
      * Tells whether a particular user is the owner of the brand id.
      */
-    function _isBrandOwnerApproved(address _brandOwner, address _sender) internal view virtual returns (bool);
+    function _isBrandOwnerApprovedEditor(address _brandOwner, address _sender) internal view virtual returns (bool);
 
     /**
      * This event is triggered when a brand is registered. The new
@@ -226,11 +226,11 @@ abstract contract BrandRegistry is Context, NativePayable {
      * This modifiers limits the action so that only owners or
      * approved operators can invoke it.
      */
-    modifier _onlyBrandOwnerOrApproved(address _brandId) {
+    modifier _onlyBrandOwnerOrApprovedEditor(address _brandId) {
         address owner = brands[_brandId].owner;
         address sender = _msgSender();
         require(
-            sender == owner || _isBrandOwnerApproved(owner, sender),
+            sender == owner || _isBrandOwnerApprovedEditor(owner, sender),
             "BrandRegistry: caller is not brand owner nor approved"
         );
         _;
@@ -248,7 +248,7 @@ abstract contract BrandRegistry is Context, NativePayable {
      * empty or a valid URL, or metadata might fail to be assembled
      * into valid JSON.
      */
-    function updateBrandImage(address _brandId, string memory _image) public _onlyBrandOwnerOrApproved(_brandId) {
+    function updateBrandImage(address _brandId, string memory _image) public _onlyBrandOwnerOrApprovedEditor(_brandId) {
         require(bytes(_image).length != 0, "BrandRegistry: use a non-empty image url");
         brands[_brandId].image = _image;
         emit BrandUpdated(_msgSender(), _brandId);
@@ -262,7 +262,7 @@ abstract contract BrandRegistry is Context, NativePayable {
      */
     function updateBrandChallengeUrl(
         address _brandId, string memory _challengeUrl
-    ) public _onlyBrandOwnerOrApproved(_brandId) {
+    ) public _onlyBrandOwnerOrApprovedEditor(_brandId) {
         brands[_brandId].challengeUrl = _challengeUrl;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -275,7 +275,7 @@ abstract contract BrandRegistry is Context, NativePayable {
      */
     function updateBrandIcon16x16Url(
         address _brandId, string memory _icon
-    ) public _onlyBrandOwnerOrApproved(_brandId) {
+    ) public _onlyBrandOwnerOrApprovedEditor(_brandId) {
         brands[_brandId].icon16x16 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -288,7 +288,7 @@ abstract contract BrandRegistry is Context, NativePayable {
      */
     function updateBrandIcon32x32Url(
         address _brandId, string memory _icon
-    ) public _onlyBrandOwnerOrApproved(_brandId) {
+    ) public _onlyBrandOwnerOrApprovedEditor(_brandId) {
         brands[_brandId].icon32x32 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -301,7 +301,7 @@ abstract contract BrandRegistry is Context, NativePayable {
      */
     function updateBrandIcon64x64Url(
         address _brandId, string memory _icon
-    ) public _onlyBrandOwnerOrApproved(_brandId) {
+    ) public _onlyBrandOwnerOrApprovedEditor(_brandId) {
         brands[_brandId].icon64x64 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
