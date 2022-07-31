@@ -218,7 +218,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
         "challengeUrl":"about:blank",
         "icon16x16":"http://example.com/ico16x16.png",
         "icon32x32":"http://example.com/ico32x32.png",
-        "icon64x64":"http://example.com/ico64x64.png"
+        "icon64x64":"http://example.com/ico64x64.png",
+        "committed":false
       }
     });
   })
@@ -255,7 +256,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
         "challengeUrl":"about:blank",
         "icon16x16":"http://example.com/ico16x16.png",
         "icon32x32":"http://example.com/ico32x32.png",
-        "icon64x64":"http://example.com/ico64x64.png"
+        "icon64x64":"http://example.com/ico64x64.png",
+        "committed":false
       }
     });
   });
@@ -279,7 +281,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
         "challengeUrl":"http://example.com/challenge-bazinga.json",
         "icon16x16":"http://example.com/ico16x16.png",
         "icon32x32":"http://example.com/ico32x32.png",
-        "icon64x64":"http://example.com/ico64x64.png"
+        "icon64x64":"http://example.com/ico64x64.png",
+        "committed":false
       }
     });
   });
@@ -303,7 +306,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
         "challengeUrl":"http://example.com/challenge-bazinga.json",
         "icon16x16":"http://example.com/ico16x16-bazinga.png",
         "icon32x32":"http://example.com/ico32x32.png",
-        "icon64x64":"http://example.com/ico64x64.png"
+        "icon64x64":"http://example.com/ico64x64.png",
+        "committed":false
       }
     });
   });
@@ -327,7 +331,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
         "challengeUrl":"http://example.com/challenge-bazinga.json",
         "icon16x16":"http://example.com/ico16x16-bazinga.png",
         "icon32x32":"http://example.com/ico32x32-bazinga.png",
-        "icon64x64":"http://example.com/ico64x64.png"
+        "icon64x64":"http://example.com/ico64x64.png",
+        "committed":false
       }
     });
   });
@@ -351,7 +356,8 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
         "challengeUrl":"http://example.com/challenge-bazinga.json",
         "icon16x16":"http://example.com/ico16x16-bazinga.png",
         "icon32x32":"http://example.com/ico32x32-bazinga.png",
-        "icon64x64":"http://example.com/ico64x64-bazinga.png"
+        "icon64x64":"http://example.com/ico64x64-bazinga.png",
+        "committed":false
       }
     });
   });

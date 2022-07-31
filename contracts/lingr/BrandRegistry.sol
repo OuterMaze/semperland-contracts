@@ -74,6 +74,16 @@ abstract contract BrandRegistry is Context, NativePayable {
          * This field is optional and mutable.
          */
         string icon64x64;
+
+        /**
+         * Whether this brand is a regarded non-government
+         * organization or not. Those brands receive another
+         * kind of treatment, as they're recognized by the
+         * management to be socially committed brands, in
+         * accordance to the management guidelines for such
+         * commitment recognition.
+         */
+        bool committed;
     }
 
     /**
@@ -157,7 +167,8 @@ abstract contract BrandRegistry is Context, NativePayable {
      */
     function _registerBrand(
         string memory _name, string memory _description, string memory _image,
-        string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
+        string memory _icon16x16, string memory _icon32x32, string memory _icon64x64,
+        bool committed
     ) internal {
         address sender = _msgSender();
         require(bytes(_name).length != 0, "BrandRegistry: use a non-empty name");
@@ -180,7 +191,7 @@ abstract contract BrandRegistry is Context, NativePayable {
         brands[brandId] = BrandMetadata({
             name: _name, description: _description, challengeUrl: "about:blank",
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
-            icon64x64: _icon64x64, owner: sender
+            icon64x64: _icon64x64, owner: sender, committed: committed
         });
 
         // 4. Mint the brand into the economic system for the sender.
@@ -199,7 +210,7 @@ abstract contract BrandRegistry is Context, NativePayable {
         string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
     ) public payable hasNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost) {
-        _registerBrand(_name, _description, _image, _icon16x16, _icon32x32, _icon64x64);
+        _registerBrand(_name, _description, _image, _icon16x16, _icon32x32, _icon64x64, false);
     }
 
     /**
@@ -309,7 +320,8 @@ abstract contract BrandRegistry is Context, NativePayable {
         return string(abi.encodePacked("data:application/json;base64,", Base64.encode(abi.encodePacked(
             '{"name":"', brand.name, '","description":"', brand.description, '","image":"', brand.image,
             '","properties":{"challengeUrl":"',brand.challengeUrl,'","icon16x16":"', brand.icon16x16,
-            '","icon32x32":"', brand.icon32x32, '","icon64x64":"', brand.icon64x64, '"}}'
+            '","icon32x32":"', brand.icon32x32, '","icon64x64":"', brand.icon64x64, '","committed":',
+            brand.committed ? 'true' : 'false','}}'
         ))));
     }
 
