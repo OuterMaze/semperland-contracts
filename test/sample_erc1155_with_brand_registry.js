@@ -395,13 +395,10 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     );
   });
 
-  // TODO ERC1155-related tests: transferring the brand and setting operators.
-
   it("must transfer the brand, and only validate the new owner", async function () {
     let brandId1 = "0x" + web3.utils.soliditySha3(
       "0xd6", "0x94", contract.address, accounts[1], 1
     ).substr(26);
-    console.log("Brand id: ", brandId1);
     // A transfer is done, with this brand, to brand 0.
     await contract.safeTransferFrom(
       accounts[1], accounts[0], new BN(brandId1), 1, web3.utils.asciiToHex("test transfer"), {from: accounts[1]}
@@ -414,4 +411,64 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     // And the new owner (0) must succeed.
     await contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[0]});
   });
+
+  it("must not allow the address 1 to set brand social commitment, or to an invalid brand", async function () {
+    let brandId1 = "0x" + web3.utils.soliditySha3(
+        "0xd6", "0x94", contract.address, accounts[1], 1
+    ).substr(26);
+    let brandId3 = "0x" + web3.utils.soliditySha3(
+        "0xd6", "0x94", contract.address, accounts[1], 3
+    ).substr(26);
+
+    await expectRevert(
+      contract.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]}),
+      revertReason("BrandRegistry: not allowed to set brands' social commitment")
+    );
+    await expectRevert(
+      contract.updateBrandSocialCommitment(brandId3, true, {from: accounts[0]}),
+      revertReason("BrandRegistry: non-existing brand")
+    );
+  });
+
+  it("must allow the address 0 to set the brand social commitment of 1st brand to true", async function() {
+    let brandId1 = "0x" + web3.utils.soliditySha3(
+        "0xd6", "0x94", contract.address, accounts[1], 1
+    ).substr(26);
+
+    await contract.updateBrandSocialCommitment(brandId1, true, {from: accounts[0]});
+
+    await expectMetadata(brandId1, {
+      "name":"My Brand 1",
+      "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
+      "properties":{
+        "challengeUrl":"http://example.com/challenge-bazinga.json",
+        "icon16x16":"http://example.com/ico16x16-bazinga.png",
+        "icon32x32":"http://example.com/ico32x32-bazinga.png",
+        "icon64x64":"http://example.com/ico64x64-bazinga.png",
+        "committed":true
+      }
+    });
+  });
+
+  it("must allow the address 0 to set the brand social commitment of 1st brand to false", async function() {
+    let brandId1 = "0x" + web3.utils.soliditySha3(
+        "0xd6", "0x94", contract.address, accounts[1], 1
+    ).substr(26);
+
+    await contract.updateBrandSocialCommitment(brandId1, false, {from: accounts[0]});
+
+    await expectMetadata(brandId1, {
+      "name":"My Brand 1",
+      "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
+      "properties":{
+        "challengeUrl":"http://example.com/challenge-bazinga.json",
+        "icon16x16":"http://example.com/ico16x16-bazinga.png",
+        "icon32x32":"http://example.com/ico32x32-bazinga.png",
+        "icon64x64":"http://example.com/ico64x64-bazinga.png",
+        "committed":false
+      }
+    });
+  });
+
+  // TODO tests related to withdrawing earnings from brand registration.
 });
