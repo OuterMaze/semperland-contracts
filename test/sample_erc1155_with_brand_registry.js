@@ -470,8 +470,6 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     });
   });
 
-  // TODO tests related to withdrawing earnings from brand registration.
-
   it("must have an earnings balance of 6 tokens", async function() {
     let balance = await contract.brandRegistrationCurrentEarnings();
     assert.isTrue(
