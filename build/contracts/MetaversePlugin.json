@@ -1,0 +1,2041 @@
+{
+  "contractName": "MetaversePlugin",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "metaverse",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "title",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "uri",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burned",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"burned\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"metaverse\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"title\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"uri\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"burned(address,uint256,uint256)\":{\"notice\":\"This function is a hook for when an asset, which exists as registered & managed by this contract, is burned by its owner.\"},\"constructor\":{\"notice\":\"Creating a metaverse plug-in requires a valid metaverse registrar as its owner.\"},\"initialize()\":{\"notice\":\"This function holds an implementation (which could be empty) for when the plugin is added to the metaverse.\"},\"metaverse()\":{\"notice\":\"The metaverse that will own this plug-in.\"},\"title()\":{\"notice\":\"The title of this metaverse.\"},\"uri(uint256)\":{\"notice\":\"This function returns the uri for a given token id, with the same semantics of ERC1155.\"}},\"notice\":\"This is the base class of a metaverse plug-in.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/lingr/MetaversePlugin.sol\":\"MetaversePlugin\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92\",\"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3\"]},\"@openzeppelin/contracts/utils/introspection/ERC165Checker.sol\":{\"keccak256\":\"0xf7291d7213336b00ee7edbf7cd5034778dd7b0bda2a7489e664f1e5cacc6c24e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://a3671a157cfdc73f334fc9e584862e1b3b48e8b771cde69d79834b03dc5c2826\",\"dweb:/ipfs/QmVJnMc3FLyYzJFktqwinaZes3pnRPuU1wKmBGvGRfh4rc\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]},\"project:/contracts/lingr/IMetaversePlugin.sol\":{\"keccak256\":\"0xe55e5a5ac9f2d64a708de9c6ac102aeeb78516fffd941eec9e81adfbc9004476\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://b9c2b63a445b60a1a53f861fff9e4f3197ad6864537562d1296e1b1238cd9e36\",\"dweb:/ipfs/QmUY8aEH1jkkgaUHrhCQ1kRv28aWhpJ8LVUCV3TFjAHkYp\"]},\"project:/contracts/lingr/IMetaverseRegistrar.sol\":{\"keccak256\":\"0xa3a7e6eade938959600edd970be5bcddd32383a6abf75323ddd7203c41c57223\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ab655f402028a6eb681c74027baa19c5e12c73eae60d2fd8d0c1012661abc93b\",\"dweb:/ipfs/QmT2EQmmQ759wH43mRGZJ34G8C9xMcTnZJyWA4vSnWXji8\"]},\"project:/contracts/lingr/MetaversePlugin.sol\":{\"keccak256\":\"0xb98d3a8c6277ad755a005ca95eb6a69b46fa0d488d0c0a7f36d0bb57a32d8d90\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://1d361e03366783cafc9e441c34fdfba1f7503abe6110a9748da9eba541060892\",\"dweb:/ipfs/QmdAnxZovmKiDssxt3nWTwXeX5A3owxubuYbkSL5CKzvCE\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8 <0.9.0;\n\nimport \"@openzeppelin/contracts/utils/Context.sol\";\nimport \"@openzeppelin/contracts/utils/introspection/ERC165Checker.sol\";\nimport \"./IMetaversePlugin.sol\";\nimport \"./IMetaverseRegistrar.sol\";\n\n/**\n * This is the base class of a metaverse plug-in.\n */\nabstract contract MetaversePlugin is Context, IMetaversePlugin {\n    /**\n     * Addresses can check for ERC165 compliance by using this\n     * embeddable library.\n     */\n    using ERC165Checker for address;\n\n    /**\n     * The metaverse that will own this plug-in.\n     */\n    address public metaverse;\n\n    /**\n     * Creating a metaverse plug-in requires a valid metaverse\n     * registrar as its owner.\n     */\n    constructor(address _metaverse) {\n        require(_metaverse != address(0), \"MetaversePlugin: the owner contract must not be 0\");\n        require(\n            _metaverse.supportsInterface(type(IMetaverseRegistrar).interfaceId),\n            \"MetaversePlugin: the owner contract must implement IMetaverseRegistrar\"\n        );\n        metaverse = _metaverse;\n    }\n\n    /**\n     * The title of this metaverse.\n     */\n    function title() public view virtual returns (string memory);\n\n    /**\n     * This function holds an implementation (which could be\n     * empty) for when the plugin is added to the metaverse.\n     */\n    function initialize() public virtual;\n\n    /**\n     * This function returns the uri for a given token id, with\n     * the same semantics of ERC1155.\n     */\n    function uri(uint256 _tokenId) public view virtual returns (string memory);\n\n    /**\n     * This function is a hook for when an asset, which exists\n     * as registered & managed by this contract, is burned by\n     * its owner.\n     */\n    function burned(address _from, uint256 _tokenId, uint256 _amount) public virtual;\n}\n",
+  "sourcePath": "/home/luismasuelli/Projects/OuterMaze/lingr-contracts/contracts/lingr/MetaversePlugin.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/lingr/MetaversePlugin.sol",
+    "exportedSymbols": {
+      "Context": [
+        21
+      ],
+      "ERC165Checker": [
+        223
+      ],
+      "IERC165": [
+        235
+      ],
+      "IMetaversePlugin": [
+        273
+      ],
+      "IMetaverseRegistrar": [
+        313
+      ],
+      "MetaversePlugin": [
+        903
+      ]
+    },
+    "id": 904,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 827,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:29:6"
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/Context.sol",
+        "file": "@openzeppelin/contracts/utils/Context.sol",
+        "id": 828,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 904,
+        "sourceUnit": 22,
+        "src": "63:51:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol",
+        "file": "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol",
+        "id": 829,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 904,
+        "sourceUnit": 224,
+        "src": "115:71:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "project:/contracts/lingr/IMetaversePlugin.sol",
+        "file": "./IMetaversePlugin.sol",
+        "id": 830,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 904,
+        "sourceUnit": 274,
+        "src": "187:32:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "project:/contracts/lingr/IMetaverseRegistrar.sol",
+        "file": "./IMetaverseRegistrar.sol",
+        "id": 831,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 904,
+        "sourceUnit": 314,
+        "src": "220:35:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": true,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 833,
+              "name": "Context",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 21,
+              "src": "352:7:6"
+            },
+            "id": 834,
+            "nodeType": "InheritanceSpecifier",
+            "src": "352:7:6"
+          },
+          {
+            "baseName": {
+              "id": 835,
+              "name": "IMetaversePlugin",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 273,
+              "src": "361:16:6"
+            },
+            "id": 836,
+            "nodeType": "InheritanceSpecifier",
+            "src": "361:16:6"
+          }
+        ],
+        "canonicalName": "MetaversePlugin",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 832,
+          "nodeType": "StructuredDocumentation",
+          "src": "257:57:6",
+          "text": " This is the base class of a metaverse plug-in."
+        },
+        "fullyImplemented": false,
+        "id": 903,
+        "linearizedBaseContracts": [
+          903,
+          273,
+          21
+        ],
+        "name": "MetaversePlugin",
+        "nameLocation": "333:15:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "id": 839,
+            "libraryName": {
+              "id": 837,
+              "name": "ERC165Checker",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 223,
+              "src": "496:13:6"
+            },
+            "nodeType": "UsingForDirective",
+            "src": "490:32:6",
+            "typeName": {
+              "id": 838,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "514:7:6",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            }
+          },
+          {
+            "baseFunctions": [
+              250
+            ],
+            "constant": false,
+            "documentation": {
+              "id": 840,
+              "nodeType": "StructuredDocumentation",
+              "src": "528:60:6",
+              "text": " The metaverse that will own this plug-in."
+            },
+            "functionSelector": "f200670d",
+            "id": 842,
+            "mutability": "mutable",
+            "name": "metaverse",
+            "nameLocation": "608:9:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 903,
+            "src": "593:24:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 841,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "593:7:6",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 873,
+              "nodeType": "Block",
+              "src": "766:329:6",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 854,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 849,
+                          "name": "_metaverse",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 845,
+                          "src": "784:10:6",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "!=",
+                        "rightExpression": {
+                          "arguments": [
+                            {
+                              "hexValue": "30",
+                              "id": 852,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "806:1:6",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "id": 851,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "798:7:6",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 850,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "798:7:6",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 853,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "798:10:6",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "src": "784:24:6",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4d6574617665727365506c7567696e3a20746865206f776e657220636f6e7472616374206d757374206e6f742062652030",
+                        "id": 855,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "810:51:6",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_cef5454619a05748bff0cf1ca38f66c8a3ffe251e5cc27e616c643899324539d",
+                          "typeString": "literal_string \"MetaversePlugin: the owner contract must not be 0\""
+                        },
+                        "value": "MetaversePlugin: the owner contract must not be 0"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_cef5454619a05748bff0cf1ca38f66c8a3ffe251e5cc27e616c643899324539d",
+                          "typeString": "literal_string \"MetaversePlugin: the owner contract must not be 0\""
+                        }
+                      ],
+                      "id": 848,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "776:7:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 856,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "776:86:6",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 857,
+                  "nodeType": "ExpressionStatement",
+                  "src": "776:86:6"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "expression": {
+                              "arguments": [
+                                {
+                                  "id": 862,
+                                  "name": "IMetaverseRegistrar",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 313,
+                                  "src": "927:19:6",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_type$_t_contract$_IMetaverseRegistrar_$313_$",
+                                    "typeString": "type(contract IMetaverseRegistrar)"
+                                  }
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": [
+                                  {
+                                    "typeIdentifier": "t_type$_t_contract$_IMetaverseRegistrar_$313_$",
+                                    "typeString": "type(contract IMetaverseRegistrar)"
+                                  }
+                                ],
+                                "id": 861,
+                                "name": "type",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 4294967269,
+                                "src": "922:4:6",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_function_metatype_pure$__$returns$__$",
+                                  "typeString": "function () pure"
+                                }
+                              },
+                              "id": 863,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "functionCall",
+                              "lValueRequested": false,
+                              "names": [],
+                              "nodeType": "FunctionCall",
+                              "src": "922:25:6",
+                              "tryCall": false,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_magic_meta_type_t_contract$_IMetaverseRegistrar_$313",
+                                "typeString": "type(contract IMetaverseRegistrar)"
+                              }
+                            },
+                            "id": 864,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "memberName": "interfaceId",
+                            "nodeType": "MemberAccess",
+                            "src": "922:37:6",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes4",
+                              "typeString": "bytes4"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes4",
+                              "typeString": "bytes4"
+                            }
+                          ],
+                          "expression": {
+                            "id": 859,
+                            "name": "_metaverse",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 845,
+                            "src": "893:10:6",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          },
+                          "id": 860,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "supportsInterface",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 71,
+                          "src": "893:28:6",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_view$_t_address_$_t_bytes4_$returns$_t_bool_$bound_to$_t_address_$",
+                            "typeString": "function (address,bytes4) view returns (bool)"
+                          }
+                        },
+                        "id": 865,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "893:67:6",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4d6574617665727365506c7567696e3a20746865206f776e657220636f6e7472616374206d75737420696d706c656d656e7420494d6574617665727365526567697374726172",
+                        "id": 866,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "974:72:6",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_dc6d8451fb58f171b1ddb323b0ba4f38d07a413fe887edad9a20e74af526a349",
+                          "typeString": "literal_string \"MetaversePlugin: the owner contract must implement IMetaverseRegistrar\""
+                        },
+                        "value": "MetaversePlugin: the owner contract must implement IMetaverseRegistrar"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_dc6d8451fb58f171b1ddb323b0ba4f38d07a413fe887edad9a20e74af526a349",
+                          "typeString": "literal_string \"MetaversePlugin: the owner contract must implement IMetaverseRegistrar\""
+                        }
+                      ],
+                      "id": 858,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "872:7:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 867,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "872:184:6",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 868,
+                  "nodeType": "ExpressionStatement",
+                  "src": "872:184:6"
+                },
+                {
+                  "expression": {
+                    "id": 871,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 869,
+                      "name": "metaverse",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 842,
+                      "src": "1066:9:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 870,
+                      "name": "_metaverse",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 845,
+                      "src": "1078:10:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "1066:22:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "id": 872,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1066:22:6"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 843,
+              "nodeType": "StructuredDocumentation",
+              "src": "624:105:6",
+              "text": " Creating a metaverse plug-in requires a valid metaverse\n registrar as its owner."
+            },
+            "id": 874,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 846,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 845,
+                  "mutability": "mutable",
+                  "name": "_metaverse",
+                  "nameLocation": "754:10:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 874,
+                  "src": "746:18:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 844,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "746:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "745:20:6"
+            },
+            "returnParameters": {
+              "id": 847,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "766:0:6"
+            },
+            "scope": 903,
+            "src": "734:361:6",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "baseFunctions": [
+              244
+            ],
+            "documentation": {
+              "id": 875,
+              "nodeType": "StructuredDocumentation",
+              "src": "1101:47:6",
+              "text": " The title of this metaverse."
+            },
+            "functionSelector": "4a79d50c",
+            "id": 880,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "title",
+            "nameLocation": "1162:5:6",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 876,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1167:2:6"
+            },
+            "returnParameters": {
+              "id": 879,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 878,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 880,
+                  "src": "1199:13:6",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 877,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1199:6:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1198:15:6"
+            },
+            "scope": 903,
+            "src": "1153:61:6",
+            "stateMutability": "view",
+            "virtual": true,
+            "visibility": "public"
+          },
+          {
+            "baseFunctions": [
+              254
+            ],
+            "documentation": {
+              "id": 881,
+              "nodeType": "StructuredDocumentation",
+              "src": "1220:133:6",
+              "text": " This function holds an implementation (which could be\n empty) for when the plugin is added to the metaverse."
+            },
+            "functionSelector": "8129fc1c",
+            "id": 884,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "initialize",
+            "nameLocation": "1367:10:6",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 882,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1377:2:6"
+            },
+            "returnParameters": {
+              "id": 883,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1394:0:6"
+            },
+            "scope": 903,
+            "src": "1358:37:6",
+            "stateMutability": "nonpayable",
+            "virtual": true,
+            "visibility": "public"
+          },
+          {
+            "baseFunctions": [
+              262
+            ],
+            "documentation": {
+              "id": 885,
+              "nodeType": "StructuredDocumentation",
+              "src": "1401:113:6",
+              "text": " This function returns the uri for a given token id, with\n the same semantics of ERC1155."
+            },
+            "functionSelector": "0e89341c",
+            "id": 892,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "uri",
+            "nameLocation": "1528:3:6",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 888,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 887,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "1540:8:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 892,
+                  "src": "1532:16:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 886,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1532:7:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1531:18:6"
+            },
+            "returnParameters": {
+              "id": 891,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 890,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 892,
+                  "src": "1579:13:6",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 889,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1579:6:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1578:15:6"
+            },
+            "scope": 903,
+            "src": "1519:75:6",
+            "stateMutability": "view",
+            "virtual": true,
+            "visibility": "public"
+          },
+          {
+            "baseFunctions": [
+              272
+            ],
+            "documentation": {
+              "id": 893,
+              "nodeType": "StructuredDocumentation",
+              "src": "1600:154:6",
+              "text": " This function is a hook for when an asset, which exists\n as registered & managed by this contract, is burned by\n its owner."
+            },
+            "functionSelector": "6c39c1b6",
+            "id": 902,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "burned",
+            "nameLocation": "1768:6:6",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 900,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 895,
+                  "mutability": "mutable",
+                  "name": "_from",
+                  "nameLocation": "1783:5:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 902,
+                  "src": "1775:13:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 894,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1775:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 897,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "1798:8:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 902,
+                  "src": "1790:16:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 896,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1790:7:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 899,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "1816:7:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 902,
+                  "src": "1808:15:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 898,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1808:7:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1774:50:6"
+            },
+            "returnParameters": {
+              "id": 901,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1839:0:6"
+            },
+            "scope": 903,
+            "src": "1759:81:6",
+            "stateMutability": "nonpayable",
+            "virtual": true,
+            "visibility": "public"
+          }
+        ],
+        "scope": 904,
+        "src": "315:1527:6",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:1811:6"
+  },
+  "legacyAST": {
+    "absolutePath": "project:/contracts/lingr/MetaversePlugin.sol",
+    "exportedSymbols": {
+      "Context": [
+        21
+      ],
+      "ERC165Checker": [
+        223
+      ],
+      "IERC165": [
+        235
+      ],
+      "IMetaversePlugin": [
+        273
+      ],
+      "IMetaverseRegistrar": [
+        313
+      ],
+      "MetaversePlugin": [
+        903
+      ]
+    },
+    "id": 904,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 827,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:29:6"
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/Context.sol",
+        "file": "@openzeppelin/contracts/utils/Context.sol",
+        "id": 828,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 904,
+        "sourceUnit": 22,
+        "src": "63:51:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol",
+        "file": "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol",
+        "id": 829,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 904,
+        "sourceUnit": 224,
+        "src": "115:71:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "project:/contracts/lingr/IMetaversePlugin.sol",
+        "file": "./IMetaversePlugin.sol",
+        "id": 830,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 904,
+        "sourceUnit": 274,
+        "src": "187:32:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "project:/contracts/lingr/IMetaverseRegistrar.sol",
+        "file": "./IMetaverseRegistrar.sol",
+        "id": 831,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 904,
+        "sourceUnit": 314,
+        "src": "220:35:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": true,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 833,
+              "name": "Context",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 21,
+              "src": "352:7:6"
+            },
+            "id": 834,
+            "nodeType": "InheritanceSpecifier",
+            "src": "352:7:6"
+          },
+          {
+            "baseName": {
+              "id": 835,
+              "name": "IMetaversePlugin",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 273,
+              "src": "361:16:6"
+            },
+            "id": 836,
+            "nodeType": "InheritanceSpecifier",
+            "src": "361:16:6"
+          }
+        ],
+        "canonicalName": "MetaversePlugin",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 832,
+          "nodeType": "StructuredDocumentation",
+          "src": "257:57:6",
+          "text": " This is the base class of a metaverse plug-in."
+        },
+        "fullyImplemented": false,
+        "id": 903,
+        "linearizedBaseContracts": [
+          903,
+          273,
+          21
+        ],
+        "name": "MetaversePlugin",
+        "nameLocation": "333:15:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "id": 839,
+            "libraryName": {
+              "id": 837,
+              "name": "ERC165Checker",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 223,
+              "src": "496:13:6"
+            },
+            "nodeType": "UsingForDirective",
+            "src": "490:32:6",
+            "typeName": {
+              "id": 838,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "514:7:6",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            }
+          },
+          {
+            "baseFunctions": [
+              250
+            ],
+            "constant": false,
+            "documentation": {
+              "id": 840,
+              "nodeType": "StructuredDocumentation",
+              "src": "528:60:6",
+              "text": " The metaverse that will own this plug-in."
+            },
+            "functionSelector": "f200670d",
+            "id": 842,
+            "mutability": "mutable",
+            "name": "metaverse",
+            "nameLocation": "608:9:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 903,
+            "src": "593:24:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 841,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "593:7:6",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 873,
+              "nodeType": "Block",
+              "src": "766:329:6",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 854,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 849,
+                          "name": "_metaverse",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 845,
+                          "src": "784:10:6",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "!=",
+                        "rightExpression": {
+                          "arguments": [
+                            {
+                              "hexValue": "30",
+                              "id": 852,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "806:1:6",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "id": 851,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "798:7:6",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 850,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "798:7:6",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 853,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "798:10:6",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "src": "784:24:6",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4d6574617665727365506c7567696e3a20746865206f776e657220636f6e7472616374206d757374206e6f742062652030",
+                        "id": 855,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "810:51:6",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_cef5454619a05748bff0cf1ca38f66c8a3ffe251e5cc27e616c643899324539d",
+                          "typeString": "literal_string \"MetaversePlugin: the owner contract must not be 0\""
+                        },
+                        "value": "MetaversePlugin: the owner contract must not be 0"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_cef5454619a05748bff0cf1ca38f66c8a3ffe251e5cc27e616c643899324539d",
+                          "typeString": "literal_string \"MetaversePlugin: the owner contract must not be 0\""
+                        }
+                      ],
+                      "id": 848,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "776:7:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 856,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "776:86:6",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 857,
+                  "nodeType": "ExpressionStatement",
+                  "src": "776:86:6"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "expression": {
+                              "arguments": [
+                                {
+                                  "id": 862,
+                                  "name": "IMetaverseRegistrar",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 313,
+                                  "src": "927:19:6",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_type$_t_contract$_IMetaverseRegistrar_$313_$",
+                                    "typeString": "type(contract IMetaverseRegistrar)"
+                                  }
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": [
+                                  {
+                                    "typeIdentifier": "t_type$_t_contract$_IMetaverseRegistrar_$313_$",
+                                    "typeString": "type(contract IMetaverseRegistrar)"
+                                  }
+                                ],
+                                "id": 861,
+                                "name": "type",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 4294967269,
+                                "src": "922:4:6",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_function_metatype_pure$__$returns$__$",
+                                  "typeString": "function () pure"
+                                }
+                              },
+                              "id": 863,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "functionCall",
+                              "lValueRequested": false,
+                              "names": [],
+                              "nodeType": "FunctionCall",
+                              "src": "922:25:6",
+                              "tryCall": false,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_magic_meta_type_t_contract$_IMetaverseRegistrar_$313",
+                                "typeString": "type(contract IMetaverseRegistrar)"
+                              }
+                            },
+                            "id": 864,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "memberName": "interfaceId",
+                            "nodeType": "MemberAccess",
+                            "src": "922:37:6",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes4",
+                              "typeString": "bytes4"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes4",
+                              "typeString": "bytes4"
+                            }
+                          ],
+                          "expression": {
+                            "id": 859,
+                            "name": "_metaverse",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 845,
+                            "src": "893:10:6",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          },
+                          "id": 860,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "supportsInterface",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 71,
+                          "src": "893:28:6",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_view$_t_address_$_t_bytes4_$returns$_t_bool_$bound_to$_t_address_$",
+                            "typeString": "function (address,bytes4) view returns (bool)"
+                          }
+                        },
+                        "id": 865,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "893:67:6",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4d6574617665727365506c7567696e3a20746865206f776e657220636f6e7472616374206d75737420696d706c656d656e7420494d6574617665727365526567697374726172",
+                        "id": 866,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "974:72:6",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_dc6d8451fb58f171b1ddb323b0ba4f38d07a413fe887edad9a20e74af526a349",
+                          "typeString": "literal_string \"MetaversePlugin: the owner contract must implement IMetaverseRegistrar\""
+                        },
+                        "value": "MetaversePlugin: the owner contract must implement IMetaverseRegistrar"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_dc6d8451fb58f171b1ddb323b0ba4f38d07a413fe887edad9a20e74af526a349",
+                          "typeString": "literal_string \"MetaversePlugin: the owner contract must implement IMetaverseRegistrar\""
+                        }
+                      ],
+                      "id": 858,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "872:7:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 867,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "872:184:6",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 868,
+                  "nodeType": "ExpressionStatement",
+                  "src": "872:184:6"
+                },
+                {
+                  "expression": {
+                    "id": 871,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 869,
+                      "name": "metaverse",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 842,
+                      "src": "1066:9:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 870,
+                      "name": "_metaverse",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 845,
+                      "src": "1078:10:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "1066:22:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "id": 872,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1066:22:6"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 843,
+              "nodeType": "StructuredDocumentation",
+              "src": "624:105:6",
+              "text": " Creating a metaverse plug-in requires a valid metaverse\n registrar as its owner."
+            },
+            "id": 874,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 846,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 845,
+                  "mutability": "mutable",
+                  "name": "_metaverse",
+                  "nameLocation": "754:10:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 874,
+                  "src": "746:18:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 844,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "746:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "745:20:6"
+            },
+            "returnParameters": {
+              "id": 847,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "766:0:6"
+            },
+            "scope": 903,
+            "src": "734:361:6",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "baseFunctions": [
+              244
+            ],
+            "documentation": {
+              "id": 875,
+              "nodeType": "StructuredDocumentation",
+              "src": "1101:47:6",
+              "text": " The title of this metaverse."
+            },
+            "functionSelector": "4a79d50c",
+            "id": 880,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "title",
+            "nameLocation": "1162:5:6",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 876,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1167:2:6"
+            },
+            "returnParameters": {
+              "id": 879,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 878,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 880,
+                  "src": "1199:13:6",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 877,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1199:6:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1198:15:6"
+            },
+            "scope": 903,
+            "src": "1153:61:6",
+            "stateMutability": "view",
+            "virtual": true,
+            "visibility": "public"
+          },
+          {
+            "baseFunctions": [
+              254
+            ],
+            "documentation": {
+              "id": 881,
+              "nodeType": "StructuredDocumentation",
+              "src": "1220:133:6",
+              "text": " This function holds an implementation (which could be\n empty) for when the plugin is added to the metaverse."
+            },
+            "functionSelector": "8129fc1c",
+            "id": 884,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "initialize",
+            "nameLocation": "1367:10:6",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 882,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1377:2:6"
+            },
+            "returnParameters": {
+              "id": 883,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1394:0:6"
+            },
+            "scope": 903,
+            "src": "1358:37:6",
+            "stateMutability": "nonpayable",
+            "virtual": true,
+            "visibility": "public"
+          },
+          {
+            "baseFunctions": [
+              262
+            ],
+            "documentation": {
+              "id": 885,
+              "nodeType": "StructuredDocumentation",
+              "src": "1401:113:6",
+              "text": " This function returns the uri for a given token id, with\n the same semantics of ERC1155."
+            },
+            "functionSelector": "0e89341c",
+            "id": 892,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "uri",
+            "nameLocation": "1528:3:6",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 888,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 887,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "1540:8:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 892,
+                  "src": "1532:16:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 886,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1532:7:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1531:18:6"
+            },
+            "returnParameters": {
+              "id": 891,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 890,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 892,
+                  "src": "1579:13:6",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 889,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1579:6:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1578:15:6"
+            },
+            "scope": 903,
+            "src": "1519:75:6",
+            "stateMutability": "view",
+            "virtual": true,
+            "visibility": "public"
+          },
+          {
+            "baseFunctions": [
+              272
+            ],
+            "documentation": {
+              "id": 893,
+              "nodeType": "StructuredDocumentation",
+              "src": "1600:154:6",
+              "text": " This function is a hook for when an asset, which exists\n as registered & managed by this contract, is burned by\n its owner."
+            },
+            "functionSelector": "6c39c1b6",
+            "id": 902,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "burned",
+            "nameLocation": "1768:6:6",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 900,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 895,
+                  "mutability": "mutable",
+                  "name": "_from",
+                  "nameLocation": "1783:5:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 902,
+                  "src": "1775:13:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 894,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1775:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 897,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "1798:8:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 902,
+                  "src": "1790:16:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 896,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1790:7:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 899,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "1816:7:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 902,
+                  "src": "1808:15:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 898,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1808:7:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1774:50:6"
+            },
+            "returnParameters": {
+              "id": 901,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1839:0:6"
+            },
+            "scope": 903,
+            "src": "1759:81:6",
+            "stateMutability": "nonpayable",
+            "virtual": true,
+            "visibility": "public"
+          }
+        ],
+        "scope": 904,
+        "src": "315:1527:6",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:1811:6"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.10+commit.fc410830.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.3",
+  "updatedAt": "2022-08-05T20:44:33.072Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "burned(address,uint256,uint256)": {
+        "notice": "This function is a hook for when an asset, which exists as registered & managed by this contract, is burned by its owner."
+      },
+      "constructor": {
+        "notice": "Creating a metaverse plug-in requires a valid metaverse registrar as its owner."
+      },
+      "initialize()": {
+        "notice": "This function holds an implementation (which could be empty) for when the plugin is added to the metaverse."
+      },
+      "metaverse()": {
+        "notice": "The metaverse that will own this plug-in."
+      },
+      "title()": {
+        "notice": "The title of this metaverse."
+      },
+      "uri(uint256)": {
+        "notice": "This function returns the uri for a given token id, with the same semantics of ERC1155."
+      }
+    },
+    "notice": "This is the base class of a metaverse plug-in.",
+    "version": 1
+  }
+}

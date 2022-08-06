@@ -1,0 +1,1050 @@
+{
+  "contractName": "IMetaverseRegistrar",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "defineFTType",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "defineNFTType",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "mintFTFor",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenType",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "mintNFTFor",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"defineFTType\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"defineNFTType\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"mintFTFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_tokenType\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"mintNFTFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"defineFTType(uint256)\":{\"notice\":\"Defines the resolution of a fungible token type. The token id must be in the range of the fungible token ids.\"},\"defineNFTType(uint256)\":{\"notice\":\"Defines the resolution of a non-fungible token type. The token id must be in the range of the fungible token (type) ids (strictly > 0, strictly < (1 << 255)).\"},\"mintFTFor(address,uint256,uint256,bytes)\":{\"notice\":\"Mints a specific fungible token type, in a certain amount.\"},\"mintNFTFor(address,uint256,uint256,bytes)\":{\"notice\":\"Mints a specific non-fungible token type, using a specific id (and always using an amount of 1). It is an error if the token id is already minted, or the chosen id is < (1 << 160) since those ids are reserved for brands.\"}},\"notice\":\"An interface for the metaverse core contract. This is meant to be used from inside the metaverse plug-ins (typically on plug-in initialization).\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/lingr/IMetaverseRegistrar.sol\":\"IMetaverseRegistrar\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/lingr/IMetaverseRegistrar.sol\":{\"keccak256\":\"0xa3a7e6eade938959600edd970be5bcddd32383a6abf75323ddd7203c41c57223\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ab655f402028a6eb681c74027baa19c5e12c73eae60d2fd8d0c1012661abc93b\",\"dweb:/ipfs/QmT2EQmmQ759wH43mRGZJ34G8C9xMcTnZJyWA4vSnWXji8\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8 <0.9.0;\n\n/**\n * An interface for the metaverse core contract. This is meant\n * to be used from inside the metaverse plug-ins (typically on\n * plug-in initialization).\n */\ninterface IMetaverseRegistrar {\n    /**\n     * Defines the resolution of a fungible token type. The token id must be\n     * in the range of the fungible token ids.\n     */\n    function defineFTType(uint256 _tokenId) external;\n\n    /**\n     * Defines the resolution of a non-fungible token type. The token id must\n     * be in the range of the fungible token (type) ids (strictly > 0, strictly\n     * < (1 << 255)).\n     */\n    function defineNFTType(uint256 _tokenId) external;\n\n    /**\n     * Mints a specific fungible token type, in a certain amount.\n     */\n    function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) external;\n\n    /**\n     * Mints a specific non-fungible token type, using a specific id (and always using\n     * an amount of 1). It is an error if the token id is already minted, or the chosen\n     * id is < (1 << 160) since those ids are reserved for brands.\n     */\n    function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data) external;\n}\n",
+  "sourcePath": "/home/luismasuelli/Projects/OuterMaze/lingr-contracts/contracts/lingr/IMetaverseRegistrar.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/lingr/IMetaverseRegistrar.sol",
+    "exportedSymbols": {
+      "IMetaverseRegistrar": [
+        307
+      ]
+    },
+    "id": 308,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 269,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:29:4"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IMetaverseRegistrar",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 270,
+          "nodeType": "StructuredDocumentation",
+          "src": "63:161:4",
+          "text": " An interface for the metaverse core contract. This is meant\n to be used from inside the metaverse plug-ins (typically on\n plug-in initialization)."
+        },
+        "fullyImplemented": false,
+        "id": 307,
+        "linearizedBaseContracts": [
+          307
+        ],
+        "name": "IMetaverseRegistrar",
+        "nameLocation": "235:19:4",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 271,
+              "nodeType": "StructuredDocumentation",
+              "src": "261:135:4",
+              "text": " Defines the resolution of a fungible token type. The token id must be\n in the range of the fungible token ids."
+            },
+            "functionSelector": "ab21afb5",
+            "id": 276,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "defineFTType",
+            "nameLocation": "410:12:4",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 274,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 273,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "431:8:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 276,
+                  "src": "423:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 272,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "423:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "422:18:4"
+            },
+            "returnParameters": {
+              "id": 275,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "449:0:4"
+            },
+            "scope": 307,
+            "src": "401:49:4",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 277,
+              "nodeType": "StructuredDocumentation",
+              "src": "456:191:4",
+              "text": " Defines the resolution of a non-fungible token type. The token id must\n be in the range of the fungible token (type) ids (strictly > 0, strictly\n < (1 << 255))."
+            },
+            "functionSelector": "28c90cd9",
+            "id": 282,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "defineNFTType",
+            "nameLocation": "661:13:4",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 280,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 279,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "683:8:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 282,
+                  "src": "675:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 278,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "675:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "674:18:4"
+            },
+            "returnParameters": {
+              "id": 281,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "701:0:4"
+            },
+            "scope": 307,
+            "src": "652:50:4",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 283,
+              "nodeType": "StructuredDocumentation",
+              "src": "708:77:4",
+              "text": " Mints a specific fungible token type, in a certain amount."
+            },
+            "functionSelector": "a16bc2ae",
+            "id": 294,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintFTFor",
+            "nameLocation": "799:9:4",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 292,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 285,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nameLocation": "817:3:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 294,
+                  "src": "809:11:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 284,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "809:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 287,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "830:8:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 294,
+                  "src": "822:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 286,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "822:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 289,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "848:7:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 294,
+                  "src": "840:15:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 288,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "840:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 291,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "870:5:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 294,
+                  "src": "857:18:4",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 290,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "857:5:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "808:68:4"
+            },
+            "returnParameters": {
+              "id": 293,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "885:0:4"
+            },
+            "scope": 307,
+            "src": "790:96:4",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 295,
+              "nodeType": "StructuredDocumentation",
+              "src": "892:253:4",
+              "text": " Mints a specific non-fungible token type, using a specific id (and always using\n an amount of 1). It is an error if the token id is already minted, or the chosen\n id is < (1 << 160) since those ids are reserved for brands."
+            },
+            "functionSelector": "b2863cc1",
+            "id": 306,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintNFTFor",
+            "nameLocation": "1159:10:4",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 304,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 297,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nameLocation": "1178:3:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 306,
+                  "src": "1170:11:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 296,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1170:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 299,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "1191:8:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 306,
+                  "src": "1183:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 298,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1183:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 301,
+                  "mutability": "mutable",
+                  "name": "_tokenType",
+                  "nameLocation": "1209:10:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 306,
+                  "src": "1201:18:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 300,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1201:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 303,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "1234:5:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 306,
+                  "src": "1221:18:4",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 302,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1221:5:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1169:71:4"
+            },
+            "returnParameters": {
+              "id": 305,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1249:0:4"
+            },
+            "scope": 307,
+            "src": "1150:100:4",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 308,
+        "src": "225:1027:4",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:1221:4"
+  },
+  "legacyAST": {
+    "absolutePath": "project:/contracts/lingr/IMetaverseRegistrar.sol",
+    "exportedSymbols": {
+      "IMetaverseRegistrar": [
+        307
+      ]
+    },
+    "id": 308,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 269,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:29:4"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IMetaverseRegistrar",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 270,
+          "nodeType": "StructuredDocumentation",
+          "src": "63:161:4",
+          "text": " An interface for the metaverse core contract. This is meant\n to be used from inside the metaverse plug-ins (typically on\n plug-in initialization)."
+        },
+        "fullyImplemented": false,
+        "id": 307,
+        "linearizedBaseContracts": [
+          307
+        ],
+        "name": "IMetaverseRegistrar",
+        "nameLocation": "235:19:4",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 271,
+              "nodeType": "StructuredDocumentation",
+              "src": "261:135:4",
+              "text": " Defines the resolution of a fungible token type. The token id must be\n in the range of the fungible token ids."
+            },
+            "functionSelector": "ab21afb5",
+            "id": 276,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "defineFTType",
+            "nameLocation": "410:12:4",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 274,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 273,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "431:8:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 276,
+                  "src": "423:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 272,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "423:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "422:18:4"
+            },
+            "returnParameters": {
+              "id": 275,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "449:0:4"
+            },
+            "scope": 307,
+            "src": "401:49:4",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 277,
+              "nodeType": "StructuredDocumentation",
+              "src": "456:191:4",
+              "text": " Defines the resolution of a non-fungible token type. The token id must\n be in the range of the fungible token (type) ids (strictly > 0, strictly\n < (1 << 255))."
+            },
+            "functionSelector": "28c90cd9",
+            "id": 282,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "defineNFTType",
+            "nameLocation": "661:13:4",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 280,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 279,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "683:8:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 282,
+                  "src": "675:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 278,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "675:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "674:18:4"
+            },
+            "returnParameters": {
+              "id": 281,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "701:0:4"
+            },
+            "scope": 307,
+            "src": "652:50:4",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 283,
+              "nodeType": "StructuredDocumentation",
+              "src": "708:77:4",
+              "text": " Mints a specific fungible token type, in a certain amount."
+            },
+            "functionSelector": "a16bc2ae",
+            "id": 294,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintFTFor",
+            "nameLocation": "799:9:4",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 292,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 285,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nameLocation": "817:3:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 294,
+                  "src": "809:11:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 284,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "809:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 287,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "830:8:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 294,
+                  "src": "822:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 286,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "822:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 289,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "848:7:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 294,
+                  "src": "840:15:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 288,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "840:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 291,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "870:5:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 294,
+                  "src": "857:18:4",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 290,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "857:5:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "808:68:4"
+            },
+            "returnParameters": {
+              "id": 293,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "885:0:4"
+            },
+            "scope": 307,
+            "src": "790:96:4",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 295,
+              "nodeType": "StructuredDocumentation",
+              "src": "892:253:4",
+              "text": " Mints a specific non-fungible token type, using a specific id (and always using\n an amount of 1). It is an error if the token id is already minted, or the chosen\n id is < (1 << 160) since those ids are reserved for brands."
+            },
+            "functionSelector": "b2863cc1",
+            "id": 306,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintNFTFor",
+            "nameLocation": "1159:10:4",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 304,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 297,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nameLocation": "1178:3:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 306,
+                  "src": "1170:11:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 296,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1170:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 299,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "1191:8:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 306,
+                  "src": "1183:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 298,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1183:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 301,
+                  "mutability": "mutable",
+                  "name": "_tokenType",
+                  "nameLocation": "1209:10:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 306,
+                  "src": "1201:18:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 300,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1201:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 303,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "1234:5:4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 306,
+                  "src": "1221:18:4",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 302,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1221:5:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1169:71:4"
+            },
+            "returnParameters": {
+              "id": 305,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1249:0:4"
+            },
+            "scope": 307,
+            "src": "1150:100:4",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 308,
+        "src": "225:1027:4",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:1221:4"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.10+commit.fc410830.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.3",
+  "updatedAt": "2022-08-05T20:05:06.713Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "defineFTType(uint256)": {
+        "notice": "Defines the resolution of a fungible token type. The token id must be in the range of the fungible token ids."
+      },
+      "defineNFTType(uint256)": {
+        "notice": "Defines the resolution of a non-fungible token type. The token id must be in the range of the fungible token (type) ids (strictly > 0, strictly < (1 << 255))."
+      },
+      "mintFTFor(address,uint256,uint256,bytes)": {
+        "notice": "Mints a specific fungible token type, in a certain amount."
+      },
+      "mintNFTFor(address,uint256,uint256,bytes)": {
+        "notice": "Mints a specific non-fungible token type, using a specific id (and always using an amount of 1). It is an error if the token id is already minted, or the chosen id is < (1 << 160) since those ids are reserved for brands."
+      }
+    },
+    "notice": "An interface for the metaverse core contract. This is meant to be used from inside the metaverse plug-ins (typically on plug-in initialization).",
+    "version": 1
+  }
+}
