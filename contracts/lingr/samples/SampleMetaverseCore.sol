@@ -19,8 +19,8 @@ contract SampleMetaverseCore is ERC1155, MetaverseAssetsRegistrar {
         return owner == _sender;
     }
 
-    function _mintBrandFor(address _brandId, address _owner) internal override {
-        _mint(_owner, uint256(uint160(_brandId)), 1, "SampleERC1155WithBrandRegistry: test _mintBrandFor");
+    function _mintBrandFor(address _to, address _brandId) internal override {
+        _mint(_to, uint256(uint160(_brandId)), 1, "SampleERC1155WithBrandRegistry: test _mintBrandFor");
     }
 
     function _isBrandOwnerApprovedEditor(address _brandOwner, address _sender) internal view override returns (bool) {

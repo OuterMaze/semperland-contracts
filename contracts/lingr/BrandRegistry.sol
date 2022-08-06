@@ -138,7 +138,7 @@ abstract contract BrandRegistry is Context, NativePayable {
     /**
      * Mints the new brand id, giving it to a particular address as owner.
      */
-    function _mintBrandFor(address _brandId, address _owner) internal virtual;
+    function _mintBrandFor(address _to, address _brandId) internal virtual;
 
     /**
      * Tells whether a particular user is the owner of the brand id.
@@ -195,7 +195,7 @@ abstract contract BrandRegistry is Context, NativePayable {
         });
 
         // 4. Mint the brand into the economic system for the sender.
-        _mintBrandFor(brandId, sender);
+        _mintBrandFor(sender, brandId);
 
         // 5. Trigger the event.
         emit BrandRegistered(sender, brandId, _name, _description, msg.value);
