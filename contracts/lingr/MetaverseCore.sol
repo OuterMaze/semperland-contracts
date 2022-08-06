@@ -231,6 +231,6 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
         IMetaversePlugin(_contract).initialize();
     }
 
-    // TODO: Implement many features (and AMEND this commit!!!!!):
-    // 2. A sample contract defining a COIN type and a dumb DEED type. TODO go further in this point.
+    // TODO: Implement many features:
+    // 1. A sample contract defining a COIN type and a dumb DEED type.
 }
