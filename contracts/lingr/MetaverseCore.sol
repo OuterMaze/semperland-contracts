@@ -79,12 +79,42 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
     }
 
     /**
+     * This modifier requires the token type to not be already registered.
+     */
+    modifier onlyNewTokenType(uint256 _tokenType) {
+        require(tokenTypeResolvers[_tokenType] == address(0), "MetaverseCore: the specified token type is not available");
+        _;
+    }
+
+    /**
+     * This modifier requires the token type to be already registered.
+     */
+    modifier onlyExistingTokenType(uint256 _tokenType) {
+        require(tokenTypeResolvers[_tokenType] != address(0), "MetaverseCore: unknown / non-mintable token type id");
+        _;
+    }
+
+    /**
+     * This modifier requires the token type to be in the FT range.
+     */
+    modifier onlyFTRange(uint256 _tokenType) {
+        require(_tokenType >= (1 << 255), "MetaverseCore: the specified value is not in the fungible tokens range");
+        _;
+    }
+
+    /**
+     * This modifier requires the token type to be in the NFT range.
+     */
+    modifier onlyNFTRange(uint256 _tokenType) {
+        require(_tokenType < (1 << 255), "MetaverseCore: the specified value is not in the nft range");
+        _;
+    }
+
+    /**
      * Defines the resolution of a fungible token type. The token id must be
      * in the range of the fungible token ids.
      */
-    function defineFTType(uint256 _tokenId) public onlyPlugin {
-        require(_tokenId >= (1 << 255), "MetaverseCore: the specified token id is not in the fungible tokens range");
-        require(tokenTypeResolvers[_tokenId] == address(0), "MetaverseCore: the specified token id is not available");
+    function defineFTType(uint256 _tokenId) public onlyPlugin onlyNewTokenType(_tokenId) onlyFTRange(_tokenId) {
         tokenTypeResolvers[_tokenId] = _msgSender();
     }
 
@@ -93,10 +123,8 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
      * be in the range of the fungible token (type) ids (strictly > 0, strictly
      * < (1 << 255)).
      */
-    function defineNFTType(uint256 _tokenId) public onlyPlugin {
+    function defineNFTType(uint256 _tokenId) public onlyPlugin onlyNewTokenType(_tokenId) onlyNFTRange(_tokenId) {
         require(_tokenId > 1, "MetaverseCore: nft type 0 is reserved for invalid / missing nfts, and 1 for brands");
-        require(_tokenId < (1 << 255), "MetaverseCore: the specified token type id is not in the nft range");
-        require(tokenTypeResolvers[_tokenId] == address(0), "MetaverseCore: the specified token id is not available");
         tokenTypeResolvers[_tokenId] = _msgSender();
     }
 
@@ -110,9 +138,9 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
     /**
      * Mints a specific fungible token type, in a certain amount.
      */
-    function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) public onlyPlugin {
-        require(tokenTypeResolvers[_tokenId] != address(0), "MetaverseCore: unknown token type id");
-        require(_tokenId >= (1 << 255), "MetaverseCore: the specified token id is not in the fungible tokens range");
+    function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data)
+        public onlyPlugin onlyExistingTokenType(_tokenId) onlyFTRange(_tokenId)
+    {
         _mintFor(_to, _tokenId, _amount, _data);
     }
 
@@ -121,10 +149,10 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
      * an amount of 1). It is an error if the token id is already minted, or the chosen
      * id is < (1 << 160) since those ids are reserved for brands.
      */
-    function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data) public onlyPlugin {
-        require(tokenTypeResolvers[_tokenType] != address(0), "MetaverseCore: unknown / non-mintable token type id");
+    function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data)
+        public onlyPlugin onlyExistingTokenType(_tokenType) onlyNFTRange(_tokenType) onlyNFTRange(_tokenId)
+    {
         require(_tokenType >= (1 << 160), "MetaverseCore: the specified token id is reserved for brands");
-        require(_tokenType < (1 << 255), "MetaverseCore: the specified token id is not in the nft range");
         require(nftTypes[_tokenId] == 0, "MetaverseCore: the specified nft id is not available");
         _mintFor(_to, _tokenId, 1, _data);
         nftTypes[_tokenId] = _tokenType;
