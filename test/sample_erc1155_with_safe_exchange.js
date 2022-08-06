@@ -473,7 +473,7 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
       contract.dealBreak(new BN("9"), {from: accounts[4]}),
       revertReason("SafeExchange: caller is not emitter/receiver nor approved")
     );
-    console.log("6. Break-attempt an already-confirmed deal - it will be invalid (deal: 1)");
+    console.log("7. Break-attempt an already-confirmed deal - it will be invalid (deal: 1)");
     await expectRevert(
       contract.dealBreak(new BN("1"), {from: accounts[0]}),
       revertReason("SafeExchange: invalid deal")

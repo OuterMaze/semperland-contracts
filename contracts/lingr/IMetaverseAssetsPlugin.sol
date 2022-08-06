@@ -5,7 +5,7 @@ pragma solidity >=0.8 <0.9.0;
  * A contract satisfying this interface is considered a plug-in
  * for a metaverse.
  */
-interface IMetaversePlugin {
+interface IMetaverseAssetsPlugin {
     /**
      * The title of this metaverse.
      */

@@ -3,22 +3,23 @@ pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "./IMetaversePlugin.sol";
-import "./IMetaverseRegistrar.sol";
+import "./IMetaverseAssetsPlugin.sol";
+import "./IMetaverseAssetsRegistrar.sol";
+import "./BrandRegistry.sol";
 
 /**
  * A metaverse hub can receive "plugs" (extensions) in the form of
- * different contracts (implementing IMetaversePlugin). This plug
- * mechanism allows extending the metaverse with new asset types
- * and new asset instances (each plug-in is managed by the team,
- * not publicly added by external users).
+ * different contracts (implementing IMetaverseAssetsPlugin). This
+ * plug mechanism allows extending the metaverse with new asset
+ * types and new asset instances (each plug-in is managed by the
+ * team, not publicly added by external users).
  *
  * Each of those contracts will make use of their own logic while
  * interacting with the metaverse, which involves having full access
  * to the whole metaverse assets (e.g. taking assets from the users
  * or granting assets to the users).
  */
-abstract contract MetaverseCore is Context, IMetaverseRegistrar {
+abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar, BrandRegistry {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -159,12 +160,6 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
     }
 
     /**
-     * This method must be implemented to define how the metadata for a brand id will be
-     * retrieved (typically, this occurs in terms of BrandRegistry's brandMetadataURI).
-     */
-    function _brandURI(address _brandId) public virtual view returns (string memory);
-
-    /**
      * Retrieves the metadata uri from the appropriate plug-in, if any. If the type id is
      * not registered then return an empty string.
      */
@@ -173,7 +168,7 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
         if (plugin == address(0)) {
             return "";
         }
-        return IMetaversePlugin(plugin).uri(_typeId);
+        return IMetaverseAssetsPlugin(plugin).uri(_typeId);
     }
 
     /**
@@ -185,7 +180,7 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
      */
     function tokenURI(uint256 _tokenId) public view returns (string memory) {
         if (_tokenId < (1 << 160)) {
-            return _brandURI(address(uint160(_tokenId)));
+            return brandMetadataURI(address(uint160(_tokenId)));
         } else if (_tokenId < (1 << 255)) {
             return _metadataFromPlugin(nftTypes[_tokenId]);
         } else {
@@ -209,7 +204,7 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
             resolver = tokenTypeResolvers[_tokenId];
         }
         if (resolver != address(0)) {
-            IMetaversePlugin(resolver).burned(_from, _tokenId, _amount);
+            IMetaverseAssetsPlugin(resolver).burned(_from, _tokenId, _amount);
         }
     }
 
@@ -239,8 +234,8 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
      * this metaverse in particular.
      */
     function _isPluginForThisMetaverse(address _plugin) private view returns (bool) {
-        return _plugin.supportsInterface(type(IMetaversePlugin).interfaceId) &&
-            IMetaversePlugin(_plugin).metaverse() == address(this);
+        return _plugin.supportsInterface(type(IMetaverseAssetsPlugin).interfaceId) &&
+            IMetaverseAssetsPlugin(_plugin).metaverse() == address(this);
     }
 
     /**
@@ -256,7 +251,7 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
             !plugins[_contract], "MetaverseCore: the plug-in is already added to this metaverse"
         );
         plugins[_contract] = true;
-        IMetaversePlugin(_contract).initialize();
+        IMetaverseAssetsPlugin(_contract).initialize();
     }
 
     // TODO: Implement many features:

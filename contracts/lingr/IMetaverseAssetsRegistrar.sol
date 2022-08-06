@@ -6,7 +6,7 @@ pragma solidity >=0.8 <0.9.0;
  * to be used from inside the metaverse plug-ins (typically on
  * plug-in initialization).
  */
-interface IMetaverseRegistrar {
+interface IMetaverseAssetsRegistrar {
     /**
      * Defines the resolution of a fungible token type. The token id must be
      * in the range of the fungible token ids.

@@ -3,13 +3,13 @@ pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "./IMetaversePlugin.sol";
-import "./IMetaverseRegistrar.sol";
+import "./IMetaverseAssetsPlugin.sol";
+import "./IMetaverseAssetsRegistrar.sol";
 
 /**
  * This is the base class of a metaverse plug-in.
  */
-abstract contract MetaversePlugin is Context, IMetaversePlugin {
+abstract contract MetaversePlugin is Context, IMetaverseAssetsPlugin {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -28,7 +28,7 @@ abstract contract MetaversePlugin is Context, IMetaversePlugin {
     constructor(address _metaverse) {
         require(_metaverse != address(0), "MetaversePlugin: the owner contract must not be 0");
         require(
-            _metaverse.supportsInterface(type(IMetaverseRegistrar).interfaceId),
+            _metaverse.supportsInterface(type(IMetaverseAssetsRegistrar).interfaceId),
             "MetaversePlugin: the owner contract must implement IMetaverseRegistrar"
         );
         metaverse = _metaverse;
