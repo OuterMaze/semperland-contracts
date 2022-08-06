@@ -232,7 +232,5 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
     }
 
     // TODO: Implement many features (and AMEND this commit!!!!!):
-    // 1. A sample contract using SampleERC1155WithBrandRegistry, and MetaverseCore.
-    //    _mintFor must be implemented in terms of ERC1155ERC11, and _brandURI in terms of BrandRegistry.
     // 2. A sample contract defining a COIN type and a dumb DEED type. TODO go further in this point.
 }
