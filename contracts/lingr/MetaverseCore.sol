@@ -65,7 +65,8 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
      * a particular token type. Also, both the NFT id and its associated
      * token type will be lower than (1<<255) since, otherwise, they would
      * be using values corresponding to the FT side (both for IDs and type
-     * indices).
+     * indices). Brand NFTs are not included in this mapping (they are only
+     * characterized by being < (1 << 160)).
      */
     mapping(uint256 => uint256) public nftTypes;
 
@@ -93,7 +94,7 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
      * < (1 << 255)).
      */
     function defineNFTType(uint256 _tokenId) public onlyPlugin {
-        require(_tokenId > 0, "MetaverseCore: nft type 0 is reserved for invalid / missing nfts");
+        require(_tokenId > 1, "MetaverseCore: nft type 0 is reserved for invalid / missing nfts, and 1 for brands");
         require(_tokenId < (1 << 255), "MetaverseCore: the specified token type id is not in the nft range");
         require(tokenTypeResolvers[_tokenId] == address(0), "MetaverseCore: the specified token id is not available");
         tokenTypeResolvers[_tokenId] = _msgSender();
@@ -121,7 +122,8 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
      * id is < (1 << 160) since those ids are reserved for brands.
      */
     function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data) public onlyPlugin {
-        require(tokenTypeResolvers[_tokenType] != address(0), "MetaverseCore: unknown token type id");
+        require(tokenTypeResolvers[_tokenType] != address(0), "MetaverseCore: unknown / non-mintable token type id");
+        require(_tokenType >= (1 << 160), "MetaverseCore: the specified token id is reserved for brands");
         require(_tokenType < (1 << 255), "MetaverseCore: the specified token id is not in the nft range");
         require(nftTypes[_tokenId] == 0, "MetaverseCore: the specified nft id is not available");
         _mintFor(_to, _tokenId, 1, _data);
