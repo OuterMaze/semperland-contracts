@@ -171,11 +171,9 @@ abstract contract MetaverseCore is Context, IMetaverseRegistrar {
      * type, or being it a non-fungible token id).
      */
     function _tokenBurned(address _from, uint256 _tokenId, uint256 _amount) internal {
+        require(_tokenId >= (1 << 160), "MetaverseCore: brands cannot be burned");
         address resolver = address(0);
-        if (_tokenId < (1 << 160)) {
-            // NO-OP: Brands are never burned.
-            return;
-        } else if (_tokenId < (1 << 255)) {
+        if (_tokenId < (1 << 255)) {
             resolver = tokenTypeResolvers[nftTypes[_tokenId]];
         } else {
             resolver = tokenTypeResolvers[_tokenId];
