@@ -24,6 +24,13 @@
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 module.exports = {
+  // Optimization is required for these contracts, since the core is a bit heave.
+  settings: {
+    optimizer: {
+      enabled: true
+    }
+  },
+
   /**
    * Networks define how you connect to your ethereum client and let you set the
    * defaults web3 uses to send transactions. If you don't specify one truffle
@@ -33,7 +40,6 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
-
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
