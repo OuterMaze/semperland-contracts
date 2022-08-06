@@ -24,6 +24,11 @@
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 module.exports = {
+  // Just for this project's purpose, as helpers, I add this plugin.
+  plugins: [
+    'truffle-contract-size'
+  ],
+
   // Optimization is required for these contracts, since the core is a bit heave.
   settings: {
     optimizer: {

@@ -39,11 +39,26 @@ abstract contract MetaversePlugin is Context, IMetaversePlugin {
      */
     function title() public view virtual returns (string memory);
 
+    modifier onlyMetaverse() {
+        require(msg.sender == metaverse, "MetaversePlugin: only the owning metaverse can invoke this method");
+        _;
+    }
+    /**
+     * This function holds an implementation (which could be
+     * empty) for when the plugin is added to the metaverse.
+     * The implementation requires the sender to be the same
+     * metaverse that owns this plugin, and the underlying
+     * implementation is defined by _initialize() instead.
+     */
+    function initialize() public onlyMetaverse {
+        _initialize();
+    }
+
     /**
      * This function holds an implementation (which could be
      * empty) for when the plugin is added to the metaverse.
      */
-    function initialize() public virtual;
+    function _initialize() public virtual;
 
     /**
      * This function returns the uri for a given token id, with
@@ -54,7 +69,18 @@ abstract contract MetaversePlugin is Context, IMetaversePlugin {
     /**
      * This function is a hook for when an asset, which exists
      * as registered & managed by this contract, is burned by
-     * its owner.
+     * its owner. The implementation requires the sender to be
+     * the same metaverse that owns this plugin, and the true
+     * implementation is defined by _burned() instead.
      */
-    function burned(address _from, uint256 _tokenId, uint256 _amount) public virtual;
+    function burned(address _from, uint256 _tokenId, uint256 _amount) public onlyMetaverse {
+        _burned(_from, _tokenId, _amount);
+    }
+
+    /**
+     * This function is a hook for when an asset, which exists
+     * as registered & managed by this contract, is burned by
+     * its owner
+     */
+    function _burned(address _from, uint256 _tokenId, uint256 _amount) public virtual;
 }
