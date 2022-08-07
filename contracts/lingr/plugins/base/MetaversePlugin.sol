@@ -4,7 +4,7 @@ pragma solidity >=0.8 <0.9.0;
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "./IMetaverseAssetsPlugin.sol";
-import "./IMetaverseAssetsRegistrar.sol";
+import "../../IMetaverseAssetsRegistrar.sol";
 
 /**
  * This is the base class of a metaverse plug-in.
