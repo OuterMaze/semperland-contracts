@@ -59,4 +59,13 @@ contract SampleERC1155WithBrandRegistry is ERC1155, BrandRegistry {
             }
         }
     }
+
+    /**
+     * This brand registry satisfies the IERC1155, the IBrandRegistry and IERC165.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, BrandRegistry) returns (bool) {
+        return interfaceId == type(IERC165).interfaceId ||
+               interfaceId == type(IBrandRegistry).interfaceId ||
+               interfaceId == type(IERC1155).interfaceId;
+    }
 }

@@ -270,6 +270,25 @@
     {
       "inputs": [
         {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
@@ -522,7 +541,7 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"withdrawnBy\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"BrandEarningsWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"registeredBy\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"brandId\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"}],\"name\":\"BrandRegistered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newCost\",\"type\":\"uint256\"}],\"name\":\"BrandRegistrationCostUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"updatedBy\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"brand\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"committed\",\"type\":\"bool\"}],\"name\":\"BrandSocialCommitmentUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"updatedBy\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"brandId\",\"type\":\"address\"}],\"name\":\"BrandUpdated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_contract\",\"type\":\"address\"}],\"name\":\"addPlugin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"}],\"name\":\"brandExists\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"}],\"name\":\"brandMetadataURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"brandRegistrationCost\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"brandRegistrationCurrentEarnings\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"defineFTType\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"defineNFTType\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"mintFTFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_tokenType\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"mintNFTFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"nftTypes\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"plugins\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_description\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_image\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_icon16x16\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_icon32x32\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_icon64x64\",\"type\":\"string\"}],\"name\":\"registerBrand\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_newCost\",\"type\":\"uint256\"}],\"name\":\"setBrandRegistrationCost\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"tokenTypeResolvers\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_challengeUrl\",\"type\":\"string\"}],\"name\":\"updateBrandChallengeUrl\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_icon\",\"type\":\"string\"}],\"name\":\"updateBrandIcon16x16Url\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_icon\",\"type\":\"string\"}],\"name\":\"updateBrandIcon32x32Url\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_icon\",\"type\":\"string\"}],\"name\":\"updateBrandIcon64x64Url\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_image\",\"type\":\"string\"}],\"name\":\"updateBrandImage\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"_committed\",\"type\":\"bool\"}],\"name\":\"updateBrandSocialCommitment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawBrandRegistrationEarnings\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"events\":{\"BrandEarningsWithdrawn(address,uint256)\":{\"notice\":\"This event is triggered when brand earnings were withdrawn successfully.\"},\"BrandRegistered(address,address,string,string,uint256)\":{\"notice\":\"This event is triggered when a brand is registered. The new address is also included, along some reference data.\"},\"BrandRegistrationCostUpdated(uint256)\":{\"notice\":\"An event for when the brand registration cost is updated.\"},\"BrandSocialCommitmentUpdated(address,address,bool)\":{\"notice\":\"This event is triggered when a brand is updated with respect to its social commitment (this is: to tell a brand is socially committed according to the metaverse's views or not). Special benefits (in particular, with respect to assets loading on customers) are given in clients to socially committed brands.\"},\"BrandUpdated(address,address)\":{\"notice\":\"This event is triggered when a brand is registered. The new address is also included, along some reference data.\"}},\"kind\":\"user\",\"methods\":{\"addPlugin(address)\":{\"notice\":\"Adds a plug-in contract to this metaverse.\"},\"brandExists(address)\":{\"notice\":\"Tells whether an address corresponds to a registered brand or not.\"},\"brandMetadataURI(address)\":{\"notice\":\"Assembles the whole metadata for a brand. WARNING: This method will consume a lot of gas if invoked inside a transaction, so it is recommended to invoke this method in the context of a CALL, and never in the context of a SEND (even as part of other contract's code).\"},\"brandRegistrationCost()\":{\"notice\":\"The cost to register a new brand. This can be changed in the future and must be able to be known in the ABI for the users to be aware of the statistic.\"},\"brandRegistrationCurrentEarnings()\":{\"notice\":\"Tells the current earnings, not yet withdrawn, from brand registrations.\"},\"defineFTType(uint256)\":{\"notice\":\"Defines the resolution of a fungible token type. The token id must be in the range of the fungible token ids.\"},\"defineNFTType(uint256)\":{\"notice\":\"Defines the resolution of a non-fungible token type. The token id must be in the range of the fungible token (type) ids (strictly > 0, strictly < (1 << 255)).\"},\"mintFTFor(address,uint256,uint256,bytes)\":{\"notice\":\"Mints a specific fungible token type, in a certain amount.\"},\"mintNFTFor(address,uint256,uint256,bytes)\":{\"notice\":\"Mints a specific non-fungible token type, using a specific id (and always using an amount of 1). It is an error if the token id is already minted, or the chosen id is < (1 << 160) since those ids are reserved for brands.\"},\"nftTypes(uint256)\":{\"notice\":\"Now, each NFT id will be registered here along its token type. The difference with the fungible tokens (they're already registered in the `tokenTypes` mapping) is that they need to be registered with a particular token type. Also, both the NFT id and its associated token type will be lower than (1<<255) since, otherwise, they would be using values corresponding to the FT side (both for IDs and type indices). Brand NFTs are not included in this mapping (they are only characterized by being < (1 << 160)).\"},\"plugins(address)\":{\"notice\":\"This is the list of plug-ins that are being added to the hub. Each contract has its separate logic but they have access to the same set of features. Once a contract is added, it will never be removed from this list. This mapping tells whether a contract in particular has permission(s) to define a type and mint tokens for an address.\"},\"registerBrand(string,string,string,string,string,string)\":{\"notice\":\"Registers a new brand, when the appropriate price is paid for it. For more details on how this method works, check _registerBrand's inline documentation.\"},\"setBrandRegistrationCost(uint256)\":{\"notice\":\"Sets the new brand registration cost.\"},\"tokenTypeResolvers(uint256)\":{\"notice\":\"Types are identified as integer values, and each registered type will have a non-zero responsible address (serving to metadata resolution and also to account for the existence of a given type). The type 1 (0x1) will be the first type, and actually it will be the brand type. Other NFT types will be registered using indices lower to (1<<255), while FT types will be registered using indices greater than or equal to that value (i.e. starting with binary {1}). In the case of the FTs, the index in this mapping is also their token id. This is not the same for NFTs (they have one extra level of indirection since multiple ids might share the same type). A special type id will be regarded as invalid type (i.e. it will not count as NFT nor FT type, but as a non-existent type): 0 (0x0). The responsible serves two purposes: The first one, is to resolve the metadata of a given token id (be it FT or NFT). The second one is to account for one of such tokens being burned. The responsible will actually be one of the registered plug-ins, on each case (save for the brands case, which is resolved by this contract, and the invalid case, which has no resolver).\"},\"tokenURI(uint256)\":{\"notice\":\"Retrieves the metadata uri of a given token. WARNING: This method will consume a lot of gas if invoked inside a transaction, so it is recommended to invoke this method in the context of a CALL, and never in the context of a SEND (even as part of other contract's code).\"},\"updateBrandChallengeUrl(address,string)\":{\"notice\":\"Updates the brand's challenge url. Only the owner of the brand or an approved account can invoke this method. Ensure the url is empty or a valid URL, or metadata might fail to be assembled into valid JSON.\"},\"updateBrandIcon16x16Url(address,string)\":{\"notice\":\"Updates the brand's 16x16 icon url. Only the owner of the brand or an approved account can invoke this method. Ensure the _icon is empty or a valid URL, or metadata might fail to be assembled into valid JSON.\"},\"updateBrandIcon32x32Url(address,string)\":{\"notice\":\"Updates the brand's 32x32 icon url. Only the owner of the brand or an approved account can invoke this method. Ensure the _icon is empty or a valid URL, or metadata might fail to be assembled into valid JSON.\"},\"updateBrandIcon64x64Url(address,string)\":{\"notice\":\"Updates the brand's 64x64 icon url. Only the owner of the brand or an approved account can invoke this method. Ensure the _icon is empty or a valid URL, or metadata might fail to be assembled into valid JSON.\"},\"updateBrandImage(address,string)\":{\"notice\":\"Updates the brand image. Only the owner of the brand or an approved account can invoke this method. Ensure the _image is empty or a valid URL, or metadata might fail to be assembled into valid JSON.\"},\"updateBrandSocialCommitment(address,bool)\":{\"notice\":\"Updates whether a brand is socially committed or not.\"},\"withdrawBrandRegistrationEarnings(uint256)\":{\"notice\":\"Allows the sender to withdraw brand registration earnings.\"}},\"notice\":\"A metaverse hub can receive \\\"plugs\\\" (extensions) in the form of different contracts (implementing IMetaverseAssetsPlugin). This plug mechanism allows extending the metaverse with new asset types and new asset instances (each plug-in is managed by the team, not publicly added by external users). Each of those contracts will make use of their own logic while interacting with the metaverse, which involves having full access to the whole metaverse assets (e.g. taking assets from the users or granting assets to the users).\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/lingr/MetaverseAssetsRegistrar.sol\":\"MetaverseAssetsRegistrar\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/Base64.sol\":{\"keccak256\":\"0x5f3461639fe20794cfb4db4a6d8477388a15b2e70a018043084b7c4bedfa8136\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://77e5309e2cc4cdc3395214edb0ff43ff5a5f7373f5a425383e540f6fab530f96\",\"dweb:/ipfs/QmTV8DZ9knJDa3b5NPBFQqjvTzodyZVjRUg5mx5A99JPLJ\"]},\"@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92\",\"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3\"]},\"@openzeppelin/contracts/utils/Strings.sol\":{\"keccak256\":\"0xaf159a8b1923ad2a26d516089bceca9bdeaeacd04be50983ea00ba63070f08a3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6f2cf1c531122bc7ca96b8c8db6a60deae60441e5223065e792553d4849b5638\",\"dweb:/ipfs/QmPBdJmBBABMDCfyDjCbdxgiqRavgiSL88SYPGibgbPas9\"]},\"@openzeppelin/contracts/utils/introspection/ERC165Checker.sol\":{\"keccak256\":\"0xf7291d7213336b00ee7edbf7cd5034778dd7b0bda2a7489e664f1e5cacc6c24e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://a3671a157cfdc73f334fc9e584862e1b3b48e8b771cde69d79834b03dc5c2826\",\"dweb:/ipfs/QmVJnMc3FLyYzJFktqwinaZes3pnRPuU1wKmBGvGRfh4rc\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]},\"project:/contracts/NativePayable.sol\":{\"keccak256\":\"0xc9018607bcc12ee352d252b8d57dd86f02119dcc449e48bddb96ca5b60d31b3b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7227abbd55c35a85934601678e6258200c984ba99b241f291fb8db29a5aeffa8\",\"dweb:/ipfs/QmTrfuvFcK3EjHbz3EdZURsJq6KgpuboWzqNqDTwtn4zGV\"]},\"project:/contracts/lingr/IMetaverseAssetsRegistrar.sol\":{\"keccak256\":\"0xedee5cf9531254901baf6d9c039edefadb3312a1cd783f9948de27751caf2b86\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://0d9da9f69e3d69dbf04a1d9d937a4ba55749cc42ccc31e111b16ac2bac2204ba\",\"dweb:/ipfs/QmbYUvi3WvjXpAJaRAmoFrAzm6oavjtdDgDT9ozT18qFjr\"]},\"project:/contracts/lingr/MetaverseAssetsRegistrar.sol\":{\"keccak256\":\"0xa8d1eb19731b95dc57a557cc664cfb7da48aa12a537ff1d870aed3f3b4cf232e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d1cde9cf261ff04e485eb2b938806bc027839e506c58938c40b3c4846224376a\",\"dweb:/ipfs/Qmf491GEHk8HYd8N8zgwrUtpyHrumPJTEndgPpV9Pu57Kz\"]},\"project:/contracts/lingr/brands/BrandRegistry.sol\":{\"keccak256\":\"0x22e49540a4c93ef84d2f0f1b36170730492753a1a44096624e6cb66bdfe5a444\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://50607f39471ab7322ec7f38fcc6f611aea37a63470281751282a213f15965bf0\",\"dweb:/ipfs/Qmb8BMShQ4gZssSXqrRs4eM2YJX5SUAuMgc143qksdwJnm\"]},\"project:/contracts/lingr/plugins/base/IMetaverseAssetsPlugin.sol\":{\"keccak256\":\"0x612fbccc058a2c02ad29b71314fc26769e9be5258046f705c0d25dc78a7a067b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://c7ac1e4b136afb117c187168bec5ae14e8f088332a237bf44d48c46c161c8f7a\",\"dweb:/ipfs/QmXfuczxxJz2T73sL8meUfbYA2ZMPPb2tJeQUwJU2pRaXD\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"withdrawnBy\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"BrandEarningsWithdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"registeredBy\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"brandId\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"}],\"name\":\"BrandRegistered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newCost\",\"type\":\"uint256\"}],\"name\":\"BrandRegistrationCostUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"updatedBy\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"brand\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"committed\",\"type\":\"bool\"}],\"name\":\"BrandSocialCommitmentUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"updatedBy\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"brandId\",\"type\":\"address\"}],\"name\":\"BrandUpdated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_contract\",\"type\":\"address\"}],\"name\":\"addPlugin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"}],\"name\":\"brandExists\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"}],\"name\":\"brandMetadataURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"brandRegistrationCost\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"brandRegistrationCurrentEarnings\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"defineFTType\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"defineNFTType\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"mintFTFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_tokenType\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"mintNFTFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"nftTypes\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"plugins\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_description\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_image\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_icon16x16\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_icon32x32\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_icon64x64\",\"type\":\"string\"}],\"name\":\"registerBrand\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_newCost\",\"type\":\"uint256\"}],\"name\":\"setBrandRegistrationCost\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"tokenTypeResolvers\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_challengeUrl\",\"type\":\"string\"}],\"name\":\"updateBrandChallengeUrl\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_icon\",\"type\":\"string\"}],\"name\":\"updateBrandIcon16x16Url\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_icon\",\"type\":\"string\"}],\"name\":\"updateBrandIcon32x32Url\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_icon\",\"type\":\"string\"}],\"name\":\"updateBrandIcon64x64Url\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_image\",\"type\":\"string\"}],\"name\":\"updateBrandImage\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"_committed\",\"type\":\"bool\"}],\"name\":\"updateBrandSocialCommitment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawBrandRegistrationEarnings\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"events\":{\"BrandEarningsWithdrawn(address,uint256)\":{\"notice\":\"This event is triggered when brand earnings were withdrawn successfully.\"},\"BrandRegistered(address,address,string,string,uint256)\":{\"notice\":\"This event is triggered when a brand is registered. The new address is also included, along some reference data.\"},\"BrandRegistrationCostUpdated(uint256)\":{\"notice\":\"An event for when the brand registration cost is updated.\"},\"BrandSocialCommitmentUpdated(address,address,bool)\":{\"notice\":\"This event is triggered when a brand is updated with respect to its social commitment (this is: to tell a brand is socially committed according to the metaverse's views or not). Special benefits (in particular, with respect to assets loading on customers) are given in clients to socially committed brands.\"},\"BrandUpdated(address,address)\":{\"notice\":\"This event is triggered when a brand is registered. The new address is also included, along some reference data.\"}},\"kind\":\"user\",\"methods\":{\"addPlugin(address)\":{\"notice\":\"Adds a plug-in contract to this metaverse.\"},\"brandExists(address)\":{\"notice\":\"Tells whether an address corresponds to a registered brand or not.\"},\"brandMetadataURI(address)\":{\"notice\":\"Assembles the whole metadata for a brand. WARNING: This method will consume a lot of gas if invoked inside a transaction, so it is recommended to invoke this method in the context of a CALL, and never in the context of a SEND (even as part of other contract's code).\"},\"brandRegistrationCost()\":{\"notice\":\"The cost to register a new brand. This can be changed in the future and must be able to be known in the ABI for the users to be aware of the statistic.\"},\"brandRegistrationCurrentEarnings()\":{\"notice\":\"Tells the current earnings, not yet withdrawn, from brand registrations.\"},\"defineFTType(uint256)\":{\"notice\":\"Defines the resolution of a fungible token type. The token id must be in the range of the fungible token ids.\"},\"defineNFTType(uint256)\":{\"notice\":\"Defines the resolution of a non-fungible token type. The token id must be in the range of the fungible token (type) ids (strictly > 0, strictly < (1 << 255)).\"},\"mintFTFor(address,uint256,uint256,bytes)\":{\"notice\":\"Mints a specific fungible token type, in a certain amount.\"},\"mintNFTFor(address,uint256,uint256,bytes)\":{\"notice\":\"Mints a specific non-fungible token type, using a specific id (and always using an amount of 1). It is an error if the token id is already minted, or the chosen id is < (1 << 160) since those ids are reserved for brands.\"},\"nftTypes(uint256)\":{\"notice\":\"Now, each NFT id will be registered here along its token type. The difference with the fungible tokens (they're already registered in the `tokenTypes` mapping) is that they need to be registered with a particular token type. Also, both the NFT id and its associated token type will be lower than (1<<255) since, otherwise, they would be using values corresponding to the FT side (both for IDs and type indices). Brand NFTs are not included in this mapping (they are only characterized by being < (1 << 160)).\"},\"plugins(address)\":{\"notice\":\"This is the list of plug-ins that are being added to the hub. Each contract has its separate logic but they have access to the same set of features. Once a contract is added, it will never be removed from this list. This mapping tells whether a contract in particular has permission(s) to define a type and mint tokens for an address.\"},\"registerBrand(string,string,string,string,string,string)\":{\"notice\":\"Registers a new brand, when the appropriate price is paid for it. For more details on how this method works, check _registerBrand's inline documentation.\"},\"setBrandRegistrationCost(uint256)\":{\"notice\":\"Sets the new brand registration cost.\"},\"supportsInterface(bytes4)\":{\"notice\":\"A brand registry satisfies the IBrandRegistry and IERC165.\"},\"tokenTypeResolvers(uint256)\":{\"notice\":\"Types are identified as integer values, and each registered type will have a non-zero responsible address (serving to metadata resolution and also to account for the existence of a given type). The type 1 (0x1) will be the first type, and actually it will be the brand type. Other NFT types will be registered using indices lower to (1<<255), while FT types will be registered using indices greater than or equal to that value (i.e. starting with binary {1}). In the case of the FTs, the index in this mapping is also their token id. This is not the same for NFTs (they have one extra level of indirection since multiple ids might share the same type). A special type id will be regarded as invalid type (i.e. it will not count as NFT nor FT type, but as a non-existent type): 0 (0x0). The responsible serves two purposes: The first one, is to resolve the metadata of a given token id (be it FT or NFT). The second one is to account for one of such tokens being burned. The responsible will actually be one of the registered plug-ins, on each case (save for the brands case, which is resolved by this contract, and the invalid case, which has no resolver).\"},\"tokenURI(uint256)\":{\"notice\":\"Retrieves the metadata uri of a given token. WARNING: This method will consume a lot of gas if invoked inside a transaction, so it is recommended to invoke this method in the context of a CALL, and never in the context of a SEND (even as part of other contract's code).\"},\"updateBrandChallengeUrl(address,string)\":{\"notice\":\"Updates the brand's challenge url. Only the owner of the brand or an approved account can invoke this method. Ensure the url is empty or a valid URL, or metadata might fail to be assembled into valid JSON.\"},\"updateBrandIcon16x16Url(address,string)\":{\"notice\":\"Updates the brand's 16x16 icon url. Only the owner of the brand or an approved account can invoke this method. Ensure the _icon is empty or a valid URL, or metadata might fail to be assembled into valid JSON.\"},\"updateBrandIcon32x32Url(address,string)\":{\"notice\":\"Updates the brand's 32x32 icon url. Only the owner of the brand or an approved account can invoke this method. Ensure the _icon is empty or a valid URL, or metadata might fail to be assembled into valid JSON.\"},\"updateBrandIcon64x64Url(address,string)\":{\"notice\":\"Updates the brand's 64x64 icon url. Only the owner of the brand or an approved account can invoke this method. Ensure the _icon is empty or a valid URL, or metadata might fail to be assembled into valid JSON.\"},\"updateBrandImage(address,string)\":{\"notice\":\"Updates the brand image. Only the owner of the brand or an approved account can invoke this method. Ensure the _image is empty or a valid URL, or metadata might fail to be assembled into valid JSON.\"},\"updateBrandSocialCommitment(address,bool)\":{\"notice\":\"Updates whether a brand is socially committed or not.\"},\"withdrawBrandRegistrationEarnings(uint256)\":{\"notice\":\"Allows the sender to withdraw brand registration earnings.\"}},\"notice\":\"A metaverse hub can receive \\\"plugs\\\" (extensions) in the form of different contracts (implementing IMetaverseAssetsPlugin). This plug mechanism allows extending the metaverse with new asset types and new asset instances (each plug-in is managed by the team, not publicly added by external users). Each of those contracts will make use of their own logic while interacting with the metaverse, which involves having full access to the whole metaverse assets (e.g. taking assets from the users or granting assets to the users).\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/lingr/MetaverseAssetsRegistrar.sol\":\"MetaverseAssetsRegistrar\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/Base64.sol\":{\"keccak256\":\"0x5f3461639fe20794cfb4db4a6d8477388a15b2e70a018043084b7c4bedfa8136\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://77e5309e2cc4cdc3395214edb0ff43ff5a5f7373f5a425383e540f6fab530f96\",\"dweb:/ipfs/QmTV8DZ9knJDa3b5NPBFQqjvTzodyZVjRUg5mx5A99JPLJ\"]},\"@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92\",\"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3\"]},\"@openzeppelin/contracts/utils/Strings.sol\":{\"keccak256\":\"0xaf159a8b1923ad2a26d516089bceca9bdeaeacd04be50983ea00ba63070f08a3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6f2cf1c531122bc7ca96b8c8db6a60deae60441e5223065e792553d4849b5638\",\"dweb:/ipfs/QmPBdJmBBABMDCfyDjCbdxgiqRavgiSL88SYPGibgbPas9\"]},\"@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"keccak256\":\"0xd10975de010d89fd1c78dc5e8a9a7e7f496198085c151648f20cba166b32582b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://fb0048dee081f6fffa5f74afc3fb328483c2a30504e94a0ddd2a5114d731ec4d\",\"dweb:/ipfs/QmZptt1nmYoA5SgjwnSgWqgUSDgm4q52Yos3xhnMv3MV43\"]},\"@openzeppelin/contracts/utils/introspection/ERC165Checker.sol\":{\"keccak256\":\"0xf7291d7213336b00ee7edbf7cd5034778dd7b0bda2a7489e664f1e5cacc6c24e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://a3671a157cfdc73f334fc9e584862e1b3b48e8b771cde69d79834b03dc5c2826\",\"dweb:/ipfs/QmVJnMc3FLyYzJFktqwinaZes3pnRPuU1wKmBGvGRfh4rc\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]},\"project:/contracts/NativePayable.sol\":{\"keccak256\":\"0xc9018607bcc12ee352d252b8d57dd86f02119dcc449e48bddb96ca5b60d31b3b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7227abbd55c35a85934601678e6258200c984ba99b241f291fb8db29a5aeffa8\",\"dweb:/ipfs/QmTrfuvFcK3EjHbz3EdZURsJq6KgpuboWzqNqDTwtn4zGV\"]},\"project:/contracts/lingr/IMetaverseAssetsRegistrar.sol\":{\"keccak256\":\"0xedee5cf9531254901baf6d9c039edefadb3312a1cd783f9948de27751caf2b86\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://0d9da9f69e3d69dbf04a1d9d937a4ba55749cc42ccc31e111b16ac2bac2204ba\",\"dweb:/ipfs/QmbYUvi3WvjXpAJaRAmoFrAzm6oavjtdDgDT9ozT18qFjr\"]},\"project:/contracts/lingr/MetaverseAssetsRegistrar.sol\":{\"keccak256\":\"0xa8d1eb19731b95dc57a557cc664cfb7da48aa12a537ff1d870aed3f3b4cf232e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d1cde9cf261ff04e485eb2b938806bc027839e506c58938c40b3c4846224376a\",\"dweb:/ipfs/Qmf491GEHk8HYd8N8zgwrUtpyHrumPJTEndgPpV9Pu57Kz\"]},\"project:/contracts/lingr/brands/BrandRegistry.sol\":{\"keccak256\":\"0x90aca5d1a4737f80f2b902076ab032700853cc7676c7371753320d4a249aa651\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://b2a21476eb42a1734b9af3b75c30bc2509ad55677c4fefb5222cbabf97fc2f7e\",\"dweb:/ipfs/QmcxaE352qnDpqytcUZb4nPAB6MMYwMUDpim4XwiPxr3gN\"]},\"project:/contracts/lingr/brands/IBrandRegistry.sol\":{\"keccak256\":\"0x0999a74294653f3d9c3b748d89b34b105b187788a3bd24abe88e94972f43e07a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://134afc92f2664b8032640c49b7bd0bc298cebe0df66423f556614377e636afea\",\"dweb:/ipfs/QmQZfdRqCPL3xVHMhmkxtD6H5dAHrcPQcmERGPevaM46VR\"]},\"project:/contracts/lingr/plugins/base/IMetaverseAssetsPlugin.sol\":{\"keccak256\":\"0x612fbccc058a2c02ad29b71314fc26769e9be5258046f705c0d25dc78a7a067b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://c7ac1e4b136afb117c187168bec5ae14e8f088332a237bf44d48c46c161c8f7a\",\"dweb:/ipfs/QmXfuczxxJz2T73sL8meUfbYA2ZMPPb2tJeQUwJU2pRaXD\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -539,19 +558,25 @@
         1742
       ],
       "BrandRegistry": [
-        3656
+        3685
       ],
       "Context": [
         1764
       ],
+      "ERC165": [
+        2014
+      ],
       "ERC165Checker": [
         2216
+      ],
+      "IBrandRegistry": [
+        3708
       ],
       "IERC165": [
         2228
       ],
       "IMetaverseAssetsPlugin": [
-        3697
+        3749
       ],
       "IMetaverseAssetsRegistrar": [
         2412
@@ -614,7 +639,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 2942,
-        "sourceUnit": 3698,
+        "sourceUnit": 3750,
         "src": "187:51:14",
         "symbolAliases": [],
         "unitAlias": ""
@@ -638,7 +663,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 2942,
-        "sourceUnit": 3657,
+        "sourceUnit": 3686,
         "src": "281:36:14",
         "symbolAliases": [],
         "unitAlias": ""
@@ -675,7 +700,7 @@
               "id": 2425,
               "name": "BrandRegistry",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 3656,
+              "referencedDeclaration": 3685,
               "src": "963:13:14"
             },
             "id": 2426,
@@ -696,7 +721,9 @@
         "id": 2941,
         "linearizedBaseContracts": [
           2941,
-          3656,
+          3685,
+          2014,
+          2228,
           2372,
           2412,
           1764
@@ -3956,10 +3983,10 @@
                           "name": "IMetaverseAssetsPlugin",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3697,
+                          "referencedDeclaration": 3749,
                           "src": "7546:22:14",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                            "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                             "typeString": "type(contract IMetaverseAssetsPlugin)"
                           }
                         },
@@ -3974,7 +4001,7 @@
                         "src": "7546:30:14",
                         "tryCall": false,
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3697",
+                          "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3749",
                           "typeString": "contract IMetaverseAssetsPlugin"
                         }
                       },
@@ -3985,7 +4012,7 @@
                       "lValueRequested": false,
                       "memberName": "uri",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3686,
+                      "referencedDeclaration": 3738,
                       "src": "7546:34:14",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_uint256_$returns$_t_string_memory_ptr_$",
@@ -4575,7 +4602,7 @@
                             "name": "brandMetadataURI",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3576,
+                            "referencedDeclaration": 3580,
                             "src": "8053:16:14",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_string_memory_ptr_$",
@@ -5415,10 +5442,10 @@
                                 "name": "IMetaverseAssetsPlugin",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 3697,
+                                "referencedDeclaration": 3749,
                                 "src": "9094:22:14",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                                   "typeString": "type(contract IMetaverseAssetsPlugin)"
                                 }
                               },
@@ -5433,7 +5460,7 @@
                               "src": "9094:32:14",
                               "tryCall": false,
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3697",
+                                "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3749",
                                 "typeString": "contract IMetaverseAssetsPlugin"
                               }
                             },
@@ -5444,7 +5471,7 @@
                             "lValueRequested": false,
                             "memberName": "burned",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 3696,
+                            "referencedDeclaration": 3748,
                             "src": "9094:39:14",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$_t_uint256_$returns$__$",
@@ -6182,10 +6209,10 @@
                                 "name": "IMetaverseAssetsPlugin",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 3697,
+                                "referencedDeclaration": 3749,
                                 "src": "10282:22:14",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                                   "typeString": "type(contract IMetaverseAssetsPlugin)"
                                 }
                               }
@@ -6193,7 +6220,7 @@
                             "expression": {
                               "argumentTypes": [
                                 {
-                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                                   "typeString": "type(contract IMetaverseAssetsPlugin)"
                                 }
                               ],
@@ -6219,7 +6246,7 @@
                             "src": "10277:28:14",
                             "tryCall": false,
                             "typeDescriptions": {
-                              "typeIdentifier": "t_magic_meta_type_t_contract$_IMetaverseAssetsPlugin_$3697",
+                              "typeIdentifier": "t_magic_meta_type_t_contract$_IMetaverseAssetsPlugin_$3749",
                               "typeString": "type(contract IMetaverseAssetsPlugin)"
                             }
                           },
@@ -6327,10 +6354,10 @@
                               "name": "IMetaverseAssetsPlugin",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3697,
+                              "referencedDeclaration": 3749,
                               "src": "10334:22:14",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                                "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                                 "typeString": "type(contract IMetaverseAssetsPlugin)"
                               }
                             },
@@ -6345,7 +6372,7 @@
                             "src": "10334:31:14",
                             "tryCall": false,
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3697",
+                              "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3749",
                               "typeString": "contract IMetaverseAssetsPlugin"
                             }
                           },
@@ -6356,7 +6383,7 @@
                           "lValueRequested": false,
                           "memberName": "metaverse",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 3674,
+                          "referencedDeclaration": 3726,
                           "src": "10334:41:14",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
@@ -7010,10 +7037,10 @@
                           "name": "IMetaverseAssetsPlugin",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3697,
+                          "referencedDeclaration": 3749,
                           "src": "11010:22:14",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                            "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                             "typeString": "type(contract IMetaverseAssetsPlugin)"
                           }
                         },
@@ -7028,7 +7055,7 @@
                         "src": "11010:33:14",
                         "tryCall": false,
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3697",
+                          "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3749",
                           "typeString": "contract IMetaverseAssetsPlugin"
                         }
                       },
@@ -7039,7 +7066,7 @@
                       "lValueRequested": false,
                       "memberName": "initialize",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3678,
+                      "referencedDeclaration": 3730,
                       "src": "11010:44:14",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$__$returns$__$",
@@ -7143,19 +7170,25 @@
         1742
       ],
       "BrandRegistry": [
-        3656
+        3685
       ],
       "Context": [
         1764
       ],
+      "ERC165": [
+        2014
+      ],
       "ERC165Checker": [
         2216
+      ],
+      "IBrandRegistry": [
+        3708
       ],
       "IERC165": [
         2228
       ],
       "IMetaverseAssetsPlugin": [
-        3697
+        3749
       ],
       "IMetaverseAssetsRegistrar": [
         2412
@@ -7218,7 +7251,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 2942,
-        "sourceUnit": 3698,
+        "sourceUnit": 3750,
         "src": "187:51:14",
         "symbolAliases": [],
         "unitAlias": ""
@@ -7242,7 +7275,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 2942,
-        "sourceUnit": 3657,
+        "sourceUnit": 3686,
         "src": "281:36:14",
         "symbolAliases": [],
         "unitAlias": ""
@@ -7279,7 +7312,7 @@
               "id": 2425,
               "name": "BrandRegistry",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 3656,
+              "referencedDeclaration": 3685,
               "src": "963:13:14"
             },
             "id": 2426,
@@ -7300,7 +7333,9 @@
         "id": 2941,
         "linearizedBaseContracts": [
           2941,
-          3656,
+          3685,
+          2014,
+          2228,
           2372,
           2412,
           1764
@@ -10560,10 +10595,10 @@
                           "name": "IMetaverseAssetsPlugin",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3697,
+                          "referencedDeclaration": 3749,
                           "src": "7546:22:14",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                            "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                             "typeString": "type(contract IMetaverseAssetsPlugin)"
                           }
                         },
@@ -10578,7 +10613,7 @@
                         "src": "7546:30:14",
                         "tryCall": false,
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3697",
+                          "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3749",
                           "typeString": "contract IMetaverseAssetsPlugin"
                         }
                       },
@@ -10589,7 +10624,7 @@
                       "lValueRequested": false,
                       "memberName": "uri",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3686,
+                      "referencedDeclaration": 3738,
                       "src": "7546:34:14",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_uint256_$returns$_t_string_memory_ptr_$",
@@ -11179,7 +11214,7 @@
                             "name": "brandMetadataURI",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3576,
+                            "referencedDeclaration": 3580,
                             "src": "8053:16:14",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_string_memory_ptr_$",
@@ -12019,10 +12054,10 @@
                                 "name": "IMetaverseAssetsPlugin",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 3697,
+                                "referencedDeclaration": 3749,
                                 "src": "9094:22:14",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                                   "typeString": "type(contract IMetaverseAssetsPlugin)"
                                 }
                               },
@@ -12037,7 +12072,7 @@
                               "src": "9094:32:14",
                               "tryCall": false,
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3697",
+                                "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3749",
                                 "typeString": "contract IMetaverseAssetsPlugin"
                               }
                             },
@@ -12048,7 +12083,7 @@
                             "lValueRequested": false,
                             "memberName": "burned",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 3696,
+                            "referencedDeclaration": 3748,
                             "src": "9094:39:14",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$_t_uint256_$returns$__$",
@@ -12786,10 +12821,10 @@
                                 "name": "IMetaverseAssetsPlugin",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 3697,
+                                "referencedDeclaration": 3749,
                                 "src": "10282:22:14",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                                   "typeString": "type(contract IMetaverseAssetsPlugin)"
                                 }
                               }
@@ -12797,7 +12832,7 @@
                             "expression": {
                               "argumentTypes": [
                                 {
-                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                                  "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                                   "typeString": "type(contract IMetaverseAssetsPlugin)"
                                 }
                               ],
@@ -12823,7 +12858,7 @@
                             "src": "10277:28:14",
                             "tryCall": false,
                             "typeDescriptions": {
-                              "typeIdentifier": "t_magic_meta_type_t_contract$_IMetaverseAssetsPlugin_$3697",
+                              "typeIdentifier": "t_magic_meta_type_t_contract$_IMetaverseAssetsPlugin_$3749",
                               "typeString": "type(contract IMetaverseAssetsPlugin)"
                             }
                           },
@@ -12931,10 +12966,10 @@
                               "name": "IMetaverseAssetsPlugin",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3697,
+                              "referencedDeclaration": 3749,
                               "src": "10334:22:14",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                                "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                                 "typeString": "type(contract IMetaverseAssetsPlugin)"
                               }
                             },
@@ -12949,7 +12984,7 @@
                             "src": "10334:31:14",
                             "tryCall": false,
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3697",
+                              "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3749",
                               "typeString": "contract IMetaverseAssetsPlugin"
                             }
                           },
@@ -12960,7 +12995,7 @@
                           "lValueRequested": false,
                           "memberName": "metaverse",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 3674,
+                          "referencedDeclaration": 3726,
                           "src": "10334:41:14",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_address_$",
@@ -13614,10 +13649,10 @@
                           "name": "IMetaverseAssetsPlugin",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3697,
+                          "referencedDeclaration": 3749,
                           "src": "11010:22:14",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3697_$",
+                            "typeIdentifier": "t_type$_t_contract$_IMetaverseAssetsPlugin_$3749_$",
                             "typeString": "type(contract IMetaverseAssetsPlugin)"
                           }
                         },
@@ -13632,7 +13667,7 @@
                         "src": "11010:33:14",
                         "tryCall": false,
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3697",
+                          "typeIdentifier": "t_contract$_IMetaverseAssetsPlugin_$3749",
                           "typeString": "contract IMetaverseAssetsPlugin"
                         }
                       },
@@ -13643,7 +13678,7 @@
                       "lValueRequested": false,
                       "memberName": "initialize",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3678,
+                      "referencedDeclaration": 3730,
                       "src": "11010:44:14",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$__$returns$__$",
@@ -13746,7 +13781,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2022-08-07T14:36:30.759Z",
+  "updatedAt": "2022-08-07T14:50:17.219Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},
@@ -13810,6 +13845,9 @@
       },
       "setBrandRegistrationCost(uint256)": {
         "notice": "Sets the new brand registration cost."
+      },
+      "supportsInterface(bytes4)": {
+        "notice": "A brand registry satisfies the IBrandRegistry and IERC165."
       },
       "tokenTypeResolvers(uint256)": {
         "notice": "Types are identified as integer values, and each registered type will have a non-zero responsible address (serving to metadata resolution and also to account for the existence of a given type). The type 1 (0x1) will be the first type, and actually it will be the brand type. Other NFT types will be registered using indices lower to (1<<255), while FT types will be registered using indices greater than or equal to that value (i.e. starting with binary {1}). In the case of the FTs, the index in this mapping is also their token id. This is not the same for NFTs (they have one extra level of indirection since multiple ids might share the same type). A special type id will be regarded as invalid type (i.e. it will not count as NFT nor FT type, but as a non-existent type): 0 (0x0). The responsible serves two purposes: The first one, is to resolve the metadata of a given token id (be it FT or NFT). The second one is to account for one of such tokens being burned. The responsible will actually be one of the registered plug-ins, on each case (save for the brands case, which is resolved by this contract, and the invalid case, which has no resolver)."

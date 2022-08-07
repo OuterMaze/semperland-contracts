@@ -3,6 +3,8 @@ pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "./IBrandRegistry.sol";
 import "../../NativePayable.sol";
 
 /**
@@ -10,7 +12,7 @@ import "../../NativePayable.sol";
  * Those brands will hold the metadata, and this trait will hold
  * the mean to register such brand with its metadata.
  */
-abstract contract BrandRegistry is Context, NativePayable {
+abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     /**
      * The cost to register a new brand. This can be changed in
      * the future and must be able to be known in the ABI for the
@@ -403,5 +405,12 @@ abstract contract BrandRegistry is Context, NativePayable {
         );
         brandRegistrationCurrentEarnings -= amount;
         payable(sender).transfer(amount);
+    }
+
+    /**
+     * A brand registry satisfies the IBrandRegistry and IERC165.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165) returns (bool) {
+        return interfaceId == type(IERC165).interfaceId || interfaceId == type(IBrandRegistry).interfaceId;
     }
 }

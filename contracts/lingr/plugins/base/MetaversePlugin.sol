@@ -86,7 +86,7 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaverseAssetsPlugin {
     function _burned(address _from, uint256 _tokenId, uint256 _amount) public virtual;
 
     /**
-     * @dev See {IERC165-supportsInterface}.
+     * A metaverse plugin satisfies the IMetaverseAssetsPlugin and IERC165.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
         return interfaceId == type(IERC165).interfaceId || interfaceId == type(IMetaverseAssetsPlugin).interfaceId;

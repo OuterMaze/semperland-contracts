@@ -20,5 +20,5 @@ interface IBrandRegistry is IERC165 {
     /**
      * Tells whether an address corresponds to a registered brand or not.
      */
-    function brandExists(address _brandId) public view returns (bool);
+    function brandExists(address _brandId) external view returns (bool);
 }
