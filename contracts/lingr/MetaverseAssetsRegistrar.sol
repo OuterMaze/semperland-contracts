@@ -75,7 +75,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * This modifier requires the sender to be one of the authorized contracts.
      */
     modifier onlyPlugin() {
-        require(plugins[_msgSender()], "MetaverseCore: the sender must be a plug-in");
+        require(plugins[_msgSender()], "MetaverseAssetsRegistrar: the sender must be a plug-in");
         _;
     }
 
@@ -83,7 +83,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * This modifier requires the token type to not be already registered.
      */
     modifier onlyNewTokenType(uint256 _tokenType) {
-        require(tokenTypeResolvers[_tokenType] == address(0), "MetaverseCore: the specified token type is not available");
+        require(tokenTypeResolvers[_tokenType] == address(0), "MetaverseAssetsRegistrar: the specified token type is not available");
         _;
     }
 
@@ -91,7 +91,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * This modifier requires the token type to be already registered.
      */
     modifier onlyExistingTokenType(uint256 _tokenType) {
-        require(tokenTypeResolvers[_tokenType] != address(0), "MetaverseCore: unknown / non-mintable token type id");
+        require(tokenTypeResolvers[_tokenType] != address(0), "MetaverseAssetsRegistrar: unknown / non-mintable token type id");
         _;
     }
 
@@ -99,7 +99,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * This modifier requires the token type to be in the FT range.
      */
     modifier onlyFTRange(uint256 _tokenType) {
-        require(_tokenType >= (1 << 255), "MetaverseCore: the specified value is not in the fungible tokens range");
+        require(_tokenType >= (1 << 255), "MetaverseAssetsRegistrar: the specified value is not in the fungible tokens range");
         _;
     }
 
@@ -107,7 +107,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * This modifier requires the token type to be in the NFT range.
      */
     modifier onlyNFTRange(uint256 _tokenType) {
-        require(_tokenType < (1 << 255), "MetaverseCore: the specified value is not in the nft range");
+        require(_tokenType < (1 << 255), "MetaverseAssetsRegistrar: the specified value is not in the nft range");
         _;
     }
 
@@ -125,7 +125,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * < (1 << 255)).
      */
     function defineNFTType(uint256 _tokenId) public onlyPlugin onlyNewTokenType(_tokenId) onlyNFTRange(_tokenId) {
-        require(_tokenId > 1, "MetaverseCore: nft type 0 is reserved for invalid / missing nfts, and 1 for brands");
+        require(_tokenId > 1, "MetaverseAssetsRegistrar: nft type 0 is reserved for invalid / missing nfts, and 1 for brands");
         tokenTypeResolvers[_tokenId] = _msgSender();
     }
 
@@ -153,8 +153,8 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
     function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data)
         public onlyPlugin onlyExistingTokenType(_tokenType) onlyNFTRange(_tokenType) onlyNFTRange(_tokenId)
     {
-        require(_tokenType >= (1 << 160), "MetaverseCore: the specified token id is reserved for brands");
-        require(nftTypes[_tokenId] == 0, "MetaverseCore: the specified nft id is not available");
+        require(_tokenType >= (1 << 160), "MetaverseAssetsRegistrar: the specified token id is reserved for brands");
+        require(nftTypes[_tokenId] == 0, "MetaverseAssetsRegistrar: the specified nft id is not available");
         _mintFor(_to, _tokenId, 1, _data);
         nftTypes[_tokenId] = _tokenType;
     }
@@ -196,7 +196,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * type, or being it a non-fungible token id).
      */
     function _tokenBurned(address _from, uint256 _tokenId, uint256 _amount) internal {
-        require(_tokenId >= (1 << 160), "MetaverseCore: brands cannot be burned");
+        require(_tokenId >= (1 << 160), "MetaverseAssetsRegistrar: brands cannot be burned");
         address resolver = address(0);
         if (_tokenId < (1 << 255)) {
             resolver = tokenTypeResolvers[nftTypes[_tokenId]];
@@ -242,13 +242,13 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * Adds a plug-in contract to this metaverse.
      */
     function addPlugin(address _contract) public {
-        require(_canAddPlugin(_msgSender()), "MetaverseCore: the sender is not allowed to add a plug-in");
+        require(_canAddPlugin(_msgSender()), "MetaverseAssetsRegistrar: the sender is not allowed to add a plug-in");
         require(
             _isPluginForThisMetaverse(_contract),
-            "MetaverseCore: the address does not belong to a valid plug-in contract for this metaverse"
+            "MetaverseAssetsRegistrar: the address does not belong to a valid plug-in contract for this metaverse"
         );
         require(
-            !plugins[_contract], "MetaverseCore: the plug-in is already added to this metaverse"
+            !plugins[_contract], "MetaverseAssetsRegistrar: the plug-in is already added to this metaverse"
         );
         plugins[_contract] = true;
         IMetaverseAssetsPlugin(_contract).initialize();
