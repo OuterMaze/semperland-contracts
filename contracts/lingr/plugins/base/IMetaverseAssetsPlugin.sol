@@ -35,5 +35,5 @@ interface IMetaverseAssetsPlugin is IERC165 {
      * as registered & managed by this contract, is burned by
      * its owner.
      */
-    function burned(address _from, uint256 _tokenId, uint256 _amount) external;
+    function onBurned(address _from, uint256 _tokenId, uint256 _amount) external;
 }

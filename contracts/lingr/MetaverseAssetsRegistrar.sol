@@ -204,7 +204,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
             resolver = tokenTypeResolvers[_tokenId];
         }
         if (resolver != address(0)) {
-            IMetaverseAssetsPlugin(resolver).burned(_from, _tokenId, _amount);
+            IMetaverseAssetsPlugin(resolver).onBurned(_from, _tokenId, _amount);
         }
     }
 

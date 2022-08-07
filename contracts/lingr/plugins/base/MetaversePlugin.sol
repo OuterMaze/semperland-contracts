@@ -40,6 +40,9 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaverseAssetsPlugin {
      */
     function title() public view virtual returns (string memory);
 
+    /**
+     * This modifier restricts function to be only invoked by the metaverse.
+     */
     modifier onlyMetaverse() {
         require(msg.sender == metaverse, "MetaversePlugin: only the owning metaverse can invoke this method");
         _;
@@ -74,7 +77,7 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaverseAssetsPlugin {
      * the same metaverse that owns this plugin, and the true
      * implementation is defined by _burned() instead.
      */
-    function burned(address _from, uint256 _tokenId, uint256 _amount) public onlyMetaverse {
+    function onBurned(address _from, uint256 _tokenId, uint256 _amount) external onlyMetaverse {
         _burned(_from, _tokenId, _amount);
     }
 
