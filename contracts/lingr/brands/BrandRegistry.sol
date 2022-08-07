@@ -3,7 +3,7 @@ pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
-import "../NativePayable.sol";
+import "../../NativePayable.sol";
 
 /**
  * A Brand registry will keep track of the brands being registered.

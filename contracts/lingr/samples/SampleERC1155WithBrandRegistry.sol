@@ -2,7 +2,7 @@
 pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "../BrandRegistry.sol";
+import "../brands/BrandRegistry.sol";
 import "../../IdUtils.sol";
 
 contract SampleERC1155WithBrandRegistry is ERC1155, BrandRegistry {

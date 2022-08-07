@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "./plugins/base/IMetaverseAssetsPlugin.sol";
 import "./IMetaverseAssetsRegistrar.sol";
-import "./BrandRegistry.sol";
+import "./brands/BrandRegistry.sol";
 
 /**
  * A metaverse hub can receive "plugs" (extensions) in the form of
