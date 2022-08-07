@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+
 /**
  * A contract satisfying this interface is considered a plug-in
  * for a metaverse.
  */
-interface IMetaverseAssetsPlugin {
+interface IMetaverseAssetsPlugin is IERC165 {
     /**
      * The title of this metaverse.
      */

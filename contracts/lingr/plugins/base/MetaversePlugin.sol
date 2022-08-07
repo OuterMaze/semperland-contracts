@@ -3,13 +3,14 @@ pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IMetaverseAssetsPlugin.sol";
 import "../../IMetaverseAssetsRegistrar.sol";
 
 /**
  * This is the base class of a metaverse plug-in.
  */
-abstract contract MetaversePlugin is Context, IMetaverseAssetsPlugin {
+abstract contract MetaversePlugin is Context, ERC165, IMetaverseAssetsPlugin {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -83,4 +84,11 @@ abstract contract MetaversePlugin is Context, IMetaverseAssetsPlugin {
      * its owner
      */
     function _burned(address _from, uint256 _tokenId, uint256 _amount) public virtual;
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
+        return interfaceId == type(IERC165).interfaceId || interfaceId == type(IMetaverseAssetsPlugin).interfaceId;
+    }
 }
