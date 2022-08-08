@@ -9,6 +9,11 @@ import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  */
 interface IBrandRegistry is IERC165 {
     /**
+     * The metaverse that will own this brand registry.
+     */
+    function metaverse() external view returns (address);
+
+    /**
      * Assembles the whole metadata for a brand. WARNING: This method
      * will consume a lot of gas if invoked inside a transaction, so
      * it is recommended to invoke this method in the context of a
@@ -21,4 +26,9 @@ interface IBrandRegistry is IERC165 {
      * Tells whether an address corresponds to a registered brand or not.
      */
     function brandExists(address _brandId) external view returns (bool);
+
+    /**
+     * A hook to execute when the owner of a brand changed.
+     */
+    function onBrandOwnerChanged(address _brandId, address _newOwner) external;
 }

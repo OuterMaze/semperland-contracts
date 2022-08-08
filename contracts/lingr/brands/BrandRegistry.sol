@@ -3,8 +3,10 @@ pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IBrandRegistry.sol";
+import "../IMetaverse.sol";
 import "../../NativePayable.sol";
 
 /**
@@ -13,6 +15,17 @@ import "../../NativePayable.sol";
  * the mean to register such brand with its metadata.
  */
 abstract contract BrandRegistry is Context, NativePayable, ERC165 {
+    /**
+     * Addresses can check for ERC165 compliance by using this
+     * embeddable library.
+     */
+    using ERC165Checker for address;
+
+    /**
+     * The metaverse that will own this brand registry.
+     */
+    address public metaverse;
+
     /**
      * The cost to register a new brand. This can be changed in
      * the future and must be able to be known in the ABI for the
@@ -118,6 +131,27 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
      * An event for when the brand registration cost is updated.
      */
     event BrandRegistrationCostUpdated(uint256 newCost);
+
+    /**
+     * Creating a brand registry requires a valid metaverse
+     * registrar as its owner.
+     */
+    constructor(address _metaverse) {
+        require(_metaverse != address(0), "BrandRegistry: the owner contract must not be 0");
+        require(
+            _metaverse.supportsInterface(type(IMetaverse).interfaceId),
+            "BrandRegistry: the owner contract must implement IMetaverse"
+        );
+        metaverse = _metaverse;
+    }
+
+    /**
+     * This modifier restricts function to be only invoked by the metaverse.
+     */
+    modifier onlyMetaverse() {
+        require(msg.sender == metaverse, "BrandRegistry: only the owning metaverse can invoke this method");
+        _;
+    }
 
     /**
      * Sets the new brand registration cost.
@@ -259,7 +293,7 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
      * internally, when the actual brand transfer is done (brands
      * can only be transferred, but never burnt).
      */
-    function _setBrandOwner(address _brandId, address _newOwner) internal {
+    function onBrandOwnerChanged(address _brandId, address _newOwner) external onlyMetaverse {
         if (brands[_brandId].owner != address(0)) brands[_brandId].owner = _newOwner;
     }
 

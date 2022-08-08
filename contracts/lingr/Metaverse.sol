@@ -3,13 +3,14 @@ pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "./plugins/base/IMetaverseAssetsPlugin.sol";
-import "./IMetaverseAssetsRegistrar.sol";
-import "./brands/BrandRegistry.sol";
+import "./plugins/base/IMetaversePlugin.sol";
+import "./IMetaverse.sol";
+import "./economy/IEconomy.sol";
+import "./brands/IBrandRegistry.sol";
 
 /**
  * A metaverse hub can receive "plugs" (extensions) in the form of
- * different contracts (implementing IMetaverseAssetsPlugin). This
+ * different contracts (implementing IMetaversePlugin). This
  * plug mechanism allows extending the metaverse with new asset
  * types and new asset instances (each plug-in is managed by the
  * team, not publicly added by external users).
@@ -19,7 +20,7 @@ import "./brands/BrandRegistry.sol";
  * to the whole metaverse assets (e.g. taking assets from the users
  * or granting assets to the users).
  */
-abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar, BrandRegistry {
+abstract contract Metaverse is Context, IMetaverse {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -35,6 +36,16 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * and mint tokens for an address.
      */
     mapping(address => bool) public plugins;
+
+    /**
+     * The linked brand registry for this metaverse.
+     */
+    address public brandRegistry;
+
+    /**
+     * The linked economy for this metaverse.
+     */
+    address public economy;
 
     /**
      * Types are identified as integer values, and each registered type
@@ -75,7 +86,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * This modifier requires the sender to be one of the authorized contracts.
      */
     modifier onlyPlugin() {
-        require(plugins[_msgSender()], "MetaverseAssetsRegistrar: the sender must be a plug-in");
+        require(plugins[_msgSender()], "Metaverse: the sender must be a plug-in");
         _;
     }
 
@@ -83,7 +94,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * This modifier requires the token type to not be already registered.
      */
     modifier onlyNewTokenType(uint256 _tokenType) {
-        require(tokenTypeResolvers[_tokenType] == address(0), "MetaverseAssetsRegistrar: the specified token type is not available");
+        require(tokenTypeResolvers[_tokenType] == address(0), "Metaverse: the specified token type is not available");
         _;
     }
 
@@ -91,7 +102,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * This modifier requires the token type to be already registered.
      */
     modifier onlyExistingTokenType(uint256 _tokenType) {
-        require(tokenTypeResolvers[_tokenType] != address(0), "MetaverseAssetsRegistrar: unknown / non-mintable token type id");
+        require(tokenTypeResolvers[_tokenType] != address(0), "Metaverse: unknown / non-mintable token type id");
         _;
     }
 
@@ -99,7 +110,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * This modifier requires the token type to be in the FT range.
      */
     modifier onlyFTRange(uint256 _tokenType) {
-        require(_tokenType >= (1 << 255), "MetaverseAssetsRegistrar: the specified value is not in the fungible tokens range");
+        require(_tokenType >= (1 << 255), "Metaverse: the specified value is not in the fungible tokens range");
         _;
     }
 
@@ -107,7 +118,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * This modifier requires the token type to be in the NFT range.
      */
     modifier onlyNFTRange(uint256 _tokenType) {
-        require(_tokenType < (1 << 255), "MetaverseAssetsRegistrar: the specified value is not in the nft range");
+        require(_tokenType < (1 << 255), "Metaverse: the specified value is not in the nft range");
         _;
     }
 
@@ -125,7 +136,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * < (1 << 255)).
      */
     function defineNFTType(uint256 _tokenId) public onlyPlugin onlyNewTokenType(_tokenId) onlyNFTRange(_tokenId) {
-        require(_tokenId > 1, "MetaverseAssetsRegistrar: nft type 0 is reserved for invalid / missing nfts, and 1 for brands");
+        require(_tokenId > 1, "Metaverse: nft type 0 is reserved for invalid / missing nfts, and 1 for brands");
         tokenTypeResolvers[_tokenId] = _msgSender();
     }
 
@@ -153,8 +164,8 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
     function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data)
         public onlyPlugin onlyExistingTokenType(_tokenType) onlyNFTRange(_tokenType) onlyNFTRange(_tokenId)
     {
-        require(_tokenType >= (1 << 160), "MetaverseAssetsRegistrar: the specified token id is reserved for brands");
-        require(nftTypes[_tokenId] == 0, "MetaverseAssetsRegistrar: the specified nft id is not available");
+        require(_tokenType >= (1 << 160), "Metaverse: the specified token id is reserved for brands");
+        require(nftTypes[_tokenId] == 0, "Metaverse: the specified nft id is not available");
         _mintFor(_to, _tokenId, 1, _data);
         nftTypes[_tokenId] = _tokenType;
     }
@@ -168,7 +179,7 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
         if (plugin == address(0)) {
             return "";
         }
-        return IMetaverseAssetsPlugin(plugin).uri(_typeId);
+        return IMetaversePlugin(plugin).uri(_typeId);
     }
 
     /**
@@ -189,14 +200,10 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
     }
 
     /**
-     * Hook to be invoked as part of a burn process when an address burns
-     * a particular token in some quantity (for NFTs, the quantity is 1
-     * in every case). By this point, we should be guaranteed that the
-     * _tokenId will actually have a resolver (being it a fungible token
-     * type, or being it a non-fungible token id).
+     * Burns a token (except brands) and invokes a hook.
      */
     function _tokenBurned(address _from, uint256 _tokenId, uint256 _amount) internal {
-        require(_tokenId >= (1 << 160), "MetaverseAssetsRegistrar: brands cannot be burned");
+        require(_tokenId >= (1 << 160), "Metaverse: brands cannot be burned");
         address resolver = address(0);
         if (_tokenId < (1 << 255)) {
             resolver = tokenTypeResolvers[nftTypes[_tokenId]];
@@ -204,8 +211,19 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
             resolver = tokenTypeResolvers[_tokenId];
         }
         if (resolver != address(0)) {
-            IMetaverseAssetsPlugin(resolver).onBurned(_from, _tokenId, _amount);
+            IMetaversePlugin(resolver).onBurned(_from, _tokenId, _amount);
         }
+    }
+
+    /**
+     * Hook to be invoked as part of a burn process when an address burns
+     * a particular token in some quantity (for NFTs, the quantity is 1
+     * in every case). By this point, we should be guaranteed that the
+     * _tokenId will actually have a resolver (being it a fungible token
+     * type, or being it a non-fungible token id).
+     */
+    function onTokenBurned(address _from, uint256 _tokenId, uint256 _amount) external onlyEconomy {
+        _tokenBurned(_from, _tokenId, _amount);
     }
 
     /**
@@ -214,11 +232,18 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * the quantity is 1 in every case; it is guaranteed that both arrays
      * are always of the same length.
      */
-    function _tokensBurned(address _from, uint256[] memory _tokenIds, uint256[] memory _amounts) internal {
+    function onTokensBurned(address _from, uint256[] memory _tokenIds, uint256[] memory _amounts) external onlyEconomy {
         uint256 length = _tokenIds.length;
         for(uint256 index = 0; index < length; index++) {
             _tokenBurned(_from, _tokenIds[index], _amounts[index]);
         }
+    }
+
+    /**
+     * Hook to be invoked as part of a transfer from ERC1155.
+     */
+    function onBrandOwnerChanged(address _brandId, address _newOwner) external onlyEconomy {
+        brandRegistry.onBrandOwnerChanged(_brandId, _owner);
     }
 
     // ********** Plugin management goes here **********
@@ -234,24 +259,92 @@ abstract contract MetaverseAssetsRegistrar is Context, IMetaverseAssetsRegistrar
      * this metaverse in particular.
      */
     function _isPluginForThisMetaverse(address _plugin) private view returns (bool) {
-        return _plugin.supportsInterface(type(IMetaverseAssetsPlugin).interfaceId) &&
-            IMetaverseAssetsPlugin(_plugin).metaverse() == address(this);
+        return _plugin.supportsInterface(type(IMetaversePlugin).interfaceId) &&
+            IMetaversePlugin(_plugin).metaverse() == address(this);
     }
 
     /**
      * Adds a plug-in contract to this metaverse.
      */
     function addPlugin(address _contract) public {
-        require(_canAddPlugin(_msgSender()), "MetaverseAssetsRegistrar: the sender is not allowed to add a plug-in");
+        require(_canAddPlugin(_msgSender()), "Metaverse: the sender is not allowed to add a plug-in");
         require(
             _isPluginForThisMetaverse(_contract),
-            "MetaverseAssetsRegistrar: the address does not belong to a valid plug-in contract for this metaverse"
+            "Metaverse: the address does not belong to a valid plug-in contract for this metaverse"
         );
         require(
-            !plugins[_contract], "MetaverseAssetsRegistrar: the plug-in is already added to this metaverse"
+            !plugins[_contract], "Metaverse: the plug-in is already added to this metaverse"
         );
         plugins[_contract] = true;
-        IMetaverseAssetsPlugin(_contract).initialize();
+        IMetaversePlugin(_contract).initialize();
+    }
+
+    /**
+     * This method must be implemented to define how is a sender allowed to
+     * add the brand registry to this metaverse.
+     */
+    function _canSetBrandRegistry(address _sender) internal view virtual returns (bool);
+
+    /**
+     * Tells whether an address is a valid brand registry contract for
+     * this metaverse in particular.
+     */
+    function _isBrandRegistryForThisMetaverse(address _registry) private view returns (bool) {
+        return _registry.supportsInterface(type(IBrandRegistry).interfaceId) &&
+            IBrandRegistry(_registry).metaverse() == address(this);
+    }
+
+    /**
+     * Adds a plug-in contract to this metaverse.
+     */
+    function setBrandRegistry(address _contract) public {
+        require(_canAddPlugin(_msgSender()), "Metaverse: the sender is not allowed to set the plug-in");
+        require(
+            _isBrandRegistryForThisMetaverse(_contract),
+            "Metaverse: the address does not belong to a valid brand registry contract for this metaverse"
+        );
+        require(
+            brandRegistry == address(0), "Metaverse: a brand registry is already set into this metaverse"
+        );
+        brandRegistry = _contract;
+    }
+
+    /**
+     * This method must be implemented to define how is a sender allowed to
+     * add the economy system to this metaverse.
+     */
+    function _canSetEconomy(address _sender) internal view virtual returns (bool);
+
+    /**
+     * Tells whether an address is a valid economy system contract for
+     * this metaverse in particular.
+     */
+    function _isEconomyForThisMetaverse(address _economy) private view returns (bool) {
+        return _economy.supportsInterface(type(IEconomy).interfaceId) &&
+            IEconomy(_economy).metaverse() == address(this);
+    }
+
+    /**
+     * Set the economy contract to this metaverse.
+     */
+    function setEconomy(address _contract) public {
+        require(_canAddPlugin(_msgSender()), "Metaverse: the sender is not allowed to set the economy");
+        require(
+            _isEconomyForThisMetaverse(_contract),
+            "Metaverse: the address does not belong to a valid economy contract for this metaverse"
+        );
+        require(
+            economy == address(0), "Metaverse: an economy is already set into this metaverse"
+        );
+        economy = _contract;
+    }
+
+    /**
+     * This modifier restricts a call to the linked economy system.
+     */
+    modifier onlyEconomy() {
+        require(_msgSender() == economy, "Metaverse: the only allowed sender is the economy system");
+        _;
     }
 
     // TODO: Implement many features:
