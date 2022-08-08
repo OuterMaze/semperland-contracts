@@ -81,5 +81,5 @@ interface IMetaverse {
     /**
      * Hook to be invoked as part of a transfer from ERC1155.
      */
-    function onBrandOwnerChanged(address _brandId, address _newOwner) external onlyEconomy;
+    function onBrandOwnerChanged(address _brandId, address _newOwner) external;
 }
