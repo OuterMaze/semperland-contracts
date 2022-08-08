@@ -236,7 +236,7 @@ abstract contract Metaverse is Context, IMetaverse {
      * Hook to be invoked as part of a transfer from ERC1155.
      */
     function onBrandOwnerChanged(address _brandId, address _newOwner) external onlyEconomy {
-        brandRegistry.onBrandOwnerChanged(_brandId, _owner);
+        brandRegistry.onBrandOwnerChanged(_brandId, _newOwner);
     }
 
     // ********** Plugin management goes here **********
