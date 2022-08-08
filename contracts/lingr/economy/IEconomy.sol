@@ -18,5 +18,5 @@ interface IEconomy is IERC1155 {
     /**
      * Mints a token for a particular account.
      */
-    function mintFor(address _to, uint256 _tokenId, uint256 _amount, bytes _data) external;
+    function mintFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) external;
 }

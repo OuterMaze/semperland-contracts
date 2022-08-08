@@ -15,6 +15,12 @@ import "../../SafeExchange.sol";
  */
 contract Economy is ERC1155, IEconomy, SafeExchange {
     /**
+     * Addresses can check for ERC165 compliance by using this
+     * embeddable library.
+     */
+    using ERC165Checker for address;
+
+    /**
      * The metaverse that will own this economy system.
      */
     address public metaverse;
@@ -79,7 +85,7 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
         super._safeBatchTransferFrom(from, to, ids, amounts, data);
         for(uint256 index = 0; index < amounts.length; index++) {
             if (ids[index] < (1 << 160) && amounts[index] != 0) {
-                IMetaverse(metaverse).onBrandOwnerChanged(address(uint160(id)), to);
+                IMetaverse(metaverse).onBrandOwnerChanged(address(uint160(ids[index])), to);
             }
         }
     }
@@ -87,7 +93,7 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
     /**
      * This brand registry satisfies the IERC1155, the IBrandRegistry and IERC165.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, IEconomy) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, IERC165) returns (bool) {
         return interfaceId == type(IERC165).interfaceId ||
                interfaceId == type(IEconomy).interfaceId ||
                interfaceId == type(IERC1155).interfaceId;
@@ -96,14 +102,14 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
     /**
      * Querying the url is now defined depending on the metaverse.
      */
-    function uri(uint256 _tokenId) public view override returns (string) {
+    function uri(uint256 _tokenId) public view override returns (string memory) {
         return IMetaverse(metaverse).tokenURI(_tokenId);
     }
 
     /**
      * Mints a token for a particular account.
      */
-    function mintFor(address _to, uint256 _tokenId, uint256 _amount, bytes _data) public onlyMetaverse {
+    function mintFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) public onlyMetaverse {
         _mint(_to, _tokenId, _amount, _data);
     }
 

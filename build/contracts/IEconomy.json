@@ -1,0 +1,978 @@
+{
+  "contractName": "IEconomy",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "ApprovalForAll",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "ids",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "values",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "TransferBatch",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "TransferSingle",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "value",
+          "type": "string"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "URI",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "accounts",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "ids",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "balanceOfBatch",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "isApprovedForAll",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "ids",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "amounts",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "safeBatchTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "setApprovalForAll",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "metaverse",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "mintFor",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"ApprovalForAll\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"ids\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"}],\"name\":\"TransferBatch\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"TransferSingle\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"value\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"URI\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"accounts\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"ids\",\"type\":\"uint256[]\"}],\"name\":\"balanceOfBatch\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isApprovedForAll\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"metaverse\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"mintFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"ids\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amounts\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"safeBatchTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"setApprovalForAll\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"balanceOf(address,uint256)\":{\"details\":\"Returns the amount of tokens of token type `id` owned by `account`. Requirements: - `account` cannot be the zero address.\"},\"balanceOfBatch(address[],uint256[])\":{\"details\":\"xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {balanceOf}. Requirements: - `accounts` and `ids` must have the same length.\"},\"isApprovedForAll(address,address)\":{\"details\":\"Returns true if `operator` is approved to transfer ``account``'s tokens. See {setApprovalForAll}.\"},\"safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)\":{\"details\":\"xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {safeTransferFrom}. Emits a {TransferBatch} event. Requirements: - `ids` and `amounts` must have the same length. - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155BatchReceived} and return the acceptance magic value.\"},\"safeTransferFrom(address,address,uint256,uint256,bytes)\":{\"details\":\"Transfers `amount` tokens of token type `id` from `from` to `to`. Emits a {TransferSingle} event. Requirements: - `to` cannot be the zero address. - If the caller is not `from`, it must have been approved to spend ``from``'s tokens via {setApprovalForAll}. - `from` must have a balance of tokens of type `id` of at least `amount`. - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the acceptance magic value.\"},\"setApprovalForAll(address,bool)\":{\"details\":\"Grants or revokes permission to `operator` to transfer the caller's tokens, according to `approved`, Emits an {ApprovalForAll} event. Requirements: - `operator` cannot be the caller.\"},\"supportsInterface(bytes4)\":{\"details\":\"Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"metaverse()\":{\"notice\":\"The metaverse this economy system is created for.\"},\"mintFor(address,uint256,uint256,bytes)\":{\"notice\":\"Mints a token for a particular account.\"}},\"notice\":\"This is the linked economy of a metaverse. It can send certain messages to the core metaverse (essentially, messages for when an asset is burned / transferred), and receive messages from the metaverse (e.g. messages to mint certain objects).\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/lingr/economy/IEconomy.sol\":\"IEconomy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/token/ERC1155/IERC1155.sol\":{\"keccak256\":\"0x6392f2cfe3a5ee802227fe7a2dfd47096d881aec89bddd214b35c5b46d3cd941\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://bd9c47a375639888e726a99da718890ba16d17d7ad9eacb0ccc892d46d1b3ee0\",\"dweb:/ipfs/Qmb41W5RUjy2sWg49A2rMnxekSeEk6SvGyJL5tyCCSr7un\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]},\"project:/contracts/lingr/economy/IEconomy.sol\":{\"keccak256\":\"0x0aae6e9fd07f630a80f76d09c24c3b56db8eb859819ae7d2945b08df1130e6d2\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://c751cbbac298f03035b54391f3292402b5f1f9459e228c29470b482b056890a5\",\"dweb:/ipfs/QmV4fSG7pwHxyD6HJc9Ri4K9EXPGBa8TCQVyfrmi9A9ZkQ\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8 <0.9.0;\n\nimport \"@openzeppelin/contracts/token/ERC1155/IERC1155.sol\";\n\n/**\n * This is the linked economy of a metaverse. It can send certain\n * messages to the core metaverse (essentially, messages for when\n * an asset is burned / transferred), and receive messages from\n * the metaverse (e.g. messages to mint certain objects).\n */\ninterface IEconomy is IERC1155 {\n    /**\n     * The metaverse this economy system is created for.\n     */\n    function metaverse() external view returns (address);\n\n    /**\n     * Mints a token for a particular account.\n     */\n    function mintFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) external;\n}\n",
+  "sourcePath": "/home/luismasuelli/Projects/OuterMaze/lingr-contracts/contracts/lingr/economy/IEconomy.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/lingr/economy/IEconomy.sol",
+    "exportedSymbols": {
+      "IERC1155": [
+        1344
+      ],
+      "IERC165": [
+        2228
+      ],
+      "IEconomy": [
+        4813
+      ]
+    },
+    "id": 4814,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 4790,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:29:18"
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/token/ERC1155/IERC1155.sol",
+        "file": "@openzeppelin/contracts/token/ERC1155/IERC1155.sol",
+        "id": 4791,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 4814,
+        "sourceUnit": 1345,
+        "src": "63:60:18",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 4793,
+              "name": "IERC1155",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 1344,
+              "src": "409:8:18"
+            },
+            "id": 4794,
+            "nodeType": "InheritanceSpecifier",
+            "src": "409:8:18"
+          }
+        ],
+        "canonicalName": "IEconomy",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 4792,
+          "nodeType": "StructuredDocumentation",
+          "src": "125:261:18",
+          "text": " This is the linked economy of a metaverse. It can send certain\n messages to the core metaverse (essentially, messages for when\n an asset is burned / transferred), and receive messages from\n the metaverse (e.g. messages to mint certain objects)."
+        },
+        "fullyImplemented": false,
+        "id": 4813,
+        "linearizedBaseContracts": [
+          4813,
+          1344,
+          2228
+        ],
+        "name": "IEconomy",
+        "nameLocation": "397:8:18",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 4795,
+              "nodeType": "StructuredDocumentation",
+              "src": "424:68:18",
+              "text": " The metaverse this economy system is created for."
+            },
+            "functionSelector": "f200670d",
+            "id": 4800,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "metaverse",
+            "nameLocation": "506:9:18",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4796,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "515:2:18"
+            },
+            "returnParameters": {
+              "id": 4799,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4798,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4800,
+                  "src": "541:7:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4797,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "541:7:18",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "540:9:18"
+            },
+            "scope": 4813,
+            "src": "497:53:18",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4801,
+              "nodeType": "StructuredDocumentation",
+              "src": "556:58:18",
+              "text": " Mints a token for a particular account."
+            },
+            "functionSelector": "5b0034fd",
+            "id": 4812,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintFor",
+            "nameLocation": "628:7:18",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4810,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4803,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nameLocation": "644:3:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4812,
+                  "src": "636:11:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4802,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "636:7:18",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4805,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "657:8:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4812,
+                  "src": "649:16:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 4804,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "649:7:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4807,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "675:7:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4812,
+                  "src": "667:15:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 4806,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "667:7:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4809,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "697:5:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4812,
+                  "src": "684:18:18",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 4808,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "684:5:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "635:68:18"
+            },
+            "returnParameters": {
+              "id": 4811,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "712:0:18"
+            },
+            "scope": 4813,
+            "src": "619:94:18",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 4814,
+        "src": "387:328:18",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:684:18"
+  },
+  "legacyAST": {
+    "absolutePath": "project:/contracts/lingr/economy/IEconomy.sol",
+    "exportedSymbols": {
+      "IERC1155": [
+        1344
+      ],
+      "IERC165": [
+        2228
+      ],
+      "IEconomy": [
+        4813
+      ]
+    },
+    "id": 4814,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 4790,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:29:18"
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/token/ERC1155/IERC1155.sol",
+        "file": "@openzeppelin/contracts/token/ERC1155/IERC1155.sol",
+        "id": 4791,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 4814,
+        "sourceUnit": 1345,
+        "src": "63:60:18",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 4793,
+              "name": "IERC1155",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 1344,
+              "src": "409:8:18"
+            },
+            "id": 4794,
+            "nodeType": "InheritanceSpecifier",
+            "src": "409:8:18"
+          }
+        ],
+        "canonicalName": "IEconomy",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 4792,
+          "nodeType": "StructuredDocumentation",
+          "src": "125:261:18",
+          "text": " This is the linked economy of a metaverse. It can send certain\n messages to the core metaverse (essentially, messages for when\n an asset is burned / transferred), and receive messages from\n the metaverse (e.g. messages to mint certain objects)."
+        },
+        "fullyImplemented": false,
+        "id": 4813,
+        "linearizedBaseContracts": [
+          4813,
+          1344,
+          2228
+        ],
+        "name": "IEconomy",
+        "nameLocation": "397:8:18",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 4795,
+              "nodeType": "StructuredDocumentation",
+              "src": "424:68:18",
+              "text": " The metaverse this economy system is created for."
+            },
+            "functionSelector": "f200670d",
+            "id": 4800,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "metaverse",
+            "nameLocation": "506:9:18",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4796,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "515:2:18"
+            },
+            "returnParameters": {
+              "id": 4799,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4798,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4800,
+                  "src": "541:7:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4797,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "541:7:18",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "540:9:18"
+            },
+            "scope": 4813,
+            "src": "497:53:18",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4801,
+              "nodeType": "StructuredDocumentation",
+              "src": "556:58:18",
+              "text": " Mints a token for a particular account."
+            },
+            "functionSelector": "5b0034fd",
+            "id": 4812,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintFor",
+            "nameLocation": "628:7:18",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4810,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4803,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nameLocation": "644:3:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4812,
+                  "src": "636:11:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4802,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "636:7:18",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4805,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "657:8:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4812,
+                  "src": "649:16:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 4804,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "649:7:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4807,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "675:7:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4812,
+                  "src": "667:15:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 4806,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "667:7:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4809,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "697:5:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4812,
+                  "src": "684:18:18",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 4808,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "684:5:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "635:68:18"
+            },
+            "returnParameters": {
+              "id": 4811,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "712:0:18"
+            },
+            "scope": 4813,
+            "src": "619:94:18",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 4814,
+        "src": "387:328:18",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:684:18"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.10+commit.fc410830.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.3",
+  "updatedAt": "2022-08-08T03:06:07.079Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "balanceOf(address,uint256)": {
+        "details": "Returns the amount of tokens of token type `id` owned by `account`. Requirements: - `account` cannot be the zero address."
+      },
+      "balanceOfBatch(address[],uint256[])": {
+        "details": "xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {balanceOf}. Requirements: - `accounts` and `ids` must have the same length."
+      },
+      "isApprovedForAll(address,address)": {
+        "details": "Returns true if `operator` is approved to transfer ``account``'s tokens. See {setApprovalForAll}."
+      },
+      "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)": {
+        "details": "xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {safeTransferFrom}. Emits a {TransferBatch} event. Requirements: - `ids` and `amounts` must have the same length. - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155BatchReceived} and return the acceptance magic value."
+      },
+      "safeTransferFrom(address,address,uint256,uint256,bytes)": {
+        "details": "Transfers `amount` tokens of token type `id` from `from` to `to`. Emits a {TransferSingle} event. Requirements: - `to` cannot be the zero address. - If the caller is not `from`, it must have been approved to spend ``from``'s tokens via {setApprovalForAll}. - `from` must have a balance of tokens of type `id` of at least `amount`. - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the acceptance magic value."
+      },
+      "setApprovalForAll(address,bool)": {
+        "details": "Grants or revokes permission to `operator` to transfer the caller's tokens, according to `approved`, Emits an {ApprovalForAll} event. Requirements: - `operator` cannot be the caller."
+      },
+      "supportsInterface(bytes4)": {
+        "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "metaverse()": {
+        "notice": "The metaverse this economy system is created for."
+      },
+      "mintFor(address,uint256,uint256,bytes)": {
+        "notice": "Mints a token for a particular account."
+      }
+    },
+    "notice": "This is the linked economy of a metaverse. It can send certain messages to the core metaverse (essentially, messages for when an asset is burned / transferred), and receive messages from the metaverse (e.g. messages to mint certain objects).",
+    "version": 1
+  }
+}

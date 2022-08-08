@@ -21,6 +21,19 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "metaverse",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -57,9 +70,27 @@
       ],
       "stateMutability": "view",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_brandId",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "onBrandOwnerChanged",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"}],\"name\":\"brandExists\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"}],\"name\":\"brandMetadataURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"supportsInterface(bytes4)\":{\"details\":\"Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"brandExists(address)\":{\"notice\":\"Tells whether an address corresponds to a registered brand or not.\"},\"brandMetadataURI(address)\":{\"notice\":\"Assembles the whole metadata for a brand. WARNING: This method will consume a lot of gas if invoked inside a transaction, so it is recommended to invoke this method in the context of a CALL, and never in the context of a SEND (even as part of other contract's code).\"}},\"notice\":\"A contract satisfying this interface will have capabilities to query the existing brands' existence or metadata.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/lingr/brands/IBrandRegistry.sol\":\"IBrandRegistry\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]},\"project:/contracts/lingr/brands/IBrandRegistry.sol\":{\"keccak256\":\"0x0999a74294653f3d9c3b748d89b34b105b187788a3bd24abe88e94972f43e07a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://134afc92f2664b8032640c49b7bd0bc298cebe0df66423f556614377e636afea\",\"dweb:/ipfs/QmQZfdRqCPL3xVHMhmkxtD6H5dAHrcPQcmERGPevaM46VR\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"}],\"name\":\"brandExists\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"}],\"name\":\"brandMetadataURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"metaverse\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_newOwner\",\"type\":\"address\"}],\"name\":\"onBrandOwnerChanged\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"supportsInterface(bytes4)\":{\"details\":\"Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"brandExists(address)\":{\"notice\":\"Tells whether an address corresponds to a registered brand or not.\"},\"brandMetadataURI(address)\":{\"notice\":\"Assembles the whole metadata for a brand. WARNING: This method will consume a lot of gas if invoked inside a transaction, so it is recommended to invoke this method in the context of a CALL, and never in the context of a SEND (even as part of other contract's code).\"},\"metaverse()\":{\"notice\":\"The metaverse that will own this brand registry.\"},\"onBrandOwnerChanged(address,address)\":{\"notice\":\"A hook to execute when the owner of a brand changed.\"}},\"notice\":\"A contract satisfying this interface will have capabilities to query the existing brands' existence or metadata.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/lingr/brands/IBrandRegistry.sol\":\"IBrandRegistry\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]},\"project:/contracts/lingr/brands/IBrandRegistry.sol\":{\"keccak256\":\"0x382c93244ef491342e8ddfea6ddda891e604b8dbe34b5ebf3f4800b75e677af8\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://57f66a0a8816382a5261ee50ead73fc409a6441f3a9a092d71d53190a42148fd\",\"dweb:/ipfs/QmNhgJWtKiaDQu9KWGeN4HN7QnpiQhQjcQerXeJMh3jnXh\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -67,24 +98,24 @@
   "deployedGeneratedSources": [],
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8 <0.9.0;\n\nimport \"@openzeppelin/contracts/utils/introspection/IERC165.sol\";\n\n/**\n * A contract satisfying this interface will have capabilities\n * to query the existing brands' existence or metadata.\n */\ninterface IBrandRegistry is IERC165 {\n    /**\n     * Assembles the whole metadata for a brand. WARNING: This method\n     * will consume a lot of gas if invoked inside a transaction, so\n     * it is recommended to invoke this method in the context of a\n     * CALL, and never in the context of a SEND (even as part of other\n     * contract's code).\n     */\n    function brandMetadataURI(address _brandId) external view returns (string memory);\n\n    /**\n     * Tells whether an address corresponds to a registered brand or not.\n     */\n    function brandExists(address _brandId) external view returns (bool);\n}\n",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8 <0.9.0;\n\nimport \"@openzeppelin/contracts/utils/introspection/IERC165.sol\";\n\n/**\n * A contract satisfying this interface will have capabilities\n * to query the existing brands' existence or metadata.\n */\ninterface IBrandRegistry is IERC165 {\n    /**\n     * The metaverse that will own this brand registry.\n     */\n    function metaverse() external view returns (address);\n\n    /**\n     * Assembles the whole metadata for a brand. WARNING: This method\n     * will consume a lot of gas if invoked inside a transaction, so\n     * it is recommended to invoke this method in the context of a\n     * CALL, and never in the context of a SEND (even as part of other\n     * contract's code).\n     */\n    function brandMetadataURI(address _brandId) external view returns (string memory);\n\n    /**\n     * Tells whether an address corresponds to a registered brand or not.\n     */\n    function brandExists(address _brandId) external view returns (bool);\n\n    /**\n     * A hook to execute when the owner of a brand changed.\n     */\n    function onBrandOwnerChanged(address _brandId, address _newOwner) external;\n}\n",
   "sourcePath": "/home/luismasuelli/Projects/OuterMaze/lingr-contracts/contracts/lingr/brands/IBrandRegistry.sol",
   "ast": {
     "absolutePath": "project:/contracts/lingr/brands/IBrandRegistry.sol",
     "exportedSymbols": {
       "IBrandRegistry": [
-        3708
+        4475
       ],
       "IERC165": [
         2228
       ]
     },
-    "id": 3709,
+    "id": 4476,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3687,
+        "id": 4440,
         "literals": [
           "solidity",
           ">=",
@@ -99,10 +130,10 @@
       {
         "absolutePath": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
         "file": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
-        "id": 3688,
+        "id": 4441,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 3709,
+        "scope": 4476,
         "sourceUnit": 2229,
         "src": "63:65:16",
         "symbolAliases": [],
@@ -113,13 +144,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 3690,
+              "id": 4443,
               "name": "IERC165",
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 2228,
               "src": "285:7:16"
             },
-            "id": 3691,
+            "id": 4444,
             "nodeType": "InheritanceSpecifier",
             "src": "285:7:16"
           }
@@ -128,15 +159,15 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 3689,
+          "id": 4442,
           "nodeType": "StructuredDocumentation",
           "src": "130:126:16",
           "text": " A contract satisfying this interface will have capabilities\n to query the existing brands' existence or metadata."
         },
         "fullyImplemented": false,
-        "id": 3708,
+        "id": 4475,
         "linearizedBaseContracts": [
-          3708,
+          4475,
           2228
         ],
         "name": "IBrandRegistry",
@@ -145,32 +176,38 @@
         "nodes": [
           {
             "documentation": {
-              "id": 3692,
+              "id": 4445,
               "nodeType": "StructuredDocumentation",
-              "src": "299:313:16",
-              "text": " Assembles the whole metadata for a brand. WARNING: This method\n will consume a lot of gas if invoked inside a transaction, so\n it is recommended to invoke this method in the context of a\n CALL, and never in the context of a SEND (even as part of other\n contract's code)."
+              "src": "299:67:16",
+              "text": " The metaverse that will own this brand registry."
             },
-            "functionSelector": "9896c31d",
-            "id": 3699,
+            "functionSelector": "f200670d",
+            "id": 4450,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
-            "name": "brandMetadataURI",
-            "nameLocation": "626:16:16",
+            "name": "metaverse",
+            "nameLocation": "380:9:16",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3695,
+              "id": 4446,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "389:2:16"
+            },
+            "returnParameters": {
+              "id": 4449,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3694,
+                  "id": 4448,
                   "mutability": "mutable",
-                  "name": "_brandId",
-                  "nameLocation": "651:8:16",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3699,
-                  "src": "643:16:16",
+                  "scope": 4450,
+                  "src": "415:7:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -178,10 +215,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3693,
+                    "id": 4447,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "643:7:16",
+                    "src": "415:7:16",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -191,21 +228,77 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "642:18:16"
+              "src": "414:9:16"
             },
-            "returnParameters": {
-              "id": 3698,
+            "scope": 4475,
+            "src": "371:53:16",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4451,
+              "nodeType": "StructuredDocumentation",
+              "src": "430:313:16",
+              "text": " Assembles the whole metadata for a brand. WARNING: This method\n will consume a lot of gas if invoked inside a transaction, so\n it is recommended to invoke this method in the context of a\n CALL, and never in the context of a SEND (even as part of other\n contract's code)."
+            },
+            "functionSelector": "9896c31d",
+            "id": 4458,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "brandMetadataURI",
+            "nameLocation": "757:16:16",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4454,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3697,
+                  "id": 4453,
+                  "mutability": "mutable",
+                  "name": "_brandId",
+                  "nameLocation": "782:8:16",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4458,
+                  "src": "774:16:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4452,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "774:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "773:18:16"
+            },
+            "returnParameters": {
+              "id": 4457,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4456,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3699,
-                  "src": "684:13:16",
+                  "scope": 4458,
+                  "src": "815:13:16",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -213,10 +306,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 3696,
+                    "id": 4455,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "684:6:16",
+                    "src": "815:6:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -225,42 +318,42 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "683:15:16"
+              "src": "814:15:16"
             },
-            "scope": 3708,
-            "src": "617:82:16",
+            "scope": 4475,
+            "src": "748:82:16",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 3700,
+              "id": 4459,
               "nodeType": "StructuredDocumentation",
-              "src": "705:85:16",
+              "src": "836:85:16",
               "text": " Tells whether an address corresponds to a registered brand or not."
             },
             "functionSelector": "7d5555df",
-            "id": 3707,
+            "id": 4466,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "brandExists",
-            "nameLocation": "804:11:16",
+            "nameLocation": "935:11:16",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3703,
+              "id": 4462,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3702,
+                  "id": 4461,
                   "mutability": "mutable",
                   "name": "_brandId",
-                  "nameLocation": "824:8:16",
+                  "nameLocation": "955:8:16",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3707,
-                  "src": "816:16:16",
+                  "scope": 4466,
+                  "src": "947:16:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -268,10 +361,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3701,
+                    "id": 4460,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "816:7:16",
+                    "src": "947:7:16",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -281,21 +374,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "815:18:16"
+              "src": "946:18:16"
             },
             "returnParameters": {
-              "id": 3706,
+              "id": 4465,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3705,
+                  "id": 4464,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3707,
-                  "src": "857:4:16",
+                  "scope": 4466,
+                  "src": "988:4:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -303,10 +396,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3704,
+                    "id": 4463,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "857:4:16",
+                    "src": "988:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -315,38 +408,128 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "856:6:16"
+              "src": "987:6:16"
             },
-            "scope": 3708,
-            "src": "795:68:16",
+            "scope": 4475,
+            "src": "926:68:16",
             "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4467,
+              "nodeType": "StructuredDocumentation",
+              "src": "1000:71:16",
+              "text": " A hook to execute when the owner of a brand changed."
+            },
+            "functionSelector": "8cd6e9a9",
+            "id": 4474,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "onBrandOwnerChanged",
+            "nameLocation": "1085:19:16",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4472,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4469,
+                  "mutability": "mutable",
+                  "name": "_brandId",
+                  "nameLocation": "1113:8:16",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4474,
+                  "src": "1105:16:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4468,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1105:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4471,
+                  "mutability": "mutable",
+                  "name": "_newOwner",
+                  "nameLocation": "1131:9:16",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4474,
+                  "src": "1123:17:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4470,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1123:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1104:37:16"
+            },
+            "returnParameters": {
+              "id": 4473,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1150:0:16"
+            },
+            "scope": 4475,
+            "src": "1076:75:16",
+            "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 3709,
-        "src": "257:608:16",
+        "scope": 4476,
+        "src": "257:896:16",
         "usedErrors": []
       }
     ],
-    "src": "32:834:16"
+    "src": "32:1122:16"
   },
   "legacyAST": {
     "absolutePath": "project:/contracts/lingr/brands/IBrandRegistry.sol",
     "exportedSymbols": {
       "IBrandRegistry": [
-        3708
+        4475
       ],
       "IERC165": [
         2228
       ]
     },
-    "id": 3709,
+    "id": 4476,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3687,
+        "id": 4440,
         "literals": [
           "solidity",
           ">=",
@@ -361,10 +544,10 @@
       {
         "absolutePath": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
         "file": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
-        "id": 3688,
+        "id": 4441,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 3709,
+        "scope": 4476,
         "sourceUnit": 2229,
         "src": "63:65:16",
         "symbolAliases": [],
@@ -375,13 +558,13 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 3690,
+              "id": 4443,
               "name": "IERC165",
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 2228,
               "src": "285:7:16"
             },
-            "id": 3691,
+            "id": 4444,
             "nodeType": "InheritanceSpecifier",
             "src": "285:7:16"
           }
@@ -390,15 +573,15 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 3689,
+          "id": 4442,
           "nodeType": "StructuredDocumentation",
           "src": "130:126:16",
           "text": " A contract satisfying this interface will have capabilities\n to query the existing brands' existence or metadata."
         },
         "fullyImplemented": false,
-        "id": 3708,
+        "id": 4475,
         "linearizedBaseContracts": [
-          3708,
+          4475,
           2228
         ],
         "name": "IBrandRegistry",
@@ -407,32 +590,38 @@
         "nodes": [
           {
             "documentation": {
-              "id": 3692,
+              "id": 4445,
               "nodeType": "StructuredDocumentation",
-              "src": "299:313:16",
-              "text": " Assembles the whole metadata for a brand. WARNING: This method\n will consume a lot of gas if invoked inside a transaction, so\n it is recommended to invoke this method in the context of a\n CALL, and never in the context of a SEND (even as part of other\n contract's code)."
+              "src": "299:67:16",
+              "text": " The metaverse that will own this brand registry."
             },
-            "functionSelector": "9896c31d",
-            "id": 3699,
+            "functionSelector": "f200670d",
+            "id": 4450,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
-            "name": "brandMetadataURI",
-            "nameLocation": "626:16:16",
+            "name": "metaverse",
+            "nameLocation": "380:9:16",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3695,
+              "id": 4446,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "389:2:16"
+            },
+            "returnParameters": {
+              "id": 4449,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3694,
+                  "id": 4448,
                   "mutability": "mutable",
-                  "name": "_brandId",
-                  "nameLocation": "651:8:16",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3699,
-                  "src": "643:16:16",
+                  "scope": 4450,
+                  "src": "415:7:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -440,10 +629,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3693,
+                    "id": 4447,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "643:7:16",
+                    "src": "415:7:16",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -453,21 +642,77 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "642:18:16"
+              "src": "414:9:16"
             },
-            "returnParameters": {
-              "id": 3698,
+            "scope": 4475,
+            "src": "371:53:16",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4451,
+              "nodeType": "StructuredDocumentation",
+              "src": "430:313:16",
+              "text": " Assembles the whole metadata for a brand. WARNING: This method\n will consume a lot of gas if invoked inside a transaction, so\n it is recommended to invoke this method in the context of a\n CALL, and never in the context of a SEND (even as part of other\n contract's code)."
+            },
+            "functionSelector": "9896c31d",
+            "id": 4458,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "brandMetadataURI",
+            "nameLocation": "757:16:16",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4454,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3697,
+                  "id": 4453,
+                  "mutability": "mutable",
+                  "name": "_brandId",
+                  "nameLocation": "782:8:16",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4458,
+                  "src": "774:16:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4452,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "774:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "773:18:16"
+            },
+            "returnParameters": {
+              "id": 4457,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4456,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3699,
-                  "src": "684:13:16",
+                  "scope": 4458,
+                  "src": "815:13:16",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -475,10 +720,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 3696,
+                    "id": 4455,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "684:6:16",
+                    "src": "815:6:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -487,42 +732,42 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "683:15:16"
+              "src": "814:15:16"
             },
-            "scope": 3708,
-            "src": "617:82:16",
+            "scope": 4475,
+            "src": "748:82:16",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 3700,
+              "id": 4459,
               "nodeType": "StructuredDocumentation",
-              "src": "705:85:16",
+              "src": "836:85:16",
               "text": " Tells whether an address corresponds to a registered brand or not."
             },
             "functionSelector": "7d5555df",
-            "id": 3707,
+            "id": 4466,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "brandExists",
-            "nameLocation": "804:11:16",
+            "nameLocation": "935:11:16",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3703,
+              "id": 4462,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3702,
+                  "id": 4461,
                   "mutability": "mutable",
                   "name": "_brandId",
-                  "nameLocation": "824:8:16",
+                  "nameLocation": "955:8:16",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3707,
-                  "src": "816:16:16",
+                  "scope": 4466,
+                  "src": "947:16:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -530,10 +775,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3701,
+                    "id": 4460,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "816:7:16",
+                    "src": "947:7:16",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -543,21 +788,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "815:18:16"
+              "src": "946:18:16"
             },
             "returnParameters": {
-              "id": 3706,
+              "id": 4465,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3705,
+                  "id": 4464,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3707,
-                  "src": "857:4:16",
+                  "scope": 4466,
+                  "src": "988:4:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -565,10 +810,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3704,
+                    "id": 4463,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "857:4:16",
+                    "src": "988:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -577,21 +822,111 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "856:6:16"
+              "src": "987:6:16"
             },
-            "scope": 3708,
-            "src": "795:68:16",
+            "scope": 4475,
+            "src": "926:68:16",
             "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4467,
+              "nodeType": "StructuredDocumentation",
+              "src": "1000:71:16",
+              "text": " A hook to execute when the owner of a brand changed."
+            },
+            "functionSelector": "8cd6e9a9",
+            "id": 4474,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "onBrandOwnerChanged",
+            "nameLocation": "1085:19:16",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4472,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4469,
+                  "mutability": "mutable",
+                  "name": "_brandId",
+                  "nameLocation": "1113:8:16",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4474,
+                  "src": "1105:16:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4468,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1105:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4471,
+                  "mutability": "mutable",
+                  "name": "_newOwner",
+                  "nameLocation": "1131:9:16",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4474,
+                  "src": "1123:17:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4470,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1123:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1104:37:16"
+            },
+            "returnParameters": {
+              "id": 4473,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1150:0:16"
+            },
+            "scope": 4475,
+            "src": "1076:75:16",
+            "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 3709,
-        "src": "257:608:16",
+        "scope": 4476,
+        "src": "257:896:16",
         "usedErrors": []
       }
     ],
-    "src": "32:834:16"
+    "src": "32:1122:16"
   },
   "compiler": {
     "name": "solc",
@@ -599,7 +934,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2022-08-07T14:50:17.233Z",
+  "updatedAt": "2022-08-08T03:06:07.067Z",
   "devdoc": {
     "kind": "dev",
     "methods": {
@@ -617,6 +952,12 @@
       },
       "brandMetadataURI(address)": {
         "notice": "Assembles the whole metadata for a brand. WARNING: This method will consume a lot of gas if invoked inside a transaction, so it is recommended to invoke this method in the context of a CALL, and never in the context of a SEND (even as part of other contract's code)."
+      },
+      "metaverse()": {
+        "notice": "The metaverse that will own this brand registry."
+      },
+      "onBrandOwnerChanged(address,address)": {
+        "notice": "A hook to execute when the owner of a brand changed."
       }
     },
     "notice": "A contract satisfying this interface will have capabilities to query the existing brands' existence or metadata.",

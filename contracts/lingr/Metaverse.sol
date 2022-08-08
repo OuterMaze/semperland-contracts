@@ -146,7 +146,7 @@ abstract contract Metaverse is Context, IMetaverse {
     function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data)
         public onlyPlugin onlyExistingTokenType(_tokenId) onlyFTRange(_tokenId)
     {
-        economy.mintFor(_to, _tokenId, _amount, _data);
+        IEconomy(economy).mintFor(_to, _tokenId, _amount, _data);
     }
 
     /**
@@ -159,7 +159,7 @@ abstract contract Metaverse is Context, IMetaverse {
     {
         require(_tokenType >= (1 << 160), "Metaverse: the specified token id is reserved for brands");
         require(nftTypes[_tokenId] == 0, "Metaverse: the specified nft id is not available");
-        economy.mintFor(_to, _tokenId, 1, _data);
+        IEconomy(economy).mintFor(_to, _tokenId, 1, _data);
         nftTypes[_tokenId] = _tokenType;
     }
 
@@ -184,7 +184,7 @@ abstract contract Metaverse is Context, IMetaverse {
      */
     function tokenURI(uint256 _tokenId) public view returns (string memory) {
         if (_tokenId < (1 << 160)) {
-            return brandMetadataURI(address(uint160(_tokenId)));
+            return IBrandRegistry(brandRegistry).brandMetadataURI(address(uint160(_tokenId)));
         } else if (_tokenId < (1 << 255)) {
             return _metadataFromPlugin(nftTypes[_tokenId]);
         } else {
@@ -236,7 +236,7 @@ abstract contract Metaverse is Context, IMetaverse {
      * Hook to be invoked as part of a transfer from ERC1155.
      */
     function onBrandOwnerChanged(address _brandId, address _newOwner) external onlyEconomy {
-        brandRegistry.onBrandOwnerChanged(_brandId, _newOwner);
+        IBrandRegistry(brandRegistry).onBrandOwnerChanged(_brandId, _newOwner);
     }
 
     // ********** Plugin management goes here **********
