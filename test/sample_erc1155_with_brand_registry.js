@@ -1,4 +1,6 @@
-const SampleERC1155WithBrandRegistry = artifacts.require("SampleERC1155WithBrandRegistry");
+const SampleBrandRegistry = artifacts.require("SampleBrandRegistry");
+const Economy = artifacts.require("Economy");
+const SampleMetaverse = artifacts.require("SampleMetaverse");
 
 const {
   BN,           // Big Number support
@@ -13,12 +15,16 @@ const {
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 contract("SampleERC1155WithBrandRegistry", function (accounts) {
+  var economy = null;
+  var metaverse = null;
   var contract = null;
 
   before(async function () {
-    contract = await SampleERC1155WithBrandRegistry.new({ from: accounts[0] });
-    // console.log("sample keccak", web3.utils.keccak256("Hello world!"));
-    // console.log("address", contract.address);
+    metaverse = await SampleMetaverse.new({ from: accounts[0] });
+    economy = await Economy.new(metaverse.address, { from: accounts[0] })
+    contract = await SampleBrandRegistry.new(metaverse.address, { from: accounts[0] });
+    await metaverse.setEconomy(economy.address, { from: accounts[0] });
+    await metaverse.setBrandRegistry(contract.address, { from: accounts[0] });
   });
 
   // Tests I need:
@@ -400,7 +406,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
       "0xd6", "0x94", contract.address, accounts[1], 1
     ).substr(26);
     // A transfer is done, with this brand, to brand 0.
-    await contract.safeTransferFrom(
+    await economy.safeTransferFrom(
       accounts[1], accounts[0], new BN(brandId1), 1, web3.utils.asciiToHex("test transfer"), {from: accounts[1]}
     );
     // The old owner (1) must fail.
