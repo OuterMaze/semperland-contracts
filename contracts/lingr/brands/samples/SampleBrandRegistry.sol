@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
-import "../brands/BrandRegistry.sol";
+import "../BrandRegistry.sol";
 
 contract SampleBrandRegistry is BrandRegistry {
     /**
