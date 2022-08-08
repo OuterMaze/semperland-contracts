@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+
 /**
  * An interface for the metaverse core contract. This is meant
  * to be used from inside the metaverse plug-ins (typically on
  * plug-in initialization).
  */
-interface IMetaverse {
+interface IMetaverse is IERC165 {
     /**
      * This is the list of plug-ins that are being added to the hub.
      * Each contract has its separate logic but they have access to
@@ -51,6 +53,11 @@ interface IMetaverse {
      * id is < (1 << 160) since those ids are reserved for brands.
      */
     function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data) external;
+
+    /**
+     * Mints a specific brand token for a given user. The brand is stated as its address.
+     */
+    function mintBrandFor(address _to, address _brandId) external;
 
     /**
      * Retrieves the metadata uri of a given token. WARNING: This method

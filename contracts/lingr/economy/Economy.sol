@@ -91,7 +91,7 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
     }
 
     /**
-     * This brand registry satisfies the IERC1155, the IBrandRegistry and IERC165.
+     * This brand registry satisfies the IERC1155, the IBrandRegistry and IERC165 interfaces.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, IERC165) returns (bool) {
         return interfaceId == type(IERC165).interfaceId ||

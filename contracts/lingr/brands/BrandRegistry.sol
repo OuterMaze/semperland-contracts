@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IBrandRegistry.sol";
 import "../IMetaverse.sol";
+import "../economy/IEconomy.sol";
 import "../../NativePayable.sol";
 
 /**
@@ -172,14 +173,11 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     // ********** Brand registration & management goes here **********
 
     /**
-     * Mints the new brand id, giving it to a particular address as owner.
-     */
-    function _mintBrandFor(address _to, address _brandId) internal virtual;
-
-    /**
      * Tells whether a particular user is the owner of the brand id.
      */
-    function _isBrandOwnerApprovedEditor(address _brandOwner, address _sender) internal view virtual returns (bool);
+    function _isBrandOwnerApprovedEditor(address _brandOwner, address _sender) internal view returns (bool) {
+        return IEconomy(IMetaverse(metaverse).economy()).isApprovedForAll(_brandOwner, _sender);
+    }
 
     /**
      * This event is triggered when a brand is registered. The new
@@ -231,7 +229,7 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
         });
 
         // 4. Mint the brand into the economic system for the sender.
-        _mintBrandFor(sender, brandId);
+        IMetaverse(metaverse).mintBrandFor(sender, brandId);
 
         // 5. Trigger the event.
         emit BrandRegistered(sender, brandId, _name, _description, msg.value);
@@ -444,7 +442,7 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     /**
      * A brand registry satisfies the IBrandRegistry and IERC165.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == type(IERC165).interfaceId || interfaceId == type(IBrandRegistry).interfaceId;
     }
 }

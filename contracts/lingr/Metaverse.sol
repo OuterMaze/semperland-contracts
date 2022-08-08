@@ -126,7 +126,7 @@ abstract contract Metaverse is Context, IMetaverse {
      * Defines the resolution of a fungible token type. The token id must be
      * in the range of the fungible token ids.
      */
-    function defineFTType(uint256 _tokenId) public onlyPlugin onlyNewTokenType(_tokenId) onlyFTRange(_tokenId) {
+    function defineFTType(uint256 _tokenId) external onlyPlugin onlyNewTokenType(_tokenId) onlyFTRange(_tokenId) {
         tokenTypeResolvers[_tokenId] = _msgSender();
     }
 
@@ -135,7 +135,7 @@ abstract contract Metaverse is Context, IMetaverse {
      * be in the range of the fungible token (type) ids (strictly > 0, strictly
      * < (1 << 255)).
      */
-    function defineNFTType(uint256 _tokenId) public onlyPlugin onlyNewTokenType(_tokenId) onlyNFTRange(_tokenId) {
+    function defineNFTType(uint256 _tokenId) external onlyPlugin onlyNewTokenType(_tokenId) onlyNFTRange(_tokenId) {
         require(_tokenId > 1, "Metaverse: nft type 0 is reserved for invalid / missing nfts, and 1 for brands");
         tokenTypeResolvers[_tokenId] = _msgSender();
     }
@@ -144,7 +144,7 @@ abstract contract Metaverse is Context, IMetaverse {
      * Mints a specific fungible token type, in a certain amount.
      */
     function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data)
-        public onlyPlugin onlyExistingTokenType(_tokenId) onlyFTRange(_tokenId)
+        external onlyPlugin onlyExistingTokenType(_tokenId) onlyFTRange(_tokenId)
     {
         IEconomy(economy).mintFor(_to, _tokenId, _amount, _data);
     }
@@ -155,12 +155,20 @@ abstract contract Metaverse is Context, IMetaverse {
      * id is < (1 << 160) since those ids are reserved for brands.
      */
     function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data)
-        public onlyPlugin onlyExistingTokenType(_tokenType) onlyNFTRange(_tokenType) onlyNFTRange(_tokenId)
+        external onlyPlugin onlyExistingTokenType(_tokenType) onlyNFTRange(_tokenType) onlyNFTRange(_tokenId)
     {
         require(_tokenType >= (1 << 160), "Metaverse: the specified token id is reserved for brands");
         require(nftTypes[_tokenId] == 0, "Metaverse: the specified nft id is not available");
         IEconomy(economy).mintFor(_to, _tokenId, 1, _data);
         nftTypes[_tokenId] = _tokenType;
+    }
+
+    /**
+     * Mints a specific brand token for a given user. The brand is stated as its address.
+     */
+    function mintBrandFor(address _to, address _brandId) external {
+        require(_msgSender() == brandRegistry, "Metaverse: the only allowed sender is the brand registry");
+        IEconomy(economy).mintFor(_to, uint256(uint160(_brandId)), 1, "Metaverse: Minting a brand");
     }
 
     /**
@@ -182,7 +190,7 @@ abstract contract Metaverse is Context, IMetaverse {
      * CALL, and never in the context of a SEND (even as part of other
      * contract's code).
      */
-    function tokenURI(uint256 _tokenId) public view returns (string memory) {
+    function tokenURI(uint256 _tokenId) external view returns (string memory) {
         if (_tokenId < (1 << 160)) {
             return IBrandRegistry(brandRegistry).brandMetadataURI(address(uint160(_tokenId)));
         } else if (_tokenId < (1 << 255)) {
@@ -338,6 +346,13 @@ abstract contract Metaverse is Context, IMetaverse {
     modifier onlyEconomy() {
         require(_msgSender() == economy, "Metaverse: the only allowed sender is the economy system");
         _;
+    }
+
+    /**
+     * A metaverse satisfies the IMetaverse and IERC165 interfaces.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == type(IERC165).interfaceId || interfaceId == type(IMetaverse).interfaceId;
     }
 
     // TODO: Implement many features:
