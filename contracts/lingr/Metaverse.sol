@@ -299,7 +299,7 @@ abstract contract Metaverse is Context, IMetaverse {
      * Adds a plug-in contract to this metaverse.
      */
     function setBrandRegistry(address _contract) public {
-        require(_canAddPlugin(_msgSender()), "Metaverse: the sender is not allowed to set the plug-in");
+        require(_canSetBrandRegistry(_msgSender()), "Metaverse: the sender is not allowed to set the plug-in");
         require(
             _isBrandRegistryForThisMetaverse(_contract),
             "Metaverse: the address does not belong to a valid brand registry contract for this metaverse"
@@ -329,7 +329,7 @@ abstract contract Metaverse is Context, IMetaverse {
      * Set the economy contract to this metaverse.
      */
     function setEconomy(address _contract) public {
-        require(_canAddPlugin(_msgSender()), "Metaverse: the sender is not allowed to set the economy");
+        require(_canSetEconomy(_msgSender()), "Metaverse: the sender is not allowed to set the economy");
         require(
             _isEconomyForThisMetaverse(_contract),
             "Metaverse: the address does not belong to a valid economy contract for this metaverse"
@@ -357,4 +357,5 @@ abstract contract Metaverse is Context, IMetaverse {
 
     // TODO: Implement many features:
     // 1. A sample contract defining a COIN type and a dumb DEED type.
+    // 2. TEST everything.
 }
