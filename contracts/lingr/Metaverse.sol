@@ -141,18 +141,12 @@ abstract contract Metaverse is Context, IMetaverse {
     }
 
     /**
-     * This method must be implemented to define the actual mint process (typically,
-     * this occurs in terms of an ERC1155's _mint process) of either a fungible or
-     * a non-fungible asset.
-     */
-    function _mintFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) internal virtual;
-
-    /**
      * Mints a specific fungible token type, in a certain amount.
      */
     function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data)
         public onlyPlugin onlyExistingTokenType(_tokenId) onlyFTRange(_tokenId)
     {
+        economy.mintFor(_to, _tokenId, _amount, _data);
         _mintFor(_to, _tokenId, _amount, _data);
     }
 
@@ -166,7 +160,7 @@ abstract contract Metaverse is Context, IMetaverse {
     {
         require(_tokenType >= (1 << 160), "Metaverse: the specified token id is reserved for brands");
         require(nftTypes[_tokenId] == 0, "Metaverse: the specified nft id is not available");
-        _mintFor(_to, _tokenId, 1, _data);
+        economy.mintFor(_to, _tokenId, 1, _data);
         nftTypes[_tokenId] = _tokenType;
     }
 
