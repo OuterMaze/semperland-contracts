@@ -147,7 +147,6 @@ abstract contract Metaverse is Context, IMetaverse {
         public onlyPlugin onlyExistingTokenType(_tokenId) onlyFTRange(_tokenId)
     {
         economy.mintFor(_to, _tokenId, _amount, _data);
-        _mintFor(_to, _tokenId, _amount, _data);
     }
 
     /**
