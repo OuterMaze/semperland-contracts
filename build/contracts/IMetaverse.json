@@ -68,26 +68,32 @@
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "_brandId",
+          "type": "address"
+        }
+      ],
+      "name": "defineNextFTType",
+      "outputs": [
+        {
           "internalType": "uint256",
-          "name": "_tokenId",
+          "name": "",
           "type": "uint256"
         }
       ],
-      "name": "defineFTType",
-      "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
-      "inputs": [
+      "inputs": [],
+      "name": "defineNextNFTType",
+      "outputs": [
         {
           "internalType": "uint256",
-          "name": "_tokenId",
+          "name": "",
           "type": "uint256"
         }
       ],
-      "name": "defineNFTType",
-      "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -249,7 +255,7 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"brandRegistry\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"defineFTType\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"defineNFTType\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"economy\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"}],\"name\":\"mintBrandFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"mintFTFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_tokenType\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"mintNFTFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_newOwner\",\"type\":\"address\"}],\"name\":\"onBrandOwnerChanged\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"onTokenBurned\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"_tokenIds\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_amounts\",\"type\":\"uint256[]\"}],\"name\":\"onTokensBurned\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_key\",\"type\":\"address\"}],\"name\":\"plugins\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"supportsInterface(bytes4)\":{\"details\":\"Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"brandRegistry()\":{\"notice\":\"The linked brand registry for this metaverse.\"},\"defineFTType(uint256)\":{\"notice\":\"Defines the resolution of a fungible token type. The token id must be in the range of the fungible token ids.\"},\"defineNFTType(uint256)\":{\"notice\":\"Defines the resolution of a non-fungible token type. The token id must be in the range of the fungible token (type) ids (strictly > 0, strictly < (1 << 255)).\"},\"economy()\":{\"notice\":\"The linked economy for this metaverse.\"},\"mintBrandFor(address,address)\":{\"notice\":\"Mints a specific brand token for a given user. The brand is stated as its address.\"},\"mintFTFor(address,uint256,uint256,bytes)\":{\"notice\":\"Mints a specific fungible token type, in a certain amount.\"},\"mintNFTFor(address,uint256,uint256,bytes)\":{\"notice\":\"Mints a specific non-fungible token type, using a specific id (and always using an amount of 1). It is an error if the token id is already minted, or the chosen id is < (1 << 160) since those ids are reserved for brands.\"},\"onBrandOwnerChanged(address,address)\":{\"notice\":\"Hook to be invoked as part of a transfer from ERC1155.\"},\"onTokenBurned(address,uint256,uint256)\":{\"notice\":\"Hook to be invoked as part of a burn process when an address burns a particular token in some quantity (for NFTs, the quantity is 1 in every case). By this point, we should be guaranteed that the _tokenId will actually have a resolver (being it a fungible token type, or being it a non-fungible token id).\"},\"onTokensBurned(address,uint256[],uint256[])\":{\"notice\":\"Hook to be invoked as part of a batch burn process when an address burns a particulars et of tokens in respective quantities (for NFTs, the quantity is 1 in every case; it is guaranteed that both arrays are always of the same length.\"},\"plugins(address)\":{\"notice\":\"This is the list of plug-ins that are being added to the hub. Each contract has its separate logic but they have access to the same set of features. Once a contract is added, it will never be removed from this list. This mapping tells whether a contract in particular has permission(s) to define a type and mint tokens for an address.\"},\"tokenURI(uint256)\":{\"notice\":\"Retrieves the metadata uri of a given token. WARNING: This method will consume a lot of gas if invoked inside a transaction, so it is recommended to invoke this method in the context of a CALL, and never in the context of a SEND (even as part of other contract's code).\"}},\"notice\":\"An interface for the metaverse core contract. This is meant to be used from inside the metaverse plug-ins (typically on plug-in initialization).\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/lingr/IMetaverse.sol\":\"IMetaverse\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]},\"project:/contracts/lingr/IMetaverse.sol\":{\"keccak256\":\"0x285bd1b9b2953326b1b3a3917e72aa2aae127f9876303fd3428a1dd4523b820a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://2c5aaf03f2c1c4bddbc413f0f14d2a9de8169ecec92bbfea4b9046c9f522d940\",\"dweb:/ipfs/QmSz61ZLJHc4t4xWPi3jgD5ZoFdj5w1Cq9r2oNmLjq2x1g\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"brandRegistry\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"}],\"name\":\"defineNextFTType\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"defineNextNFTType\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"economy\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"}],\"name\":\"mintBrandFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"mintFTFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_tokenType\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"mintNFTFor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_brandId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_newOwner\",\"type\":\"address\"}],\"name\":\"onBrandOwnerChanged\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"onTokenBurned\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"_tokenIds\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_amounts\",\"type\":\"uint256[]\"}],\"name\":\"onTokensBurned\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_key\",\"type\":\"address\"}],\"name\":\"plugins\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"supportsInterface(bytes4)\":{\"details\":\"Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"brandRegistry()\":{\"notice\":\"The linked brand registry for this metaverse.\"},\"defineNextFTType(address)\":{\"notice\":\"Defines the resolution of a fungible token type. A brand id may be provided (or address(0) for system FTs). This method must yield the NEXT id to use (it will NOT be a view, but will returns a value anyway). The returned id will be in the range of FTs.\"},\"defineNextNFTType()\":{\"notice\":\"Defines the resolution of a non-fungible token type. This method must yield the NEXT id to use (it will NOT be a view, but will returns a value anyway). The returned id will be in the range of NFTs.\"},\"economy()\":{\"notice\":\"The linked economy for this metaverse.\"},\"mintBrandFor(address,address)\":{\"notice\":\"Mints a specific brand token for a given user. The brand is stated as its address.\"},\"mintFTFor(address,uint256,uint256,bytes)\":{\"notice\":\"Mints a specific fungible token type, in a certain amount.\"},\"mintNFTFor(address,uint256,uint256,bytes)\":{\"notice\":\"Mints a specific non-fungible token type, using a specific id (and always using an amount of 1). It is an error if the token id is already minted, or the chosen id is < (1 << 160) since those ids are reserved for brands.\"},\"onBrandOwnerChanged(address,address)\":{\"notice\":\"Hook to be invoked as part of a transfer from ERC1155.\"},\"onTokenBurned(address,uint256,uint256)\":{\"notice\":\"Hook to be invoked as part of a burn process when an address burns a particular token in some quantity (for NFTs, the quantity is 1 in every case). By this point, we should be guaranteed that the _tokenId will actually have a resolver (being it a fungible token type, or being it a non-fungible token id).\"},\"onTokensBurned(address,uint256[],uint256[])\":{\"notice\":\"Hook to be invoked as part of a batch burn process when an address burns a particulars et of tokens in respective quantities (for NFTs, the quantity is 1 in every case; it is guaranteed that both arrays are always of the same length.\"},\"plugins(address)\":{\"notice\":\"This is the list of plug-ins that are being added to the hub. Each contract has its separate logic but they have access to the same set of features. Once a contract is added, it will never be removed from this list. This mapping tells whether a contract in particular has permission(s) to define a type and mint tokens for an address.\"},\"tokenURI(uint256)\":{\"notice\":\"Retrieves the metadata uri of a given token. WARNING: This method will consume a lot of gas if invoked inside a transaction, so it is recommended to invoke this method in the context of a CALL, and never in the context of a SEND (even as part of other contract's code).\"}},\"notice\":\"An interface for the metaverse core contract. This is meant to be used from inside the metaverse plug-ins (typically on plug-in initialization).\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/lingr/IMetaverse.sol\":\"IMetaverse\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]},\"project:/contracts/lingr/IMetaverse.sol\":{\"keccak256\":\"0x87ad56020ecacc878c29f914460f90d85eaaa191932fd69ef7364e3c52b0afdb\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://9f63997c83cd778346b6fc57b8d6107aad1a401381c3bef608e4bd7b8a920920\",\"dweb:/ipfs/QmcyRJqSdTZJtF9QFBzoYGgz61x1WmXbCRX8JnDVJGVGJW\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -257,7 +263,7 @@
   "deployedGeneratedSources": [],
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8 <0.9.0;\n\nimport \"@openzeppelin/contracts/utils/introspection/IERC165.sol\";\n\n/**\n * An interface for the metaverse core contract. This is meant\n * to be used from inside the metaverse plug-ins (typically on\n * plug-in initialization).\n */\ninterface IMetaverse is IERC165 {\n    /**\n     * This is the list of plug-ins that are being added to the hub.\n     * Each contract has its separate logic but they have access to\n     * the same set of features. Once a contract is added, it will\n     * never be removed from this list. This mapping tells whether\n     * a contract in particular has permission(s) to define a type\n     * and mint tokens for an address.\n     */\n    function plugins(address _key) external view returns (bool);\n\n    /**\n     * The linked brand registry for this metaverse.\n     */\n    function brandRegistry() external view returns (address);\n\n    /**\n     * The linked economy for this metaverse.\n     */\n    function economy() external view returns (address);\n\n    /**\n     * Defines the resolution of a fungible token type. The token id must be\n     * in the range of the fungible token ids.\n     */\n    function defineFTType(uint256 _tokenId) external;\n\n    /**\n     * Defines the resolution of a non-fungible token type. The token id must\n     * be in the range of the fungible token (type) ids (strictly > 0, strictly\n     * < (1 << 255)).\n     */\n    function defineNFTType(uint256 _tokenId) external;\n\n    /**\n     * Mints a specific fungible token type, in a certain amount.\n     */\n    function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) external;\n\n    /**\n     * Mints a specific non-fungible token type, using a specific id (and always using\n     * an amount of 1). It is an error if the token id is already minted, or the chosen\n     * id is < (1 << 160) since those ids are reserved for brands.\n     */\n    function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data) external;\n\n    /**\n     * Mints a specific brand token for a given user. The brand is stated as its address.\n     */\n    function mintBrandFor(address _to, address _brandId) external;\n\n    /**\n     * Retrieves the metadata uri of a given token. WARNING: This method\n     * will consume a lot of gas if invoked inside a transaction, so\n     * it is recommended to invoke this method in the context of a\n     * CALL, and never in the context of a SEND (even as part of other\n     * contract's code).\n     */\n    function tokenURI(uint256 _tokenId) external view returns (string memory);\n\n    /**\n     * Hook to be invoked as part of a burn process when an address burns\n     * a particular token in some quantity (for NFTs, the quantity is 1\n     * in every case). By this point, we should be guaranteed that the\n     * _tokenId will actually have a resolver (being it a fungible token\n     * type, or being it a non-fungible token id).\n     */\n    function onTokenBurned(address _from, uint256 _tokenId, uint256 _amount) external;\n\n    /**\n     * Hook to be invoked as part of a batch burn process when an address\n     * burns a particulars et of tokens in respective quantities (for NFTs,\n     * the quantity is 1 in every case; it is guaranteed that both arrays\n     * are always of the same length.\n     */\n    function onTokensBurned(address _from, uint256[] memory _tokenIds, uint256[] memory _amounts) external;\n\n    /**\n     * Hook to be invoked as part of a transfer from ERC1155.\n     */\n    function onBrandOwnerChanged(address _brandId, address _newOwner) external;\n}\n",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8 <0.9.0;\n\nimport \"@openzeppelin/contracts/utils/introspection/IERC165.sol\";\n\n/**\n * An interface for the metaverse core contract. This is meant\n * to be used from inside the metaverse plug-ins (typically on\n * plug-in initialization).\n */\ninterface IMetaverse is IERC165 {\n    /**\n     * This is the list of plug-ins that are being added to the hub.\n     * Each contract has its separate logic but they have access to\n     * the same set of features. Once a contract is added, it will\n     * never be removed from this list. This mapping tells whether\n     * a contract in particular has permission(s) to define a type\n     * and mint tokens for an address.\n     */\n    function plugins(address _key) external view returns (bool);\n\n    /**\n     * The linked brand registry for this metaverse.\n     */\n    function brandRegistry() external view returns (address);\n\n    /**\n     * The linked economy for this metaverse.\n     */\n    function economy() external view returns (address);\n\n    /**\n     * Defines the resolution of a fungible token type. A brand id may be\n     * provided (or address(0) for system FTs). This method must yield the\n     * NEXT id to use (it will NOT be a view, but will returns a value anyway).\n     * The returned id will be in the range of FTs.\n     */\n    function defineNextFTType(address _brandId) external returns (uint256);\n\n    /**\n     * Defines the resolution of a non-fungible token type. This method must\n     * yield the NEXT id to use (it will NOT be a view, but will returns a\n     * value anyway). The returned id will be in the range of NFTs.\n     */\n    function defineNextNFTType() external returns (uint256);\n\n    /**\n     * Mints a specific fungible token type, in a certain amount.\n     */\n    function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) external;\n\n    /**\n     * Mints a specific non-fungible token type, using a specific id (and always using\n     * an amount of 1). It is an error if the token id is already minted, or the chosen\n     * id is < (1 << 160) since those ids are reserved for brands.\n     */\n    function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data) external;\n\n    /**\n     * Mints a specific brand token for a given user. The brand is stated as its address.\n     */\n    function mintBrandFor(address _to, address _brandId) external;\n\n    /**\n     * Retrieves the metadata uri of a given token. WARNING: This method\n     * will consume a lot of gas if invoked inside a transaction, so\n     * it is recommended to invoke this method in the context of a\n     * CALL, and never in the context of a SEND (even as part of other\n     * contract's code).\n     */\n    function tokenURI(uint256 _tokenId) external view returns (string memory);\n\n    /**\n     * Hook to be invoked as part of a burn process when an address burns\n     * a particular token in some quantity (for NFTs, the quantity is 1\n     * in every case). By this point, we should be guaranteed that the\n     * _tokenId will actually have a resolver (being it a fungible token\n     * type, or being it a non-fungible token id).\n     */\n    function onTokenBurned(address _from, uint256 _tokenId, uint256 _amount) external;\n\n    /**\n     * Hook to be invoked as part of a batch burn process when an address\n     * burns a particulars et of tokens in respective quantities (for NFTs,\n     * the quantity is 1 in every case; it is guaranteed that both arrays\n     * are always of the same length.\n     */\n    function onTokensBurned(address _from, uint256[] memory _tokenIds, uint256[] memory _amounts) external;\n\n    /**\n     * Hook to be invoked as part of a transfer from ERC1155.\n     */\n    function onBrandOwnerChanged(address _brandId, address _newOwner) external;\n}\n",
   "sourcePath": "/home/luismasuelli/Projects/OuterMaze/lingr-contracts/contracts/lingr/IMetaverse.sol",
   "ast": {
     "absolutePath": "project:/contracts/lingr/IMetaverse.sol",
@@ -266,10 +272,10 @@
         2228
       ],
       "IMetaverse": [
-        2922
+        2924
       ]
     },
-    "id": 2923,
+    "id": 2925,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
@@ -292,7 +298,7 @@
         "id": 2816,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 2923,
+        "scope": 2925,
         "sourceUnit": 2229,
         "src": "63:65:13",
         "symbolAliases": [],
@@ -324,9 +330,9 @@
           "text": " An interface for the metaverse core contract. This is meant\n to be used from inside the metaverse plug-ins (typically on\n plug-in initialization)."
         },
         "fullyImplemented": false,
-        "id": 2922,
+        "id": 2924,
         "linearizedBaseContracts": [
-          2922,
+          2924,
           2228
         ],
         "name": "IMetaverse",
@@ -417,7 +423,7 @@
               ],
               "src": "776:6:13"
             },
-            "scope": 2922,
+            "scope": 2924,
             "src": "723:60:13",
             "stateMutability": "view",
             "virtual": false,
@@ -479,7 +485,7 @@
               ],
               "src": "905:9:13"
             },
-            "scope": 2922,
+            "scope": 2924,
             "src": "858:57:13",
             "stateMutability": "view",
             "virtual": false,
@@ -541,7 +547,7 @@
               ],
               "src": "1024:9:13"
             },
-            "scope": 2922,
+            "scope": 2924,
             "src": "983:51:13",
             "stateMutability": "view",
             "virtual": false,
@@ -551,16 +557,16 @@
             "documentation": {
               "id": 2840,
               "nodeType": "StructuredDocumentation",
-              "src": "1040:135:13",
-              "text": " Defines the resolution of a fungible token type. The token id must be\n in the range of the fungible token ids."
+              "src": "1040:292:13",
+              "text": " Defines the resolution of a fungible token type. A brand id may be\n provided (or address(0) for system FTs). This method must yield the\n NEXT id to use (it will NOT be a view, but will returns a value anyway).\n The returned id will be in the range of FTs."
             },
-            "functionSelector": "ab21afb5",
-            "id": 2845,
+            "functionSelector": "b842aa92",
+            "id": 2847,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
-            "name": "defineFTType",
-            "nameLocation": "1189:12:13",
+            "name": "defineNextFTType",
+            "nameLocation": "1346:16:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
               "id": 2843,
@@ -570,133 +576,11 @@
                   "constant": false,
                   "id": 2842,
                   "mutability": "mutable",
-                  "name": "_tokenId",
-                  "nameLocation": "1210:8:13",
+                  "name": "_brandId",
+                  "nameLocation": "1371:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2845,
-                  "src": "1202:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 2841,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1202:7:13",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "visibility": "internal"
-                }
-              ],
-              "src": "1201:18:13"
-            },
-            "returnParameters": {
-              "id": 2844,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "1228:0:13"
-            },
-            "scope": 2922,
-            "src": "1180:49:13",
-            "stateMutability": "nonpayable",
-            "virtual": false,
-            "visibility": "external"
-          },
-          {
-            "documentation": {
-              "id": 2846,
-              "nodeType": "StructuredDocumentation",
-              "src": "1235:191:13",
-              "text": " Defines the resolution of a non-fungible token type. The token id must\n be in the range of the fungible token (type) ids (strictly > 0, strictly\n < (1 << 255))."
-            },
-            "functionSelector": "28c90cd9",
-            "id": 2851,
-            "implemented": false,
-            "kind": "function",
-            "modifiers": [],
-            "name": "defineNFTType",
-            "nameLocation": "1440:13:13",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 2849,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 2848,
-                  "mutability": "mutable",
-                  "name": "_tokenId",
-                  "nameLocation": "1462:8:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2851,
-                  "src": "1454:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 2847,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1454:7:13",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "visibility": "internal"
-                }
-              ],
-              "src": "1453:18:13"
-            },
-            "returnParameters": {
-              "id": 2850,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "1480:0:13"
-            },
-            "scope": 2922,
-            "src": "1431:50:13",
-            "stateMutability": "nonpayable",
-            "virtual": false,
-            "visibility": "external"
-          },
-          {
-            "documentation": {
-              "id": 2852,
-              "nodeType": "StructuredDocumentation",
-              "src": "1487:77:13",
-              "text": " Mints a specific fungible token type, in a certain amount."
-            },
-            "functionSelector": "a16bc2ae",
-            "id": 2863,
-            "implemented": false,
-            "kind": "function",
-            "modifiers": [],
-            "name": "mintFTFor",
-            "nameLocation": "1578:9:13",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 2861,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 2854,
-                  "mutability": "mutable",
-                  "name": "_to",
-                  "nameLocation": "1596:3:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2863,
-                  "src": "1588:11:13",
+                  "scope": 2847,
+                  "src": "1363:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -704,10 +588,161 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2853,
+                    "id": 2841,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1588:7:13",
+                    "src": "1363:7:13",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1362:18:13"
+            },
+            "returnParameters": {
+              "id": 2846,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2845,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2847,
+                  "src": "1399:7:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2844,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1399:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1398:9:13"
+            },
+            "scope": 2924,
+            "src": "1337:71:13",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 2848,
+              "nodeType": "StructuredDocumentation",
+              "src": "1414:231:13",
+              "text": " Defines the resolution of a non-fungible token type. This method must\n yield the NEXT id to use (it will NOT be a view, but will returns a\n value anyway). The returned id will be in the range of NFTs."
+            },
+            "functionSelector": "556112d4",
+            "id": 2853,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "defineNextNFTType",
+            "nameLocation": "1659:17:13",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2849,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1676:2:13"
+            },
+            "returnParameters": {
+              "id": 2852,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2851,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2853,
+                  "src": "1697:7:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2850,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1697:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1696:9:13"
+            },
+            "scope": 2924,
+            "src": "1650:56:13",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 2854,
+              "nodeType": "StructuredDocumentation",
+              "src": "1712:77:13",
+              "text": " Mints a specific fungible token type, in a certain amount."
+            },
+            "functionSelector": "a16bc2ae",
+            "id": 2865,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintFTFor",
+            "nameLocation": "1803:9:13",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2863,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2856,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nameLocation": "1821:3:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2865,
+                  "src": "1813:11:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2855,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1813:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -718,40 +753,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 2856,
-                  "mutability": "mutable",
-                  "name": "_tokenId",
-                  "nameLocation": "1609:8:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2863,
-                  "src": "1601:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 2855,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1601:7:13",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
                   "id": 2858,
                   "mutability": "mutable",
-                  "name": "_amount",
-                  "nameLocation": "1627:7:13",
+                  "name": "_tokenId",
+                  "nameLocation": "1834:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2863,
-                  "src": "1619:15:13",
+                  "scope": 2865,
+                  "src": "1826:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -762,7 +770,7 @@
                     "id": 2857,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1619:7:13",
+                    "src": "1826:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -774,11 +782,38 @@
                   "constant": false,
                   "id": 2860,
                   "mutability": "mutable",
-                  "name": "_data",
-                  "nameLocation": "1649:5:13",
+                  "name": "_amount",
+                  "nameLocation": "1852:7:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2863,
-                  "src": "1636:18:13",
+                  "scope": 2865,
+                  "src": "1844:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2859,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1844:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2862,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "1874:5:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2865,
+                  "src": "1861:18:13",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -786,10 +821,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 2859,
+                    "id": 2861,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1636:5:13",
+                    "src": "1861:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -798,48 +833,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1587:68:13"
+              "src": "1812:68:13"
             },
             "returnParameters": {
-              "id": 2862,
+              "id": 2864,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1664:0:13"
+              "src": "1889:0:13"
             },
-            "scope": 2922,
-            "src": "1569:96:13",
+            "scope": 2924,
+            "src": "1794:96:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2864,
+              "id": 2866,
               "nodeType": "StructuredDocumentation",
-              "src": "1671:253:13",
+              "src": "1896:253:13",
               "text": " Mints a specific non-fungible token type, using a specific id (and always using\n an amount of 1). It is an error if the token id is already minted, or the chosen\n id is < (1 << 160) since those ids are reserved for brands."
             },
             "functionSelector": "b2863cc1",
-            "id": 2875,
+            "id": 2877,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "mintNFTFor",
-            "nameLocation": "1938:10:13",
+            "nameLocation": "2163:10:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2873,
+              "id": 2875,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2866,
+                  "id": 2868,
                   "mutability": "mutable",
                   "name": "_to",
-                  "nameLocation": "1957:3:13",
+                  "nameLocation": "2182:3:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2875,
-                  "src": "1949:11:13",
+                  "scope": 2877,
+                  "src": "2174:11:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -847,10 +882,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2865,
+                    "id": 2867,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1949:7:13",
+                    "src": "2174:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -861,40 +896,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 2868,
-                  "mutability": "mutable",
-                  "name": "_tokenId",
-                  "nameLocation": "1970:8:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2875,
-                  "src": "1962:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 2867,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1962:7:13",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
                   "id": 2870,
                   "mutability": "mutable",
-                  "name": "_tokenType",
-                  "nameLocation": "1988:10:13",
+                  "name": "_tokenId",
+                  "nameLocation": "2195:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2875,
-                  "src": "1980:18:13",
+                  "scope": 2877,
+                  "src": "2187:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -905,7 +913,7 @@
                     "id": 2869,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1980:7:13",
+                    "src": "2187:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -917,11 +925,38 @@
                   "constant": false,
                   "id": 2872,
                   "mutability": "mutable",
-                  "name": "_data",
-                  "nameLocation": "2013:5:13",
+                  "name": "_tokenType",
+                  "nameLocation": "2213:10:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2875,
-                  "src": "2000:18:13",
+                  "scope": 2877,
+                  "src": "2205:18:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2871,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2205:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2874,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "2238:5:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2877,
+                  "src": "2225:18:13",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -929,10 +964,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 2871,
+                    "id": 2873,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2000:5:13",
+                    "src": "2225:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -941,76 +976,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1948:71:13"
+              "src": "2173:71:13"
             },
             "returnParameters": {
-              "id": 2874,
+              "id": 2876,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2028:0:13"
+              "src": "2253:0:13"
             },
-            "scope": 2922,
-            "src": "1929:100:13",
+            "scope": 2924,
+            "src": "2154:100:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2876,
+              "id": 2878,
               "nodeType": "StructuredDocumentation",
-              "src": "2035:101:13",
+              "src": "2260:101:13",
               "text": " Mints a specific brand token for a given user. The brand is stated as its address."
             },
             "functionSelector": "1b5dc598",
-            "id": 2883,
+            "id": 2885,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "mintBrandFor",
-            "nameLocation": "2150:12:13",
+            "nameLocation": "2375:12:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2881,
+              "id": 2883,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2878,
-                  "mutability": "mutable",
-                  "name": "_to",
-                  "nameLocation": "2171:3:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2883,
-                  "src": "2163:11:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
-                  },
-                  "typeName": {
-                    "id": 2877,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2163:7:13",
-                    "stateMutability": "nonpayable",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
                   "id": 2880,
                   "mutability": "mutable",
-                  "name": "_brandId",
-                  "nameLocation": "2184:8:13",
+                  "name": "_to",
+                  "nameLocation": "2396:3:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2883,
-                  "src": "2176:16:13",
+                  "scope": 2885,
+                  "src": "2388:11:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1021,7 +1028,35 @@
                     "id": 2879,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2176:7:13",
+                    "src": "2388:7:13",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2882,
+                  "mutability": "mutable",
+                  "name": "_brandId",
+                  "nameLocation": "2409:8:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2885,
+                  "src": "2401:16:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2881,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2401:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1031,48 +1066,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2162:31:13"
+              "src": "2387:31:13"
             },
             "returnParameters": {
-              "id": 2882,
+              "id": 2884,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2202:0:13"
+              "src": "2427:0:13"
             },
-            "scope": 2922,
-            "src": "2141:62:13",
+            "scope": 2924,
+            "src": "2366:62:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2884,
+              "id": 2886,
               "nodeType": "StructuredDocumentation",
-              "src": "2209:316:13",
+              "src": "2434:316:13",
               "text": " Retrieves the metadata uri of a given token. WARNING: This method\n will consume a lot of gas if invoked inside a transaction, so\n it is recommended to invoke this method in the context of a\n CALL, and never in the context of a SEND (even as part of other\n contract's code)."
             },
             "functionSelector": "c87b56dd",
-            "id": 2891,
+            "id": 2893,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "tokenURI",
-            "nameLocation": "2539:8:13",
+            "nameLocation": "2764:8:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2887,
+              "id": 2889,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2886,
+                  "id": 2888,
                   "mutability": "mutable",
                   "name": "_tokenId",
-                  "nameLocation": "2556:8:13",
+                  "nameLocation": "2781:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2891,
-                  "src": "2548:16:13",
+                  "scope": 2893,
+                  "src": "2773:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1080,10 +1115,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2885,
+                    "id": 2887,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2548:7:13",
+                    "src": "2773:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1092,21 +1127,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2547:18:13"
+              "src": "2772:18:13"
             },
             "returnParameters": {
-              "id": 2890,
+              "id": 2892,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2889,
+                  "id": 2891,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2891,
-                  "src": "2589:13:13",
+                  "scope": 2893,
+                  "src": "2814:13:13",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1114,10 +1149,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2888,
+                    "id": 2890,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2589:6:13",
+                    "src": "2814:6:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1126,42 +1161,42 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2588:15:13"
+              "src": "2813:15:13"
             },
-            "scope": 2922,
-            "src": "2530:74:13",
+            "scope": 2924,
+            "src": "2755:74:13",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2892,
+              "id": 2894,
               "nodeType": "StructuredDocumentation",
-              "src": "2610:352:13",
+              "src": "2835:352:13",
               "text": " Hook to be invoked as part of a burn process when an address burns\n a particular token in some quantity (for NFTs, the quantity is 1\n in every case). By this point, we should be guaranteed that the\n _tokenId will actually have a resolver (being it a fungible token\n type, or being it a non-fungible token id)."
             },
             "functionSelector": "06716519",
-            "id": 2901,
+            "id": 2903,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "onTokenBurned",
-            "nameLocation": "2976:13:13",
+            "nameLocation": "3201:13:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2899,
+              "id": 2901,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2894,
+                  "id": 2896,
                   "mutability": "mutable",
                   "name": "_from",
-                  "nameLocation": "2998:5:13",
+                  "nameLocation": "3223:5:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2901,
-                  "src": "2990:13:13",
+                  "scope": 2903,
+                  "src": "3215:13:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1169,10 +1204,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2893,
+                    "id": 2895,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2990:7:13",
+                    "src": "3215:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1183,40 +1218,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 2896,
-                  "mutability": "mutable",
-                  "name": "_tokenId",
-                  "nameLocation": "3013:8:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2901,
-                  "src": "3005:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 2895,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "3005:7:13",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
                   "id": 2898,
                   "mutability": "mutable",
-                  "name": "_amount",
-                  "nameLocation": "3031:7:13",
+                  "name": "_tokenId",
+                  "nameLocation": "3238:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2901,
-                  "src": "3023:15:13",
+                  "scope": 2903,
+                  "src": "3230:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1227,7 +1235,34 @@
                     "id": 2897,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3023:7:13",
+                    "src": "3230:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2900,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "3256:7:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2903,
+                  "src": "3248:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2899,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3248:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1236,48 +1271,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2989:50:13"
+              "src": "3214:50:13"
             },
             "returnParameters": {
-              "id": 2900,
+              "id": 2902,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3048:0:13"
+              "src": "3273:0:13"
             },
-            "scope": 2922,
-            "src": "2967:82:13",
+            "scope": 2924,
+            "src": "3192:82:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2902,
+              "id": 2904,
               "nodeType": "StructuredDocumentation",
-              "src": "3055:273:13",
+              "src": "3280:273:13",
               "text": " Hook to be invoked as part of a batch burn process when an address\n burns a particulars et of tokens in respective quantities (for NFTs,\n the quantity is 1 in every case; it is guaranteed that both arrays\n are always of the same length."
             },
             "functionSelector": "2320a8b7",
-            "id": 2913,
+            "id": 2915,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "onTokensBurned",
-            "nameLocation": "3342:14:13",
+            "nameLocation": "3567:14:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2911,
+              "id": 2913,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2904,
+                  "id": 2906,
                   "mutability": "mutable",
                   "name": "_from",
-                  "nameLocation": "3365:5:13",
+                  "nameLocation": "3590:5:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2913,
-                  "src": "3357:13:13",
+                  "scope": 2915,
+                  "src": "3582:13:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1285,10 +1320,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2903,
+                    "id": 2905,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3357:7:13",
+                    "src": "3582:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1299,13 +1334,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 2907,
+                  "id": 2909,
                   "mutability": "mutable",
                   "name": "_tokenIds",
-                  "nameLocation": "3389:9:13",
+                  "nameLocation": "3614:9:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2913,
-                  "src": "3372:26:13",
+                  "scope": 2915,
+                  "src": "3597:26:13",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1314,18 +1349,18 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 2905,
+                      "id": 2907,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3372:7:13",
+                      "src": "3597:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 2906,
+                    "id": 2908,
                     "nodeType": "ArrayTypeName",
-                    "src": "3372:9:13",
+                    "src": "3597:9:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -1335,13 +1370,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 2910,
+                  "id": 2912,
                   "mutability": "mutable",
                   "name": "_amounts",
-                  "nameLocation": "3417:8:13",
+                  "nameLocation": "3642:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2913,
-                  "src": "3400:25:13",
+                  "scope": 2915,
+                  "src": "3625:25:13",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1350,18 +1385,18 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 2908,
+                      "id": 2910,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3400:7:13",
+                      "src": "3625:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 2909,
+                    "id": 2911,
                     "nodeType": "ArrayTypeName",
-                    "src": "3400:9:13",
+                    "src": "3625:9:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -1370,76 +1405,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "3356:70:13"
+              "src": "3581:70:13"
             },
             "returnParameters": {
-              "id": 2912,
+              "id": 2914,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3435:0:13"
+              "src": "3660:0:13"
             },
-            "scope": 2922,
-            "src": "3333:103:13",
+            "scope": 2924,
+            "src": "3558:103:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2914,
+              "id": 2916,
               "nodeType": "StructuredDocumentation",
-              "src": "3442:73:13",
+              "src": "3667:73:13",
               "text": " Hook to be invoked as part of a transfer from ERC1155."
             },
             "functionSelector": "8cd6e9a9",
-            "id": 2921,
+            "id": 2923,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "onBrandOwnerChanged",
-            "nameLocation": "3529:19:13",
+            "nameLocation": "3754:19:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2919,
+              "id": 2921,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2916,
-                  "mutability": "mutable",
-                  "name": "_brandId",
-                  "nameLocation": "3557:8:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2921,
-                  "src": "3549:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
-                  },
-                  "typeName": {
-                    "id": 2915,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "3549:7:13",
-                    "stateMutability": "nonpayable",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
                   "id": 2918,
                   "mutability": "mutable",
-                  "name": "_newOwner",
-                  "nameLocation": "3575:9:13",
+                  "name": "_brandId",
+                  "nameLocation": "3782:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2921,
-                  "src": "3567:17:13",
+                  "scope": 2923,
+                  "src": "3774:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1450,7 +1457,35 @@
                     "id": 2917,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3567:7:13",
+                    "src": "3774:7:13",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2920,
+                  "mutability": "mutable",
+                  "name": "_newOwner",
+                  "nameLocation": "3800:9:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2923,
+                  "src": "3792:17:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2919,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3792:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1460,27 +1495,27 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "3548:37:13"
+              "src": "3773:37:13"
             },
             "returnParameters": {
-              "id": 2920,
+              "id": 2922,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3594:0:13"
+              "src": "3819:0:13"
             },
-            "scope": 2922,
-            "src": "3520:75:13",
+            "scope": 2924,
+            "src": "3745:75:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 2923,
-        "src": "292:3305:13",
+        "scope": 2925,
+        "src": "292:3530:13",
         "usedErrors": []
       }
     ],
-    "src": "32:3566:13"
+    "src": "32:3791:13"
   },
   "legacyAST": {
     "absolutePath": "project:/contracts/lingr/IMetaverse.sol",
@@ -1489,10 +1524,10 @@
         2228
       ],
       "IMetaverse": [
-        2922
+        2924
       ]
     },
-    "id": 2923,
+    "id": 2925,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
@@ -1515,7 +1550,7 @@
         "id": 2816,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 2923,
+        "scope": 2925,
         "sourceUnit": 2229,
         "src": "63:65:13",
         "symbolAliases": [],
@@ -1547,9 +1582,9 @@
           "text": " An interface for the metaverse core contract. This is meant\n to be used from inside the metaverse plug-ins (typically on\n plug-in initialization)."
         },
         "fullyImplemented": false,
-        "id": 2922,
+        "id": 2924,
         "linearizedBaseContracts": [
-          2922,
+          2924,
           2228
         ],
         "name": "IMetaverse",
@@ -1640,7 +1675,7 @@
               ],
               "src": "776:6:13"
             },
-            "scope": 2922,
+            "scope": 2924,
             "src": "723:60:13",
             "stateMutability": "view",
             "virtual": false,
@@ -1702,7 +1737,7 @@
               ],
               "src": "905:9:13"
             },
-            "scope": 2922,
+            "scope": 2924,
             "src": "858:57:13",
             "stateMutability": "view",
             "virtual": false,
@@ -1764,7 +1799,7 @@
               ],
               "src": "1024:9:13"
             },
-            "scope": 2922,
+            "scope": 2924,
             "src": "983:51:13",
             "stateMutability": "view",
             "virtual": false,
@@ -1774,16 +1809,16 @@
             "documentation": {
               "id": 2840,
               "nodeType": "StructuredDocumentation",
-              "src": "1040:135:13",
-              "text": " Defines the resolution of a fungible token type. The token id must be\n in the range of the fungible token ids."
+              "src": "1040:292:13",
+              "text": " Defines the resolution of a fungible token type. A brand id may be\n provided (or address(0) for system FTs). This method must yield the\n NEXT id to use (it will NOT be a view, but will returns a value anyway).\n The returned id will be in the range of FTs."
             },
-            "functionSelector": "ab21afb5",
-            "id": 2845,
+            "functionSelector": "b842aa92",
+            "id": 2847,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
-            "name": "defineFTType",
-            "nameLocation": "1189:12:13",
+            "name": "defineNextFTType",
+            "nameLocation": "1346:16:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
               "id": 2843,
@@ -1793,133 +1828,11 @@
                   "constant": false,
                   "id": 2842,
                   "mutability": "mutable",
-                  "name": "_tokenId",
-                  "nameLocation": "1210:8:13",
+                  "name": "_brandId",
+                  "nameLocation": "1371:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2845,
-                  "src": "1202:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 2841,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1202:7:13",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "visibility": "internal"
-                }
-              ],
-              "src": "1201:18:13"
-            },
-            "returnParameters": {
-              "id": 2844,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "1228:0:13"
-            },
-            "scope": 2922,
-            "src": "1180:49:13",
-            "stateMutability": "nonpayable",
-            "virtual": false,
-            "visibility": "external"
-          },
-          {
-            "documentation": {
-              "id": 2846,
-              "nodeType": "StructuredDocumentation",
-              "src": "1235:191:13",
-              "text": " Defines the resolution of a non-fungible token type. The token id must\n be in the range of the fungible token (type) ids (strictly > 0, strictly\n < (1 << 255))."
-            },
-            "functionSelector": "28c90cd9",
-            "id": 2851,
-            "implemented": false,
-            "kind": "function",
-            "modifiers": [],
-            "name": "defineNFTType",
-            "nameLocation": "1440:13:13",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 2849,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 2848,
-                  "mutability": "mutable",
-                  "name": "_tokenId",
-                  "nameLocation": "1462:8:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2851,
-                  "src": "1454:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 2847,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1454:7:13",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "visibility": "internal"
-                }
-              ],
-              "src": "1453:18:13"
-            },
-            "returnParameters": {
-              "id": 2850,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "1480:0:13"
-            },
-            "scope": 2922,
-            "src": "1431:50:13",
-            "stateMutability": "nonpayable",
-            "virtual": false,
-            "visibility": "external"
-          },
-          {
-            "documentation": {
-              "id": 2852,
-              "nodeType": "StructuredDocumentation",
-              "src": "1487:77:13",
-              "text": " Mints a specific fungible token type, in a certain amount."
-            },
-            "functionSelector": "a16bc2ae",
-            "id": 2863,
-            "implemented": false,
-            "kind": "function",
-            "modifiers": [],
-            "name": "mintFTFor",
-            "nameLocation": "1578:9:13",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 2861,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 2854,
-                  "mutability": "mutable",
-                  "name": "_to",
-                  "nameLocation": "1596:3:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2863,
-                  "src": "1588:11:13",
+                  "scope": 2847,
+                  "src": "1363:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1927,10 +1840,161 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2853,
+                    "id": 2841,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1588:7:13",
+                    "src": "1363:7:13",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1362:18:13"
+            },
+            "returnParameters": {
+              "id": 2846,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2845,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2847,
+                  "src": "1399:7:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2844,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1399:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1398:9:13"
+            },
+            "scope": 2924,
+            "src": "1337:71:13",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 2848,
+              "nodeType": "StructuredDocumentation",
+              "src": "1414:231:13",
+              "text": " Defines the resolution of a non-fungible token type. This method must\n yield the NEXT id to use (it will NOT be a view, but will returns a\n value anyway). The returned id will be in the range of NFTs."
+            },
+            "functionSelector": "556112d4",
+            "id": 2853,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "defineNextNFTType",
+            "nameLocation": "1659:17:13",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2849,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1676:2:13"
+            },
+            "returnParameters": {
+              "id": 2852,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2851,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2853,
+                  "src": "1697:7:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2850,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1697:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1696:9:13"
+            },
+            "scope": 2924,
+            "src": "1650:56:13",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 2854,
+              "nodeType": "StructuredDocumentation",
+              "src": "1712:77:13",
+              "text": " Mints a specific fungible token type, in a certain amount."
+            },
+            "functionSelector": "a16bc2ae",
+            "id": 2865,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintFTFor",
+            "nameLocation": "1803:9:13",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2863,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2856,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nameLocation": "1821:3:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2865,
+                  "src": "1813:11:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2855,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1813:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1941,40 +2005,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 2856,
-                  "mutability": "mutable",
-                  "name": "_tokenId",
-                  "nameLocation": "1609:8:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2863,
-                  "src": "1601:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 2855,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1601:7:13",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
                   "id": 2858,
                   "mutability": "mutable",
-                  "name": "_amount",
-                  "nameLocation": "1627:7:13",
+                  "name": "_tokenId",
+                  "nameLocation": "1834:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2863,
-                  "src": "1619:15:13",
+                  "scope": 2865,
+                  "src": "1826:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1985,7 +2022,7 @@
                     "id": 2857,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1619:7:13",
+                    "src": "1826:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1997,11 +2034,38 @@
                   "constant": false,
                   "id": 2860,
                   "mutability": "mutable",
-                  "name": "_data",
-                  "nameLocation": "1649:5:13",
+                  "name": "_amount",
+                  "nameLocation": "1852:7:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2863,
-                  "src": "1636:18:13",
+                  "scope": 2865,
+                  "src": "1844:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2859,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1844:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2862,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "1874:5:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2865,
+                  "src": "1861:18:13",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2009,10 +2073,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 2859,
+                    "id": 2861,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1636:5:13",
+                    "src": "1861:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -2021,48 +2085,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1587:68:13"
+              "src": "1812:68:13"
             },
             "returnParameters": {
-              "id": 2862,
+              "id": 2864,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1664:0:13"
+              "src": "1889:0:13"
             },
-            "scope": 2922,
-            "src": "1569:96:13",
+            "scope": 2924,
+            "src": "1794:96:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2864,
+              "id": 2866,
               "nodeType": "StructuredDocumentation",
-              "src": "1671:253:13",
+              "src": "1896:253:13",
               "text": " Mints a specific non-fungible token type, using a specific id (and always using\n an amount of 1). It is an error if the token id is already minted, or the chosen\n id is < (1 << 160) since those ids are reserved for brands."
             },
             "functionSelector": "b2863cc1",
-            "id": 2875,
+            "id": 2877,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "mintNFTFor",
-            "nameLocation": "1938:10:13",
+            "nameLocation": "2163:10:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2873,
+              "id": 2875,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2866,
+                  "id": 2868,
                   "mutability": "mutable",
                   "name": "_to",
-                  "nameLocation": "1957:3:13",
+                  "nameLocation": "2182:3:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2875,
-                  "src": "1949:11:13",
+                  "scope": 2877,
+                  "src": "2174:11:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2070,10 +2134,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2865,
+                    "id": 2867,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1949:7:13",
+                    "src": "2174:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2084,40 +2148,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 2868,
-                  "mutability": "mutable",
-                  "name": "_tokenId",
-                  "nameLocation": "1970:8:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2875,
-                  "src": "1962:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 2867,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1962:7:13",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
                   "id": 2870,
                   "mutability": "mutable",
-                  "name": "_tokenType",
-                  "nameLocation": "1988:10:13",
+                  "name": "_tokenId",
+                  "nameLocation": "2195:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2875,
-                  "src": "1980:18:13",
+                  "scope": 2877,
+                  "src": "2187:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2128,7 +2165,7 @@
                     "id": 2869,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1980:7:13",
+                    "src": "2187:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2140,11 +2177,38 @@
                   "constant": false,
                   "id": 2872,
                   "mutability": "mutable",
-                  "name": "_data",
-                  "nameLocation": "2013:5:13",
+                  "name": "_tokenType",
+                  "nameLocation": "2213:10:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2875,
-                  "src": "2000:18:13",
+                  "scope": 2877,
+                  "src": "2205:18:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2871,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2205:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2874,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "2238:5:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2877,
+                  "src": "2225:18:13",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2152,10 +2216,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 2871,
+                    "id": 2873,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2000:5:13",
+                    "src": "2225:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -2164,76 +2228,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1948:71:13"
+              "src": "2173:71:13"
             },
             "returnParameters": {
-              "id": 2874,
+              "id": 2876,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2028:0:13"
+              "src": "2253:0:13"
             },
-            "scope": 2922,
-            "src": "1929:100:13",
+            "scope": 2924,
+            "src": "2154:100:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2876,
+              "id": 2878,
               "nodeType": "StructuredDocumentation",
-              "src": "2035:101:13",
+              "src": "2260:101:13",
               "text": " Mints a specific brand token for a given user. The brand is stated as its address."
             },
             "functionSelector": "1b5dc598",
-            "id": 2883,
+            "id": 2885,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "mintBrandFor",
-            "nameLocation": "2150:12:13",
+            "nameLocation": "2375:12:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2881,
+              "id": 2883,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2878,
-                  "mutability": "mutable",
-                  "name": "_to",
-                  "nameLocation": "2171:3:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2883,
-                  "src": "2163:11:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
-                  },
-                  "typeName": {
-                    "id": 2877,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2163:7:13",
-                    "stateMutability": "nonpayable",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
                   "id": 2880,
                   "mutability": "mutable",
-                  "name": "_brandId",
-                  "nameLocation": "2184:8:13",
+                  "name": "_to",
+                  "nameLocation": "2396:3:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2883,
-                  "src": "2176:16:13",
+                  "scope": 2885,
+                  "src": "2388:11:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2244,7 +2280,35 @@
                     "id": 2879,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2176:7:13",
+                    "src": "2388:7:13",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2882,
+                  "mutability": "mutable",
+                  "name": "_brandId",
+                  "nameLocation": "2409:8:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2885,
+                  "src": "2401:16:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2881,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2401:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2254,48 +2318,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2162:31:13"
+              "src": "2387:31:13"
             },
             "returnParameters": {
-              "id": 2882,
+              "id": 2884,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2202:0:13"
+              "src": "2427:0:13"
             },
-            "scope": 2922,
-            "src": "2141:62:13",
+            "scope": 2924,
+            "src": "2366:62:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2884,
+              "id": 2886,
               "nodeType": "StructuredDocumentation",
-              "src": "2209:316:13",
+              "src": "2434:316:13",
               "text": " Retrieves the metadata uri of a given token. WARNING: This method\n will consume a lot of gas if invoked inside a transaction, so\n it is recommended to invoke this method in the context of a\n CALL, and never in the context of a SEND (even as part of other\n contract's code)."
             },
             "functionSelector": "c87b56dd",
-            "id": 2891,
+            "id": 2893,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "tokenURI",
-            "nameLocation": "2539:8:13",
+            "nameLocation": "2764:8:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2887,
+              "id": 2889,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2886,
+                  "id": 2888,
                   "mutability": "mutable",
                   "name": "_tokenId",
-                  "nameLocation": "2556:8:13",
+                  "nameLocation": "2781:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2891,
-                  "src": "2548:16:13",
+                  "scope": 2893,
+                  "src": "2773:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2303,10 +2367,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2885,
+                    "id": 2887,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2548:7:13",
+                    "src": "2773:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2315,21 +2379,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2547:18:13"
+              "src": "2772:18:13"
             },
             "returnParameters": {
-              "id": 2890,
+              "id": 2892,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2889,
+                  "id": 2891,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2891,
-                  "src": "2589:13:13",
+                  "scope": 2893,
+                  "src": "2814:13:13",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2337,10 +2401,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2888,
+                    "id": 2890,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2589:6:13",
+                    "src": "2814:6:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -2349,42 +2413,42 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2588:15:13"
+              "src": "2813:15:13"
             },
-            "scope": 2922,
-            "src": "2530:74:13",
+            "scope": 2924,
+            "src": "2755:74:13",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2892,
+              "id": 2894,
               "nodeType": "StructuredDocumentation",
-              "src": "2610:352:13",
+              "src": "2835:352:13",
               "text": " Hook to be invoked as part of a burn process when an address burns\n a particular token in some quantity (for NFTs, the quantity is 1\n in every case). By this point, we should be guaranteed that the\n _tokenId will actually have a resolver (being it a fungible token\n type, or being it a non-fungible token id)."
             },
             "functionSelector": "06716519",
-            "id": 2901,
+            "id": 2903,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "onTokenBurned",
-            "nameLocation": "2976:13:13",
+            "nameLocation": "3201:13:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2899,
+              "id": 2901,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2894,
+                  "id": 2896,
                   "mutability": "mutable",
                   "name": "_from",
-                  "nameLocation": "2998:5:13",
+                  "nameLocation": "3223:5:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2901,
-                  "src": "2990:13:13",
+                  "scope": 2903,
+                  "src": "3215:13:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2392,10 +2456,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2893,
+                    "id": 2895,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2990:7:13",
+                    "src": "3215:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2406,40 +2470,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 2896,
-                  "mutability": "mutable",
-                  "name": "_tokenId",
-                  "nameLocation": "3013:8:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2901,
-                  "src": "3005:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 2895,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "3005:7:13",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
                   "id": 2898,
                   "mutability": "mutable",
-                  "name": "_amount",
-                  "nameLocation": "3031:7:13",
+                  "name": "_tokenId",
+                  "nameLocation": "3238:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2901,
-                  "src": "3023:15:13",
+                  "scope": 2903,
+                  "src": "3230:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2450,7 +2487,34 @@
                     "id": 2897,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3023:7:13",
+                    "src": "3230:7:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2900,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "3256:7:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2903,
+                  "src": "3248:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2899,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3248:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2459,48 +2523,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2989:50:13"
+              "src": "3214:50:13"
             },
             "returnParameters": {
-              "id": 2900,
+              "id": 2902,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3048:0:13"
+              "src": "3273:0:13"
             },
-            "scope": 2922,
-            "src": "2967:82:13",
+            "scope": 2924,
+            "src": "3192:82:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2902,
+              "id": 2904,
               "nodeType": "StructuredDocumentation",
-              "src": "3055:273:13",
+              "src": "3280:273:13",
               "text": " Hook to be invoked as part of a batch burn process when an address\n burns a particulars et of tokens in respective quantities (for NFTs,\n the quantity is 1 in every case; it is guaranteed that both arrays\n are always of the same length."
             },
             "functionSelector": "2320a8b7",
-            "id": 2913,
+            "id": 2915,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "onTokensBurned",
-            "nameLocation": "3342:14:13",
+            "nameLocation": "3567:14:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2911,
+              "id": 2913,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2904,
+                  "id": 2906,
                   "mutability": "mutable",
                   "name": "_from",
-                  "nameLocation": "3365:5:13",
+                  "nameLocation": "3590:5:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2913,
-                  "src": "3357:13:13",
+                  "scope": 2915,
+                  "src": "3582:13:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2508,10 +2572,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2903,
+                    "id": 2905,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3357:7:13",
+                    "src": "3582:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2522,13 +2586,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 2907,
+                  "id": 2909,
                   "mutability": "mutable",
                   "name": "_tokenIds",
-                  "nameLocation": "3389:9:13",
+                  "nameLocation": "3614:9:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2913,
-                  "src": "3372:26:13",
+                  "scope": 2915,
+                  "src": "3597:26:13",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2537,18 +2601,18 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 2905,
+                      "id": 2907,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3372:7:13",
+                      "src": "3597:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 2906,
+                    "id": 2908,
                     "nodeType": "ArrayTypeName",
-                    "src": "3372:9:13",
+                    "src": "3597:9:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -2558,13 +2622,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 2910,
+                  "id": 2912,
                   "mutability": "mutable",
                   "name": "_amounts",
-                  "nameLocation": "3417:8:13",
+                  "nameLocation": "3642:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2913,
-                  "src": "3400:25:13",
+                  "scope": 2915,
+                  "src": "3625:25:13",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2573,18 +2637,18 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 2908,
+                      "id": 2910,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3400:7:13",
+                      "src": "3625:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 2909,
+                    "id": 2911,
                     "nodeType": "ArrayTypeName",
-                    "src": "3400:9:13",
+                    "src": "3625:9:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -2593,76 +2657,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "3356:70:13"
+              "src": "3581:70:13"
             },
             "returnParameters": {
-              "id": 2912,
+              "id": 2914,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3435:0:13"
+              "src": "3660:0:13"
             },
-            "scope": 2922,
-            "src": "3333:103:13",
+            "scope": 2924,
+            "src": "3558:103:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 2914,
+              "id": 2916,
               "nodeType": "StructuredDocumentation",
-              "src": "3442:73:13",
+              "src": "3667:73:13",
               "text": " Hook to be invoked as part of a transfer from ERC1155."
             },
             "functionSelector": "8cd6e9a9",
-            "id": 2921,
+            "id": 2923,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "onBrandOwnerChanged",
-            "nameLocation": "3529:19:13",
+            "nameLocation": "3754:19:13",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2919,
+              "id": 2921,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2916,
-                  "mutability": "mutable",
-                  "name": "_brandId",
-                  "nameLocation": "3557:8:13",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 2921,
-                  "src": "3549:16:13",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
-                  },
-                  "typeName": {
-                    "id": 2915,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "3549:7:13",
-                    "stateMutability": "nonpayable",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
                   "id": 2918,
                   "mutability": "mutable",
-                  "name": "_newOwner",
-                  "nameLocation": "3575:9:13",
+                  "name": "_brandId",
+                  "nameLocation": "3782:8:13",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2921,
-                  "src": "3567:17:13",
+                  "scope": 2923,
+                  "src": "3774:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2673,7 +2709,35 @@
                     "id": 2917,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3567:7:13",
+                    "src": "3774:7:13",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2920,
+                  "mutability": "mutable",
+                  "name": "_newOwner",
+                  "nameLocation": "3800:9:13",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2923,
+                  "src": "3792:17:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2919,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3792:7:13",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2683,27 +2747,27 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "3548:37:13"
+              "src": "3773:37:13"
             },
             "returnParameters": {
-              "id": 2920,
+              "id": 2922,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3594:0:13"
+              "src": "3819:0:13"
             },
-            "scope": 2922,
-            "src": "3520:75:13",
+            "scope": 2924,
+            "src": "3745:75:13",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 2923,
-        "src": "292:3305:13",
+        "scope": 2925,
+        "src": "292:3530:13",
         "usedErrors": []
       }
     ],
-    "src": "32:3566:13"
+    "src": "32:3791:13"
   },
   "compiler": {
     "name": "solc",
@@ -2711,7 +2775,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2022-08-08T03:31:53.964Z",
+  "updatedAt": "2022-08-10T03:55:12.008Z",
   "devdoc": {
     "kind": "dev",
     "methods": {
@@ -2727,11 +2791,11 @@
       "brandRegistry()": {
         "notice": "The linked brand registry for this metaverse."
       },
-      "defineFTType(uint256)": {
-        "notice": "Defines the resolution of a fungible token type. The token id must be in the range of the fungible token ids."
+      "defineNextFTType(address)": {
+        "notice": "Defines the resolution of a fungible token type. A brand id may be provided (or address(0) for system FTs). This method must yield the NEXT id to use (it will NOT be a view, but will returns a value anyway). The returned id will be in the range of FTs."
       },
-      "defineNFTType(uint256)": {
-        "notice": "Defines the resolution of a non-fungible token type. The token id must be in the range of the fungible token (type) ids (strictly > 0, strictly < (1 << 255))."
+      "defineNextNFTType()": {
+        "notice": "Defines the resolution of a non-fungible token type. This method must yield the NEXT id to use (it will NOT be a view, but will returns a value anyway). The returned id will be in the range of NFTs."
       },
       "economy()": {
         "notice": "The linked economy for this metaverse."
