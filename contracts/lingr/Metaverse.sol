@@ -83,18 +83,22 @@ abstract contract Metaverse is Context, IMetaverse {
     mapping(uint256 => uint256) public nftTypes;
 
     /**
+     * Holds the next FT index to try, in the next iteration, for respective
+     * brand(s) requesting one. These ids are, at most, 1<<64 - 1.
+     */
+    mapping(address => uint64) private nextFTIndex;
+
+    /**
+     * Holds the next NFT index to try, in the next iteration. The initial
+     * value to try is 1 above the maximum value brand addresses can take.
+     */
+    uint256 private nextNFTIndex = 1 << 160;
+
+    /**
      * This modifier requires the sender to be one of the authorized contracts.
      */
     modifier onlyPlugin() {
         require(plugins[_msgSender()], "Metaverse: the sender must be a plug-in");
-        _;
-    }
-
-    /**
-     * This modifier requires the token type to not be already registered.
-     */
-    modifier onlyNewTokenType(uint256 _tokenType) {
-        require(tokenTypeResolvers[_tokenType] == address(0), "Metaverse: the specified token type is not available");
         _;
     }
 
@@ -126,8 +130,21 @@ abstract contract Metaverse is Context, IMetaverse {
      * Defines the resolution of a fungible token type. The token id must be
      * in the range of the fungible token ids.
      */
-    function defineFTType(uint256 _tokenId) external onlyPlugin onlyNewTokenType(_tokenId) onlyFTRange(_tokenId) {
-        tokenTypeResolvers[_tokenId] = _msgSender();
+    function defineNextFTType(address _brandId) external onlyPlugin returns (uint256) {
+        uint64 tokenTypeIndex = nextFTIndex[_brandId];
+        uint256 tokenType = (1 << 255) | (uint256(uint160(_brandId)) << 64) | tokenTypeIndex;
+        while(true) {
+            require(tokenTypeIndex < 0xffffffffffffffff, "Metaverse: cannot define more FT types for this address");
+            if (tokenTypeResolvers[tokenType] != address(0)) {
+                tokenTypeIndex += 1;
+                tokenType += 1;
+            } else {
+                break;
+            }
+        }
+        nextFTIndex[_brandId] = tokenTypeIndex + 1;
+        tokenTypeResolvers[tokenType] = _msgSender();
+        return tokenType;
     }
 
     /**
@@ -135,9 +152,20 @@ abstract contract Metaverse is Context, IMetaverse {
      * be in the range of the fungible token (type) ids (strictly > 0, strictly
      * < (1 << 255)).
      */
-    function defineNFTType(uint256 _tokenId) external onlyPlugin onlyNewTokenType(_tokenId) onlyNFTRange(_tokenId) {
-        require(_tokenId > 1, "Metaverse: nft type 0 is reserved for invalid / missing nfts, and 1 for brands");
-        tokenTypeResolvers[_tokenId] = _msgSender();
+    function defineNextNFTType() external onlyPlugin returns (uint256) {
+        uint256 tokenTypeId = nextNFTIndex;
+        uint256 lastNFTType = (1 << 255) - 1;
+        while(true) {
+            require(tokenTypeId < lastNFTType, "Metaverse: cannot define more NFT types");
+            if (tokenTypeResolvers[tokenTypeId] != address(0)) {
+                tokenTypeId += 1;
+            } else {
+                break;
+            }
+        }
+        nextNFTIndex = tokenTypeId + 1;
+        tokenTypeResolvers[tokenTypeId] = _msgSender();
+        return tokenTypeId;
     }
 
     /**

@@ -30,17 +30,19 @@ interface IMetaverse is IERC165 {
     function economy() external view returns (address);
 
     /**
-     * Defines the resolution of a fungible token type. The token id must be
-     * in the range of the fungible token ids.
+     * Defines the resolution of a fungible token type. A brand id may be
+     * provided (or address(0) for system FTs). This method must yield the
+     * NEXT id to use (it will NOT be a view, but will returns a value anyway).
+     * The returned id will be in the range of FTs.
      */
-    function defineFTType(uint256 _tokenId) external;
+    function defineNextFTType(address _brandId) external returns (uint256);
 
     /**
-     * Defines the resolution of a non-fungible token type. The token id must
-     * be in the range of the fungible token (type) ids (strictly > 0, strictly
-     * < (1 << 255)).
+     * Defines the resolution of a non-fungible token type. This method must
+     * yield the NEXT id to use (it will NOT be a view, but will returns a
+     * value anyway). The returned id will be in the range of NFTs.
      */
-    function defineNFTType(uint256 _tokenId) external;
+    function defineNextNFTType() external returns (uint256);
 
     /**
      * Mints a specific fungible token type, in a certain amount.
