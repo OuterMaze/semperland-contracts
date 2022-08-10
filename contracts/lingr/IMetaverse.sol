@@ -30,17 +30,15 @@ interface IMetaverse is IERC165 {
     function economy() external view returns (address);
 
     /**
-     * Defines the resolution of a fungible token type. A brand id may be
-     * provided (or address(0) for system FTs). This method must yield the
-     * NEXT id to use (it will NOT be a view, but will returns a value anyway).
-     * The returned id will be in the range of FTs.
+     * Defines the resolution of a fungible token type. The token id must be
+     * in the range of the fungible token ids.
      */
     function defineNextFTType(address _brandId) external returns (uint256);
 
     /**
-     * Defines the resolution of a non-fungible token type. This method must
-     * yield the NEXT id to use (it will NOT be a view, but will returns a
-     * value anyway). The returned id will be in the range of NFTs.
+     * Defines the resolution of a non-fungible token type. The token id must
+     * be in the range of the fungible token (type) ids (strictly > 0, strictly
+     * < (1 << 255)).
      */
     function defineNextNFTType() external returns (uint256);
 
@@ -50,11 +48,11 @@ interface IMetaverse is IERC165 {
     function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) external;
 
     /**
-     * Mints a specific non-fungible token type, using a specific id (and always using
-     * an amount of 1). It is an error if the token id is already minted, or the chosen
-     * id is < (1 << 160) since those ids are reserved for brands.
+     * Mints a specific non-fungible token type, using a specific type (and always using
+     * an amount of 1). It is an error if the chosen type is unknown or < 2, since those
+     * types are reserved for being invalid or brands.
      */
-    function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data) external;
+    function mintNFTFor(address _to, uint256 _tokenType, bytes memory _data) external returns (uint256);
 
     /**
      * Mints a specific brand token for a given user. The brand is stated as its address.

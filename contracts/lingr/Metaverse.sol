@@ -89,6 +89,12 @@ abstract contract Metaverse is Context, IMetaverse {
     mapping(address => uint64) private nextFTIndex;
 
     /**
+     * Holds the next NFT type to try, in the next iteration. The initial
+     * value to try is 2 (0 means "invalid" and 1 means "brand").
+     */
+    uint256 private nextNFTTypeIndex = 2;
+
+    /**
      * Holds the next NFT index to try, in the next iteration. The initial
      * value to try is 1 above the maximum value brand addresses can take.
      */
@@ -153,7 +159,7 @@ abstract contract Metaverse is Context, IMetaverse {
      * < (1 << 255)).
      */
     function defineNextNFTType() external onlyPlugin returns (uint256) {
-        uint256 tokenTypeId = nextNFTIndex;
+        uint256 tokenTypeId = nextNFTTypeIndex;
         uint256 lastNFTType = (1 << 255) - 1;
         while(true) {
             require(tokenTypeId < lastNFTType, "Metaverse: cannot define more NFT types");
@@ -163,7 +169,7 @@ abstract contract Metaverse is Context, IMetaverse {
                 break;
             }
         }
-        nextNFTIndex = tokenTypeId + 1;
+        nextNFTTypeIndex = tokenTypeId + 1;
         tokenTypeResolvers[tokenTypeId] = _msgSender();
         return tokenTypeId;
     }
@@ -178,17 +184,28 @@ abstract contract Metaverse is Context, IMetaverse {
     }
 
     /**
-     * Mints a specific non-fungible token type, using a specific id (and always using
-     * an amount of 1). It is an error if the token id is already minted, or the chosen
-     * id is < (1 << 160) since those ids are reserved for brands.
+     * Mints a specific non-fungible token type, using a specific type (and always using
+     * an amount of 1). It is an error if the chosen type is unknown or < 2, since those
+     * types are reserved for being invalid or brands.
      */
-    function mintNFTFor(address _to, uint256 _tokenId, uint256 _tokenType, bytes memory _data)
-        external onlyPlugin onlyExistingTokenType(_tokenType) onlyNFTRange(_tokenType) onlyNFTRange(_tokenId)
+    function mintNFTFor(address _to, uint256 _tokenType, bytes memory _data)
+        external onlyPlugin onlyExistingTokenType(_tokenType) onlyNFTRange(_tokenType) returns (uint256)
     {
-        require(_tokenType >= (1 << 160), "Metaverse: the specified token id is reserved for brands");
-        require(nftTypes[_tokenId] == 0, "Metaverse: the specified nft id is not available");
-        IEconomy(economy).mintFor(_to, _tokenId, 1, _data);
-        nftTypes[_tokenId] = _tokenType;
+        require(_tokenType >= 2, "Metaverse: NFT types 0 (invalid) and 1 (brand) cannot be minted");
+        uint256 tokenId = nextNFTIndex;
+        uint256 lastNFTId = (1 << 255) - 1;
+        while(true) {
+            require(tokenId < lastNFTId, "Metaverse: cannot mint more NFTs");
+            if (nftTypes[tokenId] != 0) {
+                tokenId += 1;
+            } else {
+                break;
+            }
+        }
+        nextNFTIndex = tokenId + 1;
+        IEconomy(economy).mintFor(_to, tokenId, 1, _data);
+        nftTypes[tokenId] = _tokenType;
+        return tokenId;
     }
 
     /**
