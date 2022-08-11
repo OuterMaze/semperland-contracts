@@ -93,26 +93,6 @@ interface IMetaverse is IERC165 {
     function tokenURI(uint256 _tokenId) external view returns (string memory);
 
     /**
-     * Hook to be invoked as part of a burn process when an address burns
-     * a particular token in some quantity (for NFTs, the quantity is 1
-     * in every case). By this point, we should be guaranteed that the
-     * _tokenId will actually have a resolver (being it a fungible token
-     * type, or being it a non-fungible token id). Also, the operator will
-     * be specified (perhaps matching the owner).
-     */
-    function onTokenBurned(address _operator, address _from, uint256 _tokenId, uint256 _amount) external;
-
-    /**
-     * Hook to be invoked as part of a batch burn process when an address
-     * burns a particulars et of tokens in respective quantities (for NFTs,
-     * the quantity is 1 in every case; it is guaranteed that both arrays
-     * are always of the same length. Also, the operator will be specified
-     * (perhaps matching the owner).
-     */
-    function onTokensBurned(address _operator, address _from, uint256[] memory _tokenIds, uint256[] memory _amounts)
-        external;
-
-    /**
      * Hook to be invoked as part of a transfer from ERC1155.
      */
     function onBrandOwnerChanged(address _brandId, address _newOwner) external;

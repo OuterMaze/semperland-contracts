@@ -71,25 +71,6 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     function uri(uint256 _tokenId) public view virtual returns (string memory);
 
     /**
-     * This function is a hook for when an asset, which exists
-     * as registered & managed by this contract, is burned by
-     * its owner or an operator previously authorized by them.
-     * The implementation requires the sender to be the same
-     * metaverse that owns this plugin, and the true
-     * implementation is defined by _burned() instead.
-     */
-    function onBurned(address _operator, address _from, uint256 _tokenId, uint256 _amount) external onlyMetaverse {
-        _burned(_operator, _from, _tokenId, _amount);
-    }
-
-    /**
-     * This function is a hook for when an asset, which exists
-     * as registered & managed by this contract, is burned by
-     * its owner or an approved operator.
-     */
-    function _burned(address _operator, address _from, uint256 _tokenId, uint256 _amount) public virtual;
-
-    /**
      * A metaverse plugin satisfies the IMetaversePlugin and IERC165.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
