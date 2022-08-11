@@ -76,4 +76,19 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
         return interfaceId == type(IERC165).interfaceId || interfaceId == type(IMetaversePlugin).interfaceId;
     }
+
+    /**
+     * Mints a FT for a user (only types defined by this contract are available).
+     */
+    function _mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) internal {
+        IMetaverse(metaverse).mintFTFor(_to, _tokenId, _amount, _data);
+    }
+
+    /**
+     * Mints a NFT for a user (only types defined by this contract are available).
+     * Returns the newly minted id.
+     */
+    function mintNFTFor(address _to, uint256 _tokenType, bytes memory _data) internal returns (uint256) {
+        return IMetaverse(metaverse).mintNFTFor(_to, _tokenType, _data);
+    }
 }
