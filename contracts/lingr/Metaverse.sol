@@ -117,6 +117,15 @@ abstract contract Metaverse is Context, IMetaverse {
     }
 
     /**
+     * This modifier requires the token type to be already registered
+     * by the plug-in that requests it.
+     */
+    modifier onlyPluginTokenType(uint256 _tokenType) {
+        require(tokenTypeResolvers[_tokenType] == _msgSender(), "Metaverse: not a type registered by this plug-in");
+        _;
+    }
+
+    /**
      * This modifier requires the token type to be in the FT range.
      */
     modifier onlyFTRange(uint256 _tokenType) {
@@ -186,10 +195,11 @@ abstract contract Metaverse is Context, IMetaverse {
     /**
      * Mints a specific non-fungible token type, using a specific type (and always using
      * an amount of 1). It is an error if the chosen type is unknown or < 2, since those
-     * types are reserved for being invalid or brands.
+     * types are reserved for being invalid or brands. Also, it is an error if the chosen
+     * type is not for that plug-in.
      */
     function mintNFTFor(address _to, uint256 _tokenType, bytes memory _data)
-        external onlyPlugin onlyExistingTokenType(_tokenType) onlyNFTRange(_tokenType) returns (uint256)
+        external onlyPlugin onlyPluginTokenType(_tokenType) onlyNFTRange(_tokenType) returns (uint256)
     {
         require(_tokenType >= 2, "Metaverse: NFT types 0 (invalid) and 1 (brand) cannot be minted");
         uint256 tokenId = nextNFTIndex;
