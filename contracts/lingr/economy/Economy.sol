@@ -64,14 +64,8 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
         address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data
     ) internal override {
         if (from != address(0)) {
-            if (to == address(0)) {
-                // A burn. Brands cannot be burned. All the other
-                // assets can be burned.
-                IMetaverse(metaverse).onTokensBurned(operator, from, ids, amounts);
-            } else {
+            if (to != address(0)) {
                 // A transfer. Brands will be transfer-processed.
-                // I could perhaps think about other watches over
-                // assets and destinations, but I'll think them later.
                 for(uint256 index = 0; index < amounts.length; index++) {
                     if (ids[index] < (1 << 160) && amounts[index] != 0) {
                         IMetaverse(metaverse).onBrandOwnerChanged(address(uint160(ids[index])), to);
@@ -102,6 +96,20 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
      */
     function mintFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) public onlyMetaverse {
         _mint(_to, _tokenId, _amount, _data);
+    }
+
+    /**
+     * Burns any token from the metaverse (actually: from plugins).
+     */
+    function burn(address _from, uint256 _tokenId, uint256 _amount) external onlyMetaverse {
+        _burn(_from, _tokenId, _amount);
+    }
+
+    /**
+     * Burns many tokens from the metaverse (actually: from plugins).
+     */
+    function burnBatch(address _from, uint256[] memory _tokenIds, uint256[] memory _amounts) external onlyMetaverse {
+        _burnBatch(_from, _tokenIds, _amounts);
     }
 
     /**

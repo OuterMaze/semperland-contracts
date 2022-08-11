@@ -19,4 +19,14 @@ interface IEconomy is IERC1155 {
      * Mints a token for a particular account.
      */
     function mintFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) external;
+
+    /**
+     * Burns any token from the metaverse (actually: from plugins).
+     */
+    function burn(address _from, uint256 _tokenId, uint256 _amount) external;
+
+    /**
+     * Burns many tokens from the metaverse (actually: from plugins).
+     */
+    function burnBatch(address _from, uint256[] memory _tokenIds, uint256[] memory _amounts) external;
 }

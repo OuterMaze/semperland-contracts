@@ -126,6 +126,34 @@ abstract contract Metaverse is Context, IMetaverse {
     }
 
     /**
+     * This modifier requires the token types to be already registered
+     * by the plug-in that requests it (they're FTs).
+     */
+    modifier onlyFTPluginTokenTypes(uint256[] memory _tokenTypes) {
+        for(uint256 index = 0; index < _tokenTypes.length; index++) {
+            require(
+                tokenTypeResolvers[_tokenTypes[index]] == _msgSender(),
+                "Metaverse: not a type registered by this plug-in"
+            );
+        }
+        _;
+    }
+
+    /**
+     * This modifier requires the token types to be already registered
+     * by the plug-in that requests it (they're NFTs).
+     */
+    modifier onlyNFTPluginTokenTypes(uint256[] memory _tokenTypes) {
+        for(uint256 index = 0; index < _tokenTypes.length; index++) {
+            require(
+                tokenTypeResolvers[nftTypes[_tokenTypes[index]]] == _msgSender(),
+                "Metaverse: not a type registered by this plug-in"
+            );
+        }
+        _;
+    }
+
+    /**
      * This modifier requires the token type to be in the FT range.
      */
     modifier onlyFTRange(uint256 _tokenType) {
@@ -216,6 +244,42 @@ abstract contract Metaverse is Context, IMetaverse {
         IEconomy(economy).mintFor(_to, tokenId, 1, _data);
         nftTypes[tokenId] = _tokenType;
         return tokenId;
+    }
+
+    /**
+     * Burns any FT the sender has, provided the sender is a plugin and also defines
+     * the type of the token being burned.
+     */
+    function burnFT(uint256 _tokenId, uint256 _amount) external onlyPlugin onlyPluginTokenType(_tokenId) {
+        IEconomy(economy).burn(_msgSender(), _tokenId, _amount);
+    }
+
+    /**
+     * Burns many FT the sender has, provided the sender is a plugin and also defines
+     * the type of the token being burned.
+     */
+    function burnFTs(uint256[] memory _tokenIds, uint256[] memory _amounts) external
+        onlyPlugin onlyFTPluginTokenTypes(_tokenIds) {
+        IEconomy(economy).burnBatch(_msgSender(), _tokenIds, _amounts);
+    }
+
+    /**
+     * Burns any NFT the sender has, provided the sender is a plugin and also defines
+     * the type of the tokens being burned.
+     */
+    function burnNFT(uint256 _tokenId) external onlyPlugin onlyPluginTokenType(nftTypes[_tokenId]) {
+        IEconomy(economy).burn(_msgSender(), _tokenId, 1);
+    }
+
+    /**
+     * Burns many NFT the sender has, provided the sender is a plugin and also defines
+     * the type of the tokens being burned.
+     */
+    function burnNFTs(uint256[] memory _tokenIds) external onlyPlugin onlyNFTPluginTokenTypes(_tokenIds) {
+        uint256 length = _tokenIds.length;
+        uint256[] memory amounts = new uint[](length);
+        for (uint i = 0; i < length; i++) amounts[i] = 1;
+        IEconomy(economy).burnBatch(_msgSender(), _tokenIds, amounts);
     }
 
     /**
