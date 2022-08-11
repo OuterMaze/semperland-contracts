@@ -88,7 +88,35 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
      * Mints a NFT for a user (only types defined by this contract are available).
      * Returns the newly minted id.
      */
-    function mintNFTFor(address _to, uint256 _tokenType, bytes memory _data) internal returns (uint256) {
+    function _mintNFTFor(address _to, uint256 _tokenType, bytes memory _data) internal returns (uint256) {
         return IMetaverse(metaverse).mintNFTFor(_to, _tokenType, _data);
+    }
+
+    /**
+     * Burns a FT in certain amount (only types defined by this contract are available).
+     */
+    function _burnFT(uint256 _tokenId, uint256 _amount) internal {
+        IMetaverse(metaverse).burnFT(_tokenId, _amount);
+    }
+
+    /**
+     * Burns many FTs in certain amounts (only types defined by this contract are available).
+     */
+    function _burnFTs(uint256[] memory _tokenIds, uint256[] memory _amounts) internal {
+        IMetaverse(metaverse).burnFTs(_tokenIds, _amounts);
+    }
+
+    /**
+     * Burns a NFT (only types defined by this contract are available).
+     */
+    function _burnNFT(uint256 _tokenId) internal {
+        IMetaverse(metaverse).burnNFT(_tokenId);
+    }
+
+    /**
+     * Burns many NFT (only types defined by this contract are available).
+     */
+    function _burnNFTs(uint256[] memory _tokenIds) internal {
+        IMetaverse(metaverse).burnNFTs(_tokenIds);
     }
 }
