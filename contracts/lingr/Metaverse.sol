@@ -187,7 +187,7 @@ abstract contract Metaverse is Context, IMetaverse {
      * Mints a specific fungible token type, in a certain amount.
      */
     function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data)
-        external onlyPlugin onlyExistingTokenType(_tokenId) onlyFTRange(_tokenId)
+        external onlyPlugin onlyPluginTokenType(_tokenId) onlyFTRange(_tokenId)
     {
         IEconomy(economy).mintFor(_to, _tokenId, _amount, _data);
     }
