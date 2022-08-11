@@ -248,7 +248,7 @@ abstract contract Metaverse is Context, IMetaverse {
     /**
      * Burns a token (except brands) and invokes a hook.
      */
-    function _tokenBurned(address _from, uint256 _tokenId, uint256 _amount) internal {
+    function _tokenBurned(address _operator, address _owner, uint256 _tokenId, uint256 _amount) internal {
         require(_tokenId >= (1 << 160), "Metaverse: brands cannot be burned");
         address resolver = address(0);
         if (_tokenId < (1 << 255)) {
@@ -257,7 +257,7 @@ abstract contract Metaverse is Context, IMetaverse {
             resolver = tokenTypeResolvers[_tokenId];
         }
         if (resolver != address(0)) {
-            IMetaversePlugin(resolver).onBurned(_from, _tokenId, _amount);
+            IMetaversePlugin(resolver).onBurned(_operator, _owner, _tokenId, _amount);
         }
     }
 
@@ -266,22 +266,25 @@ abstract contract Metaverse is Context, IMetaverse {
      * a particular token in some quantity (for NFTs, the quantity is 1
      * in every case). By this point, we should be guaranteed that the
      * _tokenId will actually have a resolver (being it a fungible token
-     * type, or being it a non-fungible token id).
+     * type, or being it a non-fungible token id). Also, the operator will
+     * be specified (perhaps matching the owner).
      */
-    function onTokenBurned(address _from, uint256 _tokenId, uint256 _amount) external onlyEconomy {
-        _tokenBurned(_from, _tokenId, _amount);
+    function onTokenBurned(address _operator, address _owner, uint256 _tokenId, uint256 _amount) external onlyEconomy {
+        _tokenBurned(_operator, _owner, _tokenId, _amount);
     }
 
     /**
      * Hook to be invoked as part of a batch burn process when an address
      * burns a particulars et of tokens in respective quantities (for NFTs,
      * the quantity is 1 in every case; it is guaranteed that both arrays
-     * are always of the same length.
+     * are always of the same length. Also, the operator will be specified
+     * (perhaps matching the owner).
      */
-    function onTokensBurned(address _from, uint256[] memory _tokenIds, uint256[] memory _amounts) external onlyEconomy {
+    function onTokensBurned(address _operator, address _owner, uint256[] memory _tokenIds, uint256[] memory _amounts)
+        external onlyEconomy {
         uint256 length = _tokenIds.length;
         for(uint256 index = 0; index < length; index++) {
-            _tokenBurned(_from, _tokenIds[index], _amounts[index]);
+            _tokenBurned(_operator, _owner, _tokenIds[index], _amounts[index]);
         }
     }
 

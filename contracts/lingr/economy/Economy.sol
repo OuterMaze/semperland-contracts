@@ -57,35 +57,26 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
     }
 
     /**
-     * On transferring a token, invokes the hook in the metaverse.
+     * Processes a token transfer or burn appropriately. Burns are
+     * forwarded using the metaverse.
      */
-    function _safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
+    function _afterTokenTransfer(
+        address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data
     ) internal override {
-        super._safeTransferFrom(from, to, id, amount, data);
-        if (id < (1 << 160)) {
-            IMetaverse(metaverse).onBrandOwnerChanged(address(uint160(id)), to);
-        }
-    }
-
-    /**
-     * On transferring many tokens, invokes the hook in the metaverse.
-     */
-    function _safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) internal override {
-        super._safeBatchTransferFrom(from, to, ids, amounts, data);
-        for(uint256 index = 0; index < amounts.length; index++) {
-            if (ids[index] < (1 << 160) && amounts[index] != 0) {
-                IMetaverse(metaverse).onBrandOwnerChanged(address(uint160(ids[index])), to);
+        if (from != address(0)) {
+            if (to == address(0)) {
+                // A burn. Brands cannot be burned. All the other
+                // assets can be burned.
+                IMetaverse(metaverse).onTokensBurned(operator, from, ids, amounts);
+            } else {
+                // A transfer. Brands will be transfer-processed.
+                // I could perhaps think about other watches over
+                // assets and destinations, but I'll think them later.
+                for(uint256 index = 0; index < amounts.length; index++) {
+                    if (ids[index] < (1 << 160) && amounts[index] != 0) {
+                        IMetaverse(metaverse).onBrandOwnerChanged(address(uint160(ids[index])), to);
+                    }
+                }
             }
         }
     }
