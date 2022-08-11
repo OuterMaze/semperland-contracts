@@ -38,6 +38,11 @@ abstract contract Metaverse is Context, IMetaverse {
     mapping(address => bool) public plugins;
 
     /**
+     * This is the enumerable list of plug-ins added to this hub.
+     */
+    address[] public pluginsList;
+
+    /**
      * The linked brand registry for this metaverse.
      */
     address public brandRegistry;
@@ -356,7 +361,15 @@ abstract contract Metaverse is Context, IMetaverse {
             !plugins[_contract], "Metaverse: the plug-in is already added to this metaverse"
         );
         plugins[_contract] = true;
+        pluginsList.push(_contract);
         IMetaversePlugin(_contract).initialize();
+    }
+
+    /**
+     * This is the count of registered plug-ins.
+     */
+    function pluginsCount() public view returns (uint256) {
+        return pluginsList.length;
     }
 
     /**

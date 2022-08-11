@@ -20,6 +20,16 @@ interface IMetaverse is IERC165 {
     function plugins(address _key) external view returns (bool);
 
     /**
+     * This is the enumerable list of plug-ins added to this hub.
+     */
+    function pluginsList(uint256 index) external view returns (address);
+
+    /**
+     * This is the count of registered plug-ins.
+     */
+    function pluginsCount() external view returns (uint256);
+
+    /**
      * The linked brand registry for this metaverse.
      */
     function brandRegistry() external view returns (address);
