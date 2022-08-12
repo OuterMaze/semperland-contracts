@@ -238,7 +238,9 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     );
     await expectMetadata(brandId, expectedPayloadAfterChange);
     await expectRevert(
-      callback(brandId, notOwner), revertReason("BrandRegistry: caller is not brand owner nor approved")
+      callback(brandId, notOwner), revertReason(
+        "BrandRegistry: caller is not brand owner nor approved, and does not have the required permission"
+      )
     );
     await expectMetadata(brandId, expectedPayloadAfterChange);
   }
@@ -343,6 +345,9 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     });
   });
 
+  const SUPERUSER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+  const BRAND_EDITOR = web3.utils.soliditySha3("BrandRegistry::Brand::Edit");
+
   // 29. Change brand icon 64 (using addresses[1]).
   // 30. Test the JSON metadata for brand 1.
   // 31. This must revert: Change brand icon 64 (using addresses[0]).
@@ -412,7 +417,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     // The old owner (1) must fail.
     await expectRevert(
       contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[1]}),
-      revertReason("BrandRegistry: caller is not brand owner nor approved")
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
     );
     // And the new owner (0) must succeed.
     await contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[0]});
@@ -538,6 +543,108 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     assert.isTrue(
       nativeBalance.cmp(new BN(0)) === 0,
       "the current native balance must be 0, but it is " + nativeBalance.toString()
+    );
+  });
+
+  it("must not allow 2 and 3 to set the brand image, since they don't have permissions", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+    await expectRevert(
+      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[2]}),
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
+    );
+    await expectRevert(
+      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]}),
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
+    );
+  });
+
+  it("must not allow 2 to grant brand editor to 3, since they don't have permissions", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+    await expectRevert(
+      contract.brandSetPermission(brandId1, BRAND_EDITOR, accounts[3], true, {from: accounts[2]}),
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
+    );
+  });
+
+  it("must allow 0 to grant superuser to 2, but must now allow 2 to grant superuser to 3", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+    await contract.brandSetPermission(brandId1, SUPERUSER, accounts[2], true, {from: accounts[0]});
+    await expectRevert(
+      contract.brandSetPermission(brandId1, SUPERUSER, accounts[3], true, {from: accounts[2]}),
+      revertReason("BrandRegistry: SUPERUSER permission cannot be added by this user")
+    )
+  });
+
+  it("must allow both 0 and 2 to grant brand editor to 3", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+    await contract.brandSetPermission(brandId1, BRAND_EDITOR, accounts[3], true, {from: accounts[0]});
+    await contract.brandSetPermission(brandId1, BRAND_EDITOR, accounts[3], true, {from: accounts[2]});
+  });
+
+  it("must allow 0, 2 and 3 to set the brand 0 image", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+    await contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[2]});
+    await contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]});
+  });
+
+  it("must allow 2 to revoke brand editor to 3", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+    await contract.brandSetPermission(brandId1, BRAND_EDITOR, accounts[3], false, {from: accounts[2]});
+  });
+
+  it("must not allow 3 to revoke any permission to 2, or set the brand image", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+    await expectRevert(
+      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]}),
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
+    );
+    await expectRevert(
+      contract.brandSetPermission(brandId1, SUPERUSER, accounts[2], true, {from: accounts[3]}),
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
+    );
+  });
+
+  it("must allow 0 to revoke superuser to 2", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+        "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+    await contract.brandSetPermission(brandId1, SUPERUSER, accounts[2], false, {from: accounts[0]});
+  });
+
+  it("must not allow 2 and 3 to set the brand image, since they don't have permissions, again", async function() {
+    let brandId1 = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    );
+    brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
+    await expectRevert(
+      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[2]}),
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
+    );
+    await expectRevert(
+      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]}),
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
     );
   });
 });

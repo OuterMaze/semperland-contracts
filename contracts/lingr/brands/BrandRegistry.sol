@@ -110,6 +110,25 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     mapping(address => BrandMetadata) brands;
 
     /**
+     * Permission: Superuser (all the permissions are considered
+     * given to superuser which is registered in a non-zero brand).
+     * The only thing that superuser per-se cannot
+     * do in a brand is to transfer it via ERC-1155.
+     */
+    bytes32 constant SUPERUSER = bytes32(uint256((1 << 256) - 1));
+
+    /**
+     * Permission: The user is allowed to edit a brand's aesthetic.
+     */
+    bytes32 constant BRAND_AESTHETICS_EDITION = keccak256("BrandRegistry::Brand::Edit");
+
+    /**
+     * Maintains the permissions assigned to all the brands
+     * (the brand must always be != 0).
+     */
+    mapping(address => mapping(bytes32 => mapping(address => bool))) brandPermissions;
+
+    /**
      * The count of registered brands.
      */
     uint256 brandsCount;
@@ -175,7 +194,7 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     /**
      * Tells whether a particular user is the owner of the brand id.
      */
-    function _isBrandOwnerApprovedEditor(address _brandOwner, address _sender) internal view returns (bool) {
+    function _isBrandOwnerApproved(address _brandOwner, address _sender) internal view returns (bool) {
         return IEconomy(IMetaverse(metaverse).economy()).isApprovedForAll(_brandOwner, _sender);
     }
 
@@ -213,6 +232,8 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
         brandRegistrationCurrentEarnings += msg.value;
 
         // 2. Increment the counter and generate the new brand address.
+        //    In the extremely unlikely case that the brand id is 0, this
+        //    call will revert.
         brandsCount += 1;
         address brandId = address(uint160(uint256(keccak256(
             abi.encodePacked(
@@ -220,6 +241,10 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
                 bytes32(brandsCount)
             )
         ))));
+        require(
+            brandId != address(0),
+            "BrandRegistry: this brand cannot be minted now - try again later"
+        );
 
         // 3. Register the brand.
         brands[brandId] = BrandMetadata({
@@ -300,11 +325,11 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
      * approved operators can invoke it (it also implies that
      * the brand itself must exist).
      */
-    modifier _onlyBrandOwnerOrApprovedEditor(address _brandId) {
+    modifier onlyBrandOwnerOrApproved(address _brandId) {
         address owner = brands[_brandId].owner;
         address sender = _msgSender();
         require(
-            owner != address(0) && (sender == owner || _isBrandOwnerApprovedEditor(owner, sender)),
+            owner != address(0) && (sender == owner || _isBrandOwnerApproved(owner, sender)),
             "BrandRegistry: caller is not brand owner nor approved"
         );
         _;
@@ -322,7 +347,9 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
      * empty or a valid URL, or metadata might fail to be assembled
      * into valid JSON.
      */
-    function updateBrandImage(address _brandId, string memory _image) public _onlyBrandOwnerOrApprovedEditor(_brandId) {
+    function updateBrandImage(address _brandId, string memory _image) public
+        onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION)
+    {
         require(bytes(_image).length != 0, "BrandRegistry: use a non-empty image url");
         brands[_brandId].image = _image;
         emit BrandUpdated(_msgSender(), _brandId);
@@ -336,7 +363,7 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
      */
     function updateBrandChallengeUrl(
         address _brandId, string memory _challengeUrl
-    ) public _onlyBrandOwnerOrApprovedEditor(_brandId) {
+    ) public onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].challengeUrl = _challengeUrl;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -349,7 +376,7 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
      */
     function updateBrandIcon16x16Url(
         address _brandId, string memory _icon
-    ) public _onlyBrandOwnerOrApprovedEditor(_brandId) {
+    ) public onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].icon16x16 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -362,7 +389,7 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
      */
     function updateBrandIcon32x32Url(
         address _brandId, string memory _icon
-    ) public _onlyBrandOwnerOrApprovedEditor(_brandId) {
+    ) public onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].icon32x32 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -375,7 +402,7 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
      */
     function updateBrandIcon64x64Url(
         address _brandId, string memory _icon
-    ) public _onlyBrandOwnerOrApprovedEditor(_brandId) {
+    ) public onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].icon64x64 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -444,5 +471,49 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == type(IERC165).interfaceId || interfaceId == type(IBrandRegistry).interfaceId;
+    }
+
+    // Brand permissions management start here.
+
+    /**
+     * Restricts an action to senders that are considered to have
+     * certain permission in the (non-zero) brand.
+     */
+    modifier onlyBrandAllowed(address _brandId, bytes32 _permission) {
+        require(
+            isBrandAllowed(_brandId, _permission, _msgSender()),
+            "BrandRegistry: caller is not brand owner nor approved, and does not have the required permission"
+        );
+        _;
+    }
+
+    /**
+     * Tells whether a given sender is considered to have certain
+     * permission in the (non-zero) brand.
+     */
+    function isBrandAllowed(address _brandId, bytes32 _permission, address _sender) public view returns (bool) {
+        address owner = brands[_brandId].owner;
+        address sender = _msgSender();
+        return owner != address(0) && (sender == owner || _isBrandOwnerApproved(owner, sender) ||
+                                       brandPermissions[_brandId][SUPERUSER][_sender] ||
+                                       brandPermissions[_brandId][_permission][_sender]);
+    }
+
+    /**
+     * Grants a permission to a user. This action is reserved to owners,
+     * approved operators, or allowed superusers. However, superuser cannot
+     * set, in particular, the SUPERUSER permission itself.
+     */
+    function brandSetPermission(address _brandId, bytes32 _permission, address _user, bool _allowed) public
+        onlyBrandAllowed(_brandId, SUPERUSER)
+    {
+        address owner = brands[_brandId].owner;
+        address sender = _msgSender();
+        require(_user != address(0), "BrandRegistry: Cannot grant a permission to address 0");
+        require(
+            sender == owner || _isBrandOwnerApproved(owner, sender) || _permission != SUPERUSER,
+            "BrandRegistry: SUPERUSER permission cannot be added by this user"
+        );
+        brandPermissions[_brandId][_permission][_user] = _allowed;
     }
 }
