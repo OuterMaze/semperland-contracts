@@ -1,4 +1,4 @@
-const SampleBrandRegistry = artifacts.require("SampleBrandRegistry");
+const BrandRegistry = artifacts.require("BrandRegistry");
 const Economy = artifacts.require("Economy");
 const Metaverse = artifacts.require("Metaverse");
 
@@ -22,7 +22,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   before(async function () {
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
-    contract = await SampleBrandRegistry.new(metaverse.address, { from: accounts[0] });
+    contract = await BrandRegistry.new(metaverse.address, { from: accounts[0] });
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(contract.address, { from: accounts[0] });
   });
@@ -85,7 +85,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   it("must not allow a brand registration price to account 1", async function () {
     await expectRevert(
       contract.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[1] }),
-      revertReason("BrandRegistry: not allowed to set the brand registration cost")
+      revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
     )
   });
 
@@ -433,7 +433,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
 
     await expectRevert(
       contract.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]}),
-      revertReason("BrandRegistry: not allowed to set brands' social commitment")
+      revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
     );
     await expectRevert(
       contract.updateBrandSocialCommitment(brandId3, true, {from: accounts[0]}),
@@ -492,7 +492,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   it("must not allow the account 1 to withdraw earnings (3 tokens)", async function() {
     await expectRevert(
       contract.withdrawBrandRegistrationEarnings(new BN("3000000000000000000"), {from: accounts[1]}),
-      "BrandRegistry: earnings cannot be withdrawn by this sender"
+      "BrandRegistry: caller is not metaverse owner, and does not have the required permission"
     );
   });
 

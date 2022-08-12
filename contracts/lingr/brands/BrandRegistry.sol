@@ -15,7 +15,7 @@ import "../../NativePayable.sol";
  * Those brands will hold the metadata, and this trait will hold
  * the mean to register such brand with its metadata.
  */
-abstract contract BrandRegistry is Context, NativePayable, ERC165 {
+contract BrandRegistry is Context, NativePayable, ERC165 {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -119,6 +119,28 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     bytes32 constant SUPERUSER = bytes32(uint256((1 << 256) - 1));
 
     /**
+     * (Metaverse-scope) Permission: The user is allowed to set
+     * the brand registration cost.
+     */
+    bytes32 constant METAVERSE_SET_BRAND_REGISTRATION_COST = keccak256("BrandRegistry::SetBrandRegistrationCost");
+
+    /**
+     * (Metaverse-scope) Permission: The user is allowed to set
+     * the brand social commitment to a brand, or not. Brands with
+     * that flag set are (1) non-commercial and (2) aligned to this
+     * metaverse's social commitment views.
+     */
+    bytes32 constant METAVERSE_SET_BRAND_COMMITMENT = keccak256("BrandRegistry::SetBrandCommitment");
+
+    /**
+     * (Metaverse-scope) Permission: The user is allowed to withdraw
+     * the earnings from brand registrations, which reside in this
+     * contract since the very moment a brand is registered.
+     */
+    bytes32 constant METAVERSE_WITHDRAW_BRAND_REGISTRATION_EARNINGS =
+        keccak256("BrandRegistry::WithdrawBrandRegistrationEarnings");
+
+    /**
      * Permission: The user is allowed to edit a brand's aesthetic.
      */
     bytes32 constant BRAND_AESTHETICS_EDITION = keccak256("BrandRegistry::Brand::Edit");
@@ -141,12 +163,6 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     uint256 public brandRegistrationCurrentEarnings;
 
     // ********** Brand management goes here **********
-
-    /**
-     * Tells whether the specified user can set the registration
-     * cost, or not.
-     */
-    function _canSetBrandRegistrationCost(address _sender) internal virtual view returns (bool);
 
     /**
      * An event for when the brand registration cost is updated.
@@ -177,11 +193,9 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     /**
      * Sets the new brand registration cost.
      */
-    function setBrandRegistrationCost(uint256 _newCost) public {
-        require(
-            _canSetBrandRegistrationCost(_msgSender()),
-            "BrandRegistry: not allowed to set the brand registration cost"
-        );
+    function setBrandRegistrationCost(uint256 _newCost) public
+        onlyMetaverseAllowed(METAVERSE_SET_BRAND_REGISTRATION_COST)
+    {
         require(
             _newCost >= (1 ether) / 100,
             "BrandRegistry: the brand registry cost must not be less than 0.01 native tokens"
@@ -274,14 +288,6 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     }
 
     /**
-     * Tells whether the specified user can set the brand social
-     * commitment to a brand, or not. Brands with that flag set
-     * are (1) non-commercial and (2) aligned to this metaverse's
-     * social commitment views.
-     */
-    function _canSetBrandCommitment(address _sender) internal virtual view returns (bool);
-
-    /**
      * This event is triggered when a brand is updated with respect
      * to its social commitment (this is: to tell a brand is socially
      * committed according to the metaverse's views or not). Special
@@ -293,17 +299,15 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     /**
      * Updates whether a brand is socially committed or not.
      */
-    function updateBrandSocialCommitment(address _brandId, bool _committed) public {
+    function updateBrandSocialCommitment(address _brandId, bool _committed) public
+        onlyMetaverseAllowed(METAVERSE_SET_BRAND_COMMITMENT)
+    {
         // Require the flag to exist.
         address owner = brands[_brandId].owner;
         require(owner != address(0), "BrandRegistry: non-existing brand");
 
         // Require the sender to be allowed to set brands' commitment.
         address sender = _msgSender();
-        require(
-            _canSetBrandCommitment(sender),
-            "BrandRegistry: not allowed to set brands' social commitment"
-        );
 
         // Update the commitment flag.
         brands[_brandId].committed = _committed;
@@ -422,11 +426,6 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     // ********** Brand registration earnings management goes here **********
 
     /**
-     * Tells whether the sender can withdraw the earnings from brand registration.
-     */
-    function _canWithdrawBrandRegistrationEarnings(address _sender) internal view virtual returns (bool);
-
-    /**
      * This event is triggered when brand earnings were withdrawn successfully.
      */
     event BrandEarningsWithdrawn(address indexed withdrawnBy, uint256 amount);
@@ -434,12 +433,10 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     /**
      * Allows the sender to withdraw brand registration earnings.
      */
-    function withdrawBrandRegistrationEarnings(uint256 amount) public {
+    function withdrawBrandRegistrationEarnings(uint256 amount) public
+        onlyMetaverseAllowed(METAVERSE_WITHDRAW_BRAND_REGISTRATION_EARNINGS)
+    {
         address sender = _msgSender();
-        require(
-            _canWithdrawBrandRegistrationEarnings(sender),
-            "BrandRegistry: earnings cannot be withdrawn by this sender"
-        );
         require(
             amount > 0,
             "BrandRegistry: earnings amount must not be 0"
@@ -469,6 +466,18 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
         require(
             isBrandAllowed(_brandId, _permission, _msgSender()),
             "BrandRegistry: caller is not brand owner nor approved, and does not have the required permission"
+        );
+        _;
+    }
+
+    /**
+     * Restricts an action to senders that are considered to have
+     * certain metaverse-scoped permissions.
+     */
+    modifier onlyMetaverseAllowed(bytes32 _permission) {
+        require(
+            IMetaverse(metaverse).isAllowed(_permission, _msgSender()),
+            "BrandRegistry: caller is not metaverse owner, and does not have the required permission"
         );
         _;
     }

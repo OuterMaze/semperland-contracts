@@ -70,6 +70,7 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
             IBrandRegistry(IMetaverse(metaverse).brandRegistry()).isBrandAllowed(_brandId, _permission, _msgSender()),
             "MetaversePlugin: caller is not brand owner nor approved, and does not have the required permission"
         );
+        _;
     }
 
     /**
