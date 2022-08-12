@@ -480,6 +480,12 @@ contract Metaverse is Ownable, IMetaverse {
     }
 
     /**
+     * This event is triggered when a permission is set or revoked
+     * for a given user in the whole metaverse.
+     */
+    event PermissionChanged(bytes32 indexed permission, address indexed user, bool set);
+
+    /**
      * Grants a permission to a user. This action is reserved to owners,
      * approved operators, or allowed superusers. However, superuser cannot
      * set, in particular, the SUPERUSER permission itself.
@@ -492,5 +498,6 @@ contract Metaverse is Ownable, IMetaverse {
             "Metaverse: SUPERUSER permission cannot be added by this user"
         );
         permissions[_permission][_user] = _allowed;
+        emit PermissionChanged(_permission, _user, _allowed);
     }
 }

@@ -495,6 +495,12 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
     }
 
     /**
+     * This event is triggered when a brand permission is set or revoked
+     * for a given user in a given brand.
+     */
+    event BrandPermissionChanged(address indexed brandId, bytes32 indexed permission, address indexed user, bool set);
+
+    /**
      * Grants a permission to a user. This action is reserved to owners,
      * approved operators, or allowed superusers. However, superuser cannot
      * set, in particular, the SUPERUSER permission itself.
@@ -510,5 +516,6 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
             "BrandRegistry: SUPERUSER permission cannot be added by this user"
         );
         brandPermissions[_brandId][_permission][_user] = _allowed;
+        emit BrandPermissionChanged(_brandId, _permission, _user, _allowed);
     }
 }

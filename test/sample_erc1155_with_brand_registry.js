@@ -647,4 +647,13 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
     );
   });
+
+  // TODO Test MetaversePermissionChanged event in the metaverse.
+  // TODO Test BrandPermissionChanged event in a brand.
+  //
+  // TODO Test granting / removing metaverse permissions (this time, for the metaverse-level actions like withdrawing
+  // TODO earnings or setting brands costs or social commitment flags).
+  //
+  // TODO (when implemented) Test user groups (with relevant permissions) in Metaverse (for BrandRegistry actions).
+  // TODO (when implemented) Test user groups (with relevant permissions) in a Brand (for BrandRegistry actions).
 });
