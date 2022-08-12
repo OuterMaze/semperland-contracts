@@ -1,6 +1,6 @@
 const SampleBrandRegistry = artifacts.require("SampleBrandRegistry");
 const Economy = artifacts.require("Economy");
-const SampleMetaverse = artifacts.require("SampleMetaverse");
+const Metaverse = artifacts.require("Metaverse");
 
 const {
   BN,           // Big Number support
@@ -20,7 +20,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   var contract = null;
 
   before(async function () {
-    metaverse = await SampleMetaverse.new({ from: accounts[0] });
+    metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
     contract = await SampleBrandRegistry.new(metaverse.address, { from: accounts[0] });
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
