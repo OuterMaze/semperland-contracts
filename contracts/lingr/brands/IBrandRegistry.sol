@@ -34,8 +34,7 @@ interface IBrandRegistry is IERC165 {
 
     /**
      * Tells whether a user has a specific permission on a specific brand
-     * (or the brand 0, which is the system itself), or it is allowed by
-     * the brand's ownership.
+     * or it is allowed by the brand's ownership.
      */
     function isBrandAllowed(address _brandId, bytes32 _permission, address _sender) external view returns (bool);
 }

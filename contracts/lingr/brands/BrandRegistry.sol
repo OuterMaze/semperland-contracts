@@ -111,9 +111,10 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
 
     /**
      * Permission: Superuser (all the permissions are considered
-     * given to superuser which is registered in a non-zero brand).
-     * The only thing that superuser per-se cannot
-     * do in a brand is to transfer it via ERC-1155.
+     * given to a superuser which is registered in a respective
+     * non-zero brand). The only things that superuser per-se
+     * cannot do in a brand are to transfer it via ERC-1155 and
+     * add more superusers.
      */
     bytes32 constant SUPERUSER = bytes32(uint256((1 << 256) - 1));
 
@@ -488,8 +489,8 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     }
 
     /**
-     * Tells whether a given sender is considered to have certain
-     * permission in the (non-zero) brand.
+     * Tells whether a user has a specific permission on a specific brand
+     * or it is allowed by the brand's ownership.
      */
     function isBrandAllowed(address _brandId, bytes32 _permission, address _sender) public view returns (bool) {
         address owner = brands[_brandId].owner;
@@ -509,7 +510,7 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     {
         address owner = brands[_brandId].owner;
         address sender = _msgSender();
-        require(_user != address(0), "BrandRegistry: Cannot grant a permission to address 0");
+        require(_user != address(0), "BrandRegistry: cannot grant a permission to address 0");
         require(
             sender == owner || _isBrandOwnerApproved(owner, sender) || _permission != SUPERUSER,
             "BrandRegistry: SUPERUSER permission cannot be added by this user"

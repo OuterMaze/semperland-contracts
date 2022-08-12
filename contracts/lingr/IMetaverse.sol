@@ -106,4 +106,10 @@ interface IMetaverse is IERC165 {
      * Hook to be invoked as part of a transfer from ERC1155.
      */
     function onBrandOwnerChanged(address _brandId, address _newOwner) external;
+
+    /**
+     * Tells whether a user has a specific permission on the metaverse, or
+     * is its owner.
+     */
+    function isAllowed(bytes32 _permission, address _sender) external view returns (bool);
 }

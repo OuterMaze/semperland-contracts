@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
-import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "./plugins/base/IMetaversePlugin.sol";
 import "./IMetaverse.sol";
@@ -20,7 +20,7 @@ import "./brands/IBrandRegistry.sol";
  * to the whole metaverse assets (e.g. taking assets from the users
  * or granting assets to the users).
  */
-abstract contract Metaverse is Context, IMetaverse {
+contract Metaverse is Ownable, IMetaverse {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -104,6 +104,33 @@ abstract contract Metaverse is Context, IMetaverse {
      * value to try is 1 above the maximum value brand addresses can take.
      */
     uint256 private nextNFTIndex = 1 << 160;
+
+    /**
+     * Permission: Superuser (all the permissions are considered given to
+     * a superuser which is registered in the metaverse). The only thing
+     * that superuser per-se cannot do is to add more superusers.
+     */
+    bytes32 constant SUPERUSER = bytes32(uint256((1 << 256) - 1));
+
+    /**
+     * Permission: To add a plug-in.
+     */
+    bytes32 constant ADD_PLUGIN = keccak256("Metaverse::AddPlugin");
+
+    /**
+     * Permission: To set a brand registry.
+     */
+    bytes32 constant SET_BRAND_REGISTRY = keccak256("Metaverse::SetBrandRegistry");
+
+    /**
+     * Permission: To set the related economy.
+     */
+    bytes32 constant SET_ECONOMY = keccak256("Metaverse::SetEconomy");
+
+    /**
+     * Maintains the permissions assigned to this metaverse.
+     */
+    mapping(bytes32 => mapping(address => bool)) permissions;
 
     /**
      * This modifier requires the sender to be one of the authorized contracts.
@@ -334,12 +361,6 @@ abstract contract Metaverse is Context, IMetaverse {
     // ********** Plugin management goes here **********
 
     /**
-     * This method must be implemented to define how is a sender allowed to
-     * add a plug-in to this metaverse.
-     */
-    function _canAddPlugin(address _sender) internal view virtual returns (bool);
-
-    /**
      * Tells whether an address is a valid metaverse plug-in contract for
      * this metaverse in particular.
      */
@@ -351,8 +372,7 @@ abstract contract Metaverse is Context, IMetaverse {
     /**
      * Adds a plug-in contract to this metaverse.
      */
-    function addPlugin(address _contract) public {
-        require(_canAddPlugin(_msgSender()), "Metaverse: the sender is not allowed to add a plug-in");
+    function addPlugin(address _contract) public onlyAllowed(ADD_PLUGIN) {
         require(
             _isPluginForThisMetaverse(_contract),
             "Metaverse: the address does not belong to a valid plug-in contract for this metaverse"
@@ -373,12 +393,6 @@ abstract contract Metaverse is Context, IMetaverse {
     }
 
     /**
-     * This method must be implemented to define how is a sender allowed to
-     * add the brand registry to this metaverse.
-     */
-    function _canSetBrandRegistry(address _sender) internal view virtual returns (bool);
-
-    /**
      * Tells whether an address is a valid brand registry contract for
      * this metaverse in particular.
      */
@@ -390,8 +404,7 @@ abstract contract Metaverse is Context, IMetaverse {
     /**
      * Adds a plug-in contract to this metaverse.
      */
-    function setBrandRegistry(address _contract) public {
-        require(_canSetBrandRegistry(_msgSender()), "Metaverse: the sender is not allowed to set the plug-in");
+    function setBrandRegistry(address _contract) public onlyAllowed(SET_BRAND_REGISTRY) {
         require(
             _isBrandRegistryForThisMetaverse(_contract),
             "Metaverse: the address does not belong to a valid brand registry contract for this metaverse"
@@ -401,12 +414,6 @@ abstract contract Metaverse is Context, IMetaverse {
         );
         brandRegistry = _contract;
     }
-
-    /**
-     * This method must be implemented to define how is a sender allowed to
-     * add the economy system to this metaverse.
-     */
-    function _canSetEconomy(address _sender) internal view virtual returns (bool);
 
     /**
      * Tells whether an address is a valid economy system contract for
@@ -420,8 +427,7 @@ abstract contract Metaverse is Context, IMetaverse {
     /**
      * Set the economy contract to this metaverse.
      */
-    function setEconomy(address _contract) public {
-        require(_canSetEconomy(_msgSender()), "Metaverse: the sender is not allowed to set the economy");
+    function setEconomy(address _contract) public onlyAllowed(SET_ECONOMY) {
         require(
             _isEconomyForThisMetaverse(_contract),
             "Metaverse: the address does not belong to a valid economy contract for this metaverse"
@@ -450,4 +456,41 @@ abstract contract Metaverse is Context, IMetaverse {
     // TODO: Implement many features:
     // 1. A sample contract defining a COIN type and a dumb DEED type.
     // 2. TEST everything.
+
+    // Permissions management start here.
+
+    /**
+     * Restricts an action to senders that are considered to have
+     * certain permission in the metaverse.
+     */
+    modifier onlyAllowed(bytes32 _permission) {
+        require(
+            isAllowed(_permission, _msgSender()),
+            "Metaverse: caller is not metaverse owner, and does not have the required permission"
+        );
+        _;
+    }
+
+    /**
+     * Tells whether a user has a specific permission on the metaverse, or
+     * is its owner.
+     */
+    function isAllowed(bytes32 _permission, address _sender) public view returns (bool) {
+        return _sender == owner() || permissions[_permission][_sender];
+    }
+
+    /**
+     * Grants a permission to a user. This action is reserved to owners,
+     * approved operators, or allowed superusers. However, superuser cannot
+     * set, in particular, the SUPERUSER permission itself.
+     */
+    function setPermission(bytes32 _permission, address _user, bool _allowed) public onlyAllowed(SUPERUSER) {
+        address sender = _msgSender();
+        require(_user != address(0), "Metaverse: cannot grant a permission to address 0");
+        require(
+            sender == owner() || _permission != SUPERUSER,
+            "Metaverse: SUPERUSER permission cannot be added by this user"
+        );
+        permissions[_permission][_user] = _allowed;
+    }
 }
