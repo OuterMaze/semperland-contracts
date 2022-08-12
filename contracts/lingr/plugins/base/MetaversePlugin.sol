@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IMetaversePlugin.sol";
 import "../../IMetaverse.sol";
+import "../../brands/IBrandRegistry.sol";
 
 /**
  * This is the base class of a metaverse plug-in.
@@ -44,9 +45,33 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
      * This modifier restricts function to be only invoked by the metaverse.
      */
     modifier onlyMetaverse() {
-        require(msg.sender == metaverse, "MetaversePlugin: only the owning metaverse can invoke this method");
+        require(_msgSender() == metaverse, "MetaversePlugin: only the owning metaverse can invoke this method");
         _;
     }
+
+    /**
+     * This modifier requires a specific permission or being the owner of the
+     * metaverse to perform an action.
+     */
+    modifier onlyMetaverseAllowed(bytes32 _permission) {
+        require(
+            IMetaverse(metaverse).isAllowed(_permission, _msgSender()),
+            "MetaversePlugin: caller is not metaverse owner, and does not have the required permission"
+        );
+        _;
+    }
+
+    /**
+     * This modifier requires a specific permission or being the owner of the
+     * the brand to perform an action.
+     */
+    modifier onlyBrandAllowed(address _brandId, bytes32 _permission) {
+        require(
+            IBrandRegistry(IMetaverse(metaverse).brandRegistry()).isBrandAllowed(_brandId, _permission, _msgSender()),
+            "MetaversePlugin: caller is not brand owner nor approved, and does not have the required permission"
+        );
+    }
+
     /**
      * This function holds an implementation (which could be
      * empty) for when the plugin is added to the metaverse.
