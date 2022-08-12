@@ -322,21 +322,6 @@ abstract contract BrandRegistry is Context, NativePayable, ERC165 {
     }
 
     /**
-     * This modifiers limits the action so that only owners or
-     * approved operators can invoke it (it also implies that
-     * the brand itself must exist).
-     */
-    modifier onlyBrandOwnerOrApproved(address _brandId) {
-        address owner = brands[_brandId].owner;
-        address sender = _msgSender();
-        require(
-            owner != address(0) && (sender == owner || _isBrandOwnerApproved(owner, sender)),
-            "BrandRegistry: caller is not brand owner nor approved"
-        );
-        _;
-    }
-
-    /**
      * This event is triggered when a brand is registered. The new
      * address is also included, along some reference data.
      */
