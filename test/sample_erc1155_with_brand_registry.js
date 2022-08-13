@@ -577,7 +577,13 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
       "0xd6", "0x94", contract.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
-    await contract.brandSetPermission(brandId1, SUPERUSER, accounts[2], true, {from: accounts[0]});
+    await expectEvent(
+      await contract.brandSetPermission(brandId1, SUPERUSER, accounts[2], true, {from: accounts[0]}),
+      "BrandPermissionChanged", {
+        "brandId": brandId1, "permission": SUPERUSER, "user": accounts[2],
+        "set": true, "sender": accounts[0]
+      }
+    );
     await expectRevert(
       contract.brandSetPermission(brandId1, SUPERUSER, accounts[3], true, {from: accounts[2]}),
       revertReason("BrandRegistry: SUPERUSER permission cannot be added by this user")
@@ -607,7 +613,13 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
       "0xd6", "0x94", contract.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
-    await contract.brandSetPermission(brandId1, BRAND_EDITOR, accounts[3], false, {from: accounts[2]});
+    await expectEvent(
+      await contract.brandSetPermission(brandId1, BRAND_EDITOR, accounts[3], false, {from: accounts[2]}),
+      "BrandPermissionChanged", {
+        "brandId": brandId1, "permission": BRAND_EDITOR, "user": accounts[3],
+        "set": false, "sender": accounts[2]
+      }
+    );
   });
 
   it("must not allow 3 to revoke any permission to 2, or set the brand image", async function() {
@@ -627,10 +639,16 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
 
   it("must allow 0 to revoke superuser to 2", async function() {
     let brandId1 = web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", contract.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
-    await contract.brandSetPermission(brandId1, SUPERUSER, accounts[2], false, {from: accounts[0]});
+    await expectEvent(
+      await contract.brandSetPermission(brandId1, SUPERUSER, accounts[2], false, {from: accounts[0]}),
+      "BrandPermissionChanged", {
+        "brandId": brandId1, "permission": SUPERUSER, "user": accounts[2],
+        "set": false, "sender": accounts[0]
+      }
+    );
   });
 
   it("must not allow 2 and 3 to set the brand image, since they don't have permissions, again", async function() {
