@@ -348,6 +348,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   const SUPERUSER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
   const BRAND_EDITOR = web3.utils.soliditySha3("BrandRegistry::Brand::Edit");
   const METAVERSE_WITHDRAW_EARNINGS = web3.utils.soliditySha3("BrandRegistry::WithdrawBrandRegistrationEarnings");
+  const METAVERSE_SET_BRAND_COMMITMENT = web3.utils.soliditySha3("BrandRegistry::SetBrandCommitment");
 
   // 29. Change brand icon 64 (using addresses[1]).
   // 30. Test the JSON metadata for brand 1.
@@ -533,7 +534,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     );
   });
 
-  it("must not allow the account 1 to grant superuser on itself", async function() {
+  it("must not allow the account 1 to grant withdraw permission on itself", async function() {
     await expectRevert(
       metaverse.setPermission(METAVERSE_WITHDRAW_EARNINGS, accounts[1], false, {from: accounts[1]}),
       revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
@@ -590,6 +591,73 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     assert.isTrue(
       nativeBalance.cmp(new BN(0)) === 0,
       "the current native balance must be 0, but it is " + nativeBalance.toString()
+    );
+  });
+
+  it("must not allow account 1 to set the brand commitment", async function() {
+    let brandId1 = "0x" + web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    ).substr(26);
+
+    await expectRevert(
+      contract.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]}),
+      revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 1 to grant setting the brand commitment on itself", async function() {
+    await expectRevert(
+      metaverse.setPermission(METAVERSE_SET_BRAND_COMMITMENT, accounts[1], false, {from: accounts[1]}),
+      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must allow the account 0 to grant setting the brand commitment on account 1", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_SET_BRAND_COMMITMENT, accounts[1], true, {from: accounts[0]}),
+      "PermissionChanged", {
+        "permission": METAVERSE_SET_BRAND_COMMITMENT, "user": accounts[1], "set": true, sender: accounts[0]
+      }
+    );
+  });
+
+  it("must allow the account 1 to set the brand commitment on brand 1", async function() {
+    let brandId1 = "0x" + web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    ).substr(26);
+
+    await contract.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]});
+
+    await expectMetadata(brandId1, {
+      "name":"My Brand 1",
+      "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
+      "properties":{
+        "challengeUrl":"http://example.com/challenge-bazinga.json",
+        "icon16x16":"http://example.com/ico16x16-bazinga.png",
+        "icon32x32":"http://example.com/ico32x32-bazinga.png",
+        "icon64x64":"http://example.com/ico64x64-bazinga.png",
+        "committed":true
+      }
+    });
+  });
+
+  it("must allow the account 0 to revoke setting the brand commitment to account 1", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_SET_BRAND_COMMITMENT, accounts[1], false, {from: accounts[0]}),
+      "PermissionChanged", {
+        "permission": METAVERSE_SET_BRAND_COMMITMENT, "user": accounts[1], "set": false, sender: accounts[0]
+      }
+    );
+  });
+
+  it("must not allow the account 1 to set the brand commitment to brand 1", async function() {
+    let brandId1 = "0x" + web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[1], 1
+    ).substr(26);
+
+    await expectRevert(
+      contract.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]}),
+      revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
     );
   });
 
