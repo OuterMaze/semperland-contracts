@@ -116,7 +116,7 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
      * This modifier restricts function to be only invoked by the metaverse.
      */
     modifier onlyMetaverse() {
-        require(msg.sender == metaverse, "Economy: only the owning metaverse can invoke this method");
+        require(msg.sender == metaverse, "Economy: the only allowed sender is the metaverse system");
         _;
     }
 }

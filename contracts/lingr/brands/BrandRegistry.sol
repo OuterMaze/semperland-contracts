@@ -186,7 +186,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
      * This modifier restricts function to be only invoked by the metaverse.
      */
     modifier onlyMetaverse() {
-        require(msg.sender == metaverse, "BrandRegistry: only the owning metaverse can invoke this method");
+        require(msg.sender == metaverse, "BrandRegistry: the only allowed sender is the metaverse system");
         _;
     }
 
