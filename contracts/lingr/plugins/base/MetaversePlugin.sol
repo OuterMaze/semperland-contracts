@@ -2,6 +2,7 @@
 pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IMetaversePlugin.sol";
@@ -92,9 +93,23 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
 
     /**
      * This function returns the uri for a given token id, with
-     * the same semantics of ERC1155.
+     * the same semantics of ERC1155. WARNING: this method will
+     * spend a lot of gas if invoked inside a transaction, so
+     * doing that is strongly discouraged.
      */
-    function uri(uint256 _tokenId) public view virtual returns (string memory);
+    function uri(uint256 _tokenId) public view returns (string memory) {
+        bytes memory metadata = _tokenMetadata(_tokenId);
+        if (metadata.length == 0) return "";
+        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(metadata)));
+    }
+
+    /**
+     * This function builds an appropriate JSON representation of
+     * a token's metadata (by its id, instead of its type). it must
+     * actually be a valid JSON (otherwise markets will not render
+     * it appropriately) returned as a bytes sequence.
+     */
+    function _tokenMetadata(uint256 _tokenId) internal view virtual returns (bytes memory);
 
     /**
      * A metaverse plugin satisfies the IMetaversePlugin and IERC165.
