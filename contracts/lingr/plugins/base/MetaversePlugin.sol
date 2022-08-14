@@ -37,7 +37,7 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     }
 
     /**
-     * The title of this metaverse.
+     * The title of this metaverse plug-in.
      */
     function title() public view virtual returns (string memory);
 
@@ -88,7 +88,7 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
      * This function holds an implementation (which could be
      * empty) for when the plugin is added to the metaverse.
      */
-    function _initialize() public virtual;
+    function _initialize() internal virtual;
 
     /**
      * This function returns the uri for a given token id, with
