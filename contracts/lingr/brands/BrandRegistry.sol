@@ -66,8 +66,8 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
         string challengeUrl;
 
         /**
-         * The URL of the brand. It matches the "image" field
-         * of the metadata. This field is mutable.
+         * The URL of the brand image. It matches the "image"
+         * field of the metadata. This field is mutable.
          */
         string image;
 
