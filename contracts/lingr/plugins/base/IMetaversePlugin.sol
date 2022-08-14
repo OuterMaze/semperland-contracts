@@ -29,11 +29,4 @@ interface IMetaversePlugin is IERC165 {
      * the same semantics of ERC1155.
      */
     function uri(uint256 _tokenId) external view returns (string memory);
-
-    /**
-     * This function is a hook for when an asset, which exists
-     * as registered & managed by this contract, is burned by
-     * its owner.
-     */
-    function onBurned(address _operator, address _from, uint256 _tokenId, uint256 _amount) external;
 }

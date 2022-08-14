@@ -104,6 +104,29 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     }
 
     /**
+     * Defines a new FT type in the system scope (i.e. not a brand at all).
+     * Returns its id.
+     */
+    function _defineNextSystemFTType() internal returns (uint256) {
+        return _defineNextFTType(address(0));
+    }
+
+    /**
+     * Defines a new FT type, tied to a brand (use address 0 for metaverse-wide
+     * FT types). Returns its id.
+     */
+    function _defineNextFTType(address _brandId) internal returns (uint256) {
+        return IMetaverse(metaverse).defineNextFTType(_brandId);
+    }
+
+    /**
+     * Defines a new NFT type. Returns its id.
+     */
+    function _defineNextNFTType() internal returns (uint256) {
+        return IMetaverse(metaverse).defineNextNFTType();
+    }
+
+    /**
      * Mints a FT for a user (only types defined by this contract are available).
      */
     function _mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) internal {
