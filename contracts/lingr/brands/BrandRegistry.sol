@@ -30,9 +30,10 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
     /**
      * The cost to register a new brand. This can be changed in
      * the future and must be able to be known in the ABI for the
-     * users to be aware of the statistic.
+     * users to be aware of the statistic. By default, a brand
+     * costs 100 MATIC to register.
      */
-    uint256 public brandRegistrationCost;
+    uint256 public brandRegistrationCost = 100 ether;
 
     /**
      * This is the whole brand metadata. It only has aesthetics,
