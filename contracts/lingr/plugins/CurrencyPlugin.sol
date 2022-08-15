@@ -121,8 +121,8 @@ contract CurrencyPlugin is MetaversePlugin {
                 '{"name":"',currency.name,'","description":"', currency.description,
                 '","image":"', currency.image, '","decimals":18,"properties":{"icon16x16":"',
                 currency.icon16x16, '","icon32x32":"', currency.icon32x32, '","icon64x64":"',
-                currency.icon64x64, '","color":"', currency.color,
-            '"}}');
+                currency.icon64x64, '","color":"', currency.color, '"}}'
+            );
         }
     }
 }
