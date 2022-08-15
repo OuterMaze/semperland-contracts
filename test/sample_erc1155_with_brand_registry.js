@@ -353,6 +353,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   const BRAND_EDITOR = web3.utils.soliditySha3("BrandRegistry::Brand::Edit");
   const METAVERSE_WITHDRAW_EARNINGS = web3.utils.soliditySha3("BrandRegistry::WithdrawBrandRegistrationEarnings");
   const METAVERSE_SET_BRAND_COMMITMENT = web3.utils.soliditySha3("BrandRegistry::SetBrandCommitment");
+  const METAVERSE_MINT_BRAND_FOR = web3.utils.soliditySha3("BrandRegistry::Brands::MintFor");
 
   // 29. Change brand icon 64 (using addresses[1]).
   // 30. Test the JSON metadata for brand 1.
@@ -787,4 +788,97 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
 
   // TODO (when implemented) Test user groups (with relevant permissions) in Metaverse (for BrandRegistry actions).
   // TODO (when implemented) Test user groups (with relevant permissions) in a Brand (for BrandRegistry actions).
+
+  it("must allow an appropriate user to set the brand registration cost to 0", async function() {
+    await expectEvent(
+      await contract.setBrandRegistrationCost(new BN("0"), { from: accounts[0] }),
+      "BrandRegistrationCostUpdated", {"newCost": new BN("0")}
+    );
+  });
+
+  it("must not allow brand registration to be done while the cost is 0", async function() {
+    await expectRevert(
+      contract.registerBrand(
+        "My Brand 4", "My awesome brand 4", "http://example.com/brand4.png", "http://example.com/ico16x16-4.png",
+        "http://example.com/ico32x32-4.png", "http://example.com/ico64x64-4.png",
+        {from: accounts[1], value: new BN("2000000000000000001")}
+      ),
+      revertReason(
+        "BrandRegistry: brand registration is currently disabled (no price is set)"
+      )
+    );
+  });
+
+  it("must not allow regular users to mint brand 'for'", async function() {
+    await expectRevert(
+      contract.registerBrandFor(
+        accounts[1],
+        "My Brand 5", "My awesome brand 5", "http://example.com/brand5.png", "http://example.com/ico16x16-5.png",
+        "http://example.com/ico32x32-5.png", "http://example.com/ico64x64-5.png",
+        {from: accounts[1]}
+      ),
+      revertReason(
+        "BrandRegistry: caller is not metaverse owner, and does not have the required permission"
+      )
+    );
+  });
+
+  it("must allow the metaverse owner to grant the free brand minting permission to another user", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MINT_BRAND_FOR, accounts[1], true, {from: accounts[0]}),
+      "PermissionChanged", {
+        "permission": METAVERSE_MINT_BRAND_FOR, "user": accounts[1], "set": true, sender: accounts[0]
+      }
+    );
+  });
+
+  it("must allow the permitted user to mint brand 'for'", async function() {
+    let hash = web3.utils.soliditySha3(
+      "0xd6", "0x94", contract.address, accounts[2], 3
+    );
+    hash = web3.utils.toChecksumAddress("0x" + hash.substr(26));
+
+    await expectEvent(
+      await contract.registerBrandFor(
+        accounts[2],
+        "My Brand 5", "My awesome brand 5", "http://example.com/brand5.png", "http://example.com/ico16x16-5.png",
+        "http://example.com/ico32x32-5.png", "http://example.com/ico64x64-5.png",
+        {from: accounts[1]},
+      ), "BrandRegistered", {
+        "registeredBy": accounts[2], "brandId": hash, "name": "My Brand 5",
+        "description": "My awesome brand 5", "price": new BN("0"),
+        "mintedBy": accounts[1]
+      }
+    );
+  });
+
+  it("must allow the metaverse owner to revoke the free brand minting permission to another user", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MINT_BRAND_FOR, accounts[1], false, {from: accounts[0]}),
+      "PermissionChanged", {
+        "permission": METAVERSE_MINT_BRAND_FOR, "user": accounts[1], "set": false, sender: accounts[0]
+      }
+    );
+  });
+
+  it("must not allow regular users to mint brand 'for', again", async function() {
+    await expectRevert(
+      contract.registerBrandFor(
+        accounts[1],
+        "My Brand 6", "My awesome brand 6", "http://example.com/brand6.png", "http://example.com/ico16x16-6.png",
+        "http://example.com/ico32x32-6.png", "http://example.com/ico64x64-6.png",
+        {from: accounts[1]}
+      ),
+      revertReason(
+        "BrandRegistry: caller is not metaverse owner, and does not have the required permission"
+      )
+    );
+  });
+
+  it("must allow an appropriate user to set the brand registration cost to 2 MATIC", async function() {
+    await expectEvent(
+      await contract.setBrandRegistrationCost(new BN("2000000000000000000"), { from: accounts[0] }),
+      "BrandRegistrationCostUpdated", {"newCost": new BN("2000000000000000000")}
+    );
+  });
 });
