@@ -110,9 +110,11 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
         "My Brand 1", "My awesome brand 1", "http://example.com/brand1.png", "http://example.com/ico16x16.png",
         "http://example.com/ico32x32.png", "http://example.com/ico64x64.png",
         {from: accounts[1], value: new BN("2000000000000000000")}
-      ), "BrandRegistered",
-      {"registeredBy": accounts[1], "brandId": hash, "name": "My Brand 1",
-        "description": "My awesome brand 1", "price": new BN("2000000000000000000")}
+      ), "BrandRegistered", {
+        "registeredBy": accounts[1], "brandId": hash, "name": "My Brand 1",
+        "description": "My awesome brand 1", "price": new BN("2000000000000000000"),
+        "mintedBy": constants.ZERO_ADDRESS
+      }
     );
   });
 
@@ -164,9 +166,11 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
         "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/ico16x16-2.png",
         "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
         {from: accounts[1], value: new BN("4000000000000000000")}
-        ), "BrandRegistered",
-        {"registeredBy": accounts[1], "brandId": hash, "name": "My Brand 2",
-        "description": "My awesome brand 2", "price": new BN("4000000000000000000")}
+        ), "BrandRegistered", {
+        "registeredBy": accounts[1], "brandId": hash, "name": "My Brand 2",
+        "description": "My awesome brand 2", "price": new BN("4000000000000000000"),
+        "mintedBy": constants.ZERO_ADDRESS
+      }
     );
   });
 

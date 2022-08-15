@@ -143,6 +143,12 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
         keccak256("BrandRegistry::WithdrawBrandRegistrationEarnings");
 
     /**
+     * (Metaverse-scope) Permission: The user is allowed to mint
+     * and brand, for an owner, for free.
+     */
+    bytes32 constant METAVERSE_MINT_BRAND_FOR = keccak256("BrandRegistry::Brands::MintFor");
+
+    /**
      * Permission: The user is allowed to edit a brand's aesthetic.
      */
     bytes32 constant BRAND_AESTHETICS_EDITION = keccak256("BrandRegistry::Brand::Edit");
@@ -221,7 +227,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
      */
     event BrandRegistered(
         address indexed registeredBy, address indexed brandId, string name, string description,
-        uint256 price
+        uint256 price, address indexed mintedBy
     );
 
     /**
@@ -236,11 +242,11 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
      * cannot be changed later.
      */
     function _registerBrand(
+        address sender, address mintedBy,
         string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64,
         bool committed
     ) internal {
-        address sender = _msgSender();
         require(bytes(_name).length != 0, "BrandRegistry: use a non-empty name");
         require(bytes(_description).length != 0, "BrandRegistry: use a non-empty description");
         require(bytes(_image).length != 0, "BrandRegistry: use a non-empty image url");
@@ -274,7 +280,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
         IMetaverse(metaverse).mintBrandFor(sender, brandId);
 
         // 5. Trigger the event.
-        emit BrandRegistered(sender, brandId, _name, _description, msg.value);
+        emit BrandRegistered(sender, brandId, _name, _description, msg.value, mintedBy);
     }
 
     /**
@@ -286,7 +292,23 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
         string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
     ) public payable hasNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost) {
-        _registerBrand(_name, _description, _image, _icon16x16, _icon32x32, _icon64x64, false);
+        _registerBrand(
+            _msgSender(), address(0), _name, _description, _image, _icon16x16, _icon32x32, _icon64x64, false
+        );
+    }
+
+    /**
+     * Registers a new brand for free, for a specific owner. This requires
+     * a special permission, which is metaverse-wide, and must be used only
+     * in specific given cases.
+     */
+    function registerBrandFor(
+        address owner,
+        string memory _name, string memory _description, string memory _image,
+        string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
+    ) public onlyMetaverseAllowed(METAVERSE_MINT_BRAND_FOR) {
+        require(owner != address(0), "BrandRegistry: a brand cannot be minted for owner address 0");
+        _registerBrand(owner, _msgSender(), _name, _description, _image, _icon16x16, _icon32x32, _icon64x64, false);
     }
 
     /**
