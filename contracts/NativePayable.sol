@@ -11,6 +11,7 @@ abstract contract NativePayable {
      * Requires an exact payment on the underlying method.
      */
     modifier hasNativeTokenPrice(string memory concept, uint256 price) {
+        require(price != 0, string(abi.encodePacked(concept, " is currently disabled (no price is set)")));
         uint256 value = msg.value;
         require(value == price, string(abi.encodePacked(
             concept, " requires an exact payment of ", Strings.toString(price), " but ",
