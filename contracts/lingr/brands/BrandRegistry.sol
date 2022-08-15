@@ -30,10 +30,11 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
     /**
      * The cost to register a new brand. This can be changed in
      * the future and must be able to be known in the ABI for the
-     * users to be aware of the statistic. By default, a brand
-     * costs 100 MATIC to register.
+     * users to be aware of the statistic. By default, defining
+     * a brand is disabled by the public mean, until a price is
+     * set by the administration.
      */
-    uint256 public brandRegistrationCost = 100 ether;
+    uint256 public brandRegistrationCost = 0;
 
     /**
      * This is the whole brand metadata. It only has aesthetics,
@@ -198,7 +199,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
         onlyMetaverseAllowed(METAVERSE_SET_BRAND_REGISTRATION_COST)
     {
         require(
-            _newCost >= (1 ether) / 100,
+            _newCost == 0 || _newCost >= (1 ether) / 100,
             "BrandRegistry: the brand registry cost must not be less than 0.01 native tokens"
         );
         brandRegistrationCost = _newCost;
