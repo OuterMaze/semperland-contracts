@@ -242,10 +242,10 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
      * cannot be changed later.
      */
     function _registerBrand(
-        address sender, address mintedBy,
+        address _sender, address _mintedBy,
         string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64,
-        bool committed
+        bool _committed
     ) internal {
         require(bytes(_name).length != 0, "BrandRegistry: use a non-empty name");
         require(bytes(_description).length != 0, "BrandRegistry: use a non-empty description");
@@ -260,7 +260,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
         brandsCount += 1;
         address brandId = address(uint160(uint256(keccak256(
             abi.encodePacked(
-                bytes1(0xd6), bytes1(0x94), address(this), sender,
+                bytes1(0xd6), bytes1(0x94), address(this), _sender,
                 bytes32(brandsCount)
             )
         ))));
@@ -273,14 +273,14 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
         brands[brandId] = BrandMetadata({
             name: _name, description: _description, challengeUrl: "about:blank",
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
-            icon64x64: _icon64x64, owner: sender, committed: committed
+            icon64x64: _icon64x64, owner: _sender, committed: _committed
         });
 
         // 4. Mint the brand into the economic system for the sender.
-        IMetaverse(metaverse).mintBrandFor(sender, brandId);
+        IMetaverse(metaverse).mintBrandFor(_sender, brandId);
 
         // 5. Trigger the event.
-        emit BrandRegistered(sender, brandId, _name, _description, msg.value, mintedBy);
+        emit BrandRegistered(_sender, brandId, _name, _description, msg.value, _mintedBy);
     }
 
     /**
