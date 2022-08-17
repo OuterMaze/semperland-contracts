@@ -20,6 +20,23 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     using ERC165Checker for address;
 
     /**
+     * This mask captures all the enabled bits of for the id / type
+     * of a FT asset.
+     */
+    uint256 constant FT_MASK = (1 << 255) | ((1 << 224) - 1);
+
+    /**
+     * This mask captures all the enabled bits of for the id / type
+     * of a system FT asset.
+     */
+    uint256 constant SYSTEM_FT_MASK = (1 << 255) | ((1 << 64) - 1);
+
+    /**
+     * This mask captures all the NFT ids and types.
+     */
+    uint256 constant NFT_MASK = (1 << 255) - 1;
+
+    /**
      * The metaverse that will own this plug-in.
      */
     address public metaverse;
@@ -97,6 +114,46 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
         require(
             IBrandRegistry(IMetaverse(metaverse).brandRegistry()).isBrandAllowed(_brandId, _permission, _msgSender()),
             "MetaversePlugin: caller is not brand owner nor approved, and does not have the required permission"
+        );
+        _;
+    }
+
+
+    /**
+     * Requires an id to be in the system's FT id/type range.
+     */
+    modifier inSystemFTRange(uint256 _id) {
+        require(
+            _id == (_id & SYSTEM_FT_MASK),
+            "MetaversePlugin: a valid system FT-ranged value is required"
+        );
+        _;
+    }
+
+    /**
+     * Requires an id to be in the brands' FT id/type range(s).
+     * If brand 0 is specified, then the only thing required in
+     * the match is that it belongs to any brand. Otherwise, it
+     * is also required that the brand matches the one in the
+     * FT id being used.
+     */
+    modifier inBrandFTRange(address _brandId, uint256 _id) {
+        bool rangeMatch = _id == (_id & FT_MASK);
+        if (_brandId != address(0)) {
+            address brandPart = address(uint160((_id >> 64) & ((1 << 160) - 1)));
+            rangeMatch = rangeMatch && brandPart == _brandId;
+        }
+        require(rangeMatch, "MetaversePlugin: a valid brand FT-ranged value is required");
+        _;
+    }
+
+    /**
+     * Requires an (asset or type) id to be in the NFT range.
+     */
+    modifier inNFTRange(uint256 _id) {
+        require(
+            _id == (_id & NFT_MASK),
+            "MetaversePlugin: a valid NFT-ranged value is required"
         );
         _;
     }
@@ -211,6 +268,4 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     function _burnNFTs(uint256[] memory _tokenIds) internal {
         IMetaverse(metaverse).burnNFTs(_tokenIds);
     }
-
-
 }

@@ -301,7 +301,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
     function registerBrand(
         string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
-    ) public payable hasNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost) {
+    ) public payable hasNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost, 1) {
         require(
             brandEarningsReceiver != address(0),
             "BrandRegistry: brand registration is disabled since no setup is done for the earnings receiver"

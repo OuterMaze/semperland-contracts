@@ -227,15 +227,16 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      * empty) for when the plugin is added to the metaverse.
      */
     function _initialize() internal override {
-        WMATICType = _defineSystemCurrency(
-            address(this), "WMATIC", "Wrapped MATIC in this metaverse",
-            wmaticImage, wmaticIcon16x16, wmaticIcon32x32, wmaticIcon64x64,
-            "#ffd700"
-        );
-        BEATType = _defineSystemCurrency(
-            address(this), "BEAT", "BEAT coin", beatImage, beatIcon16x16,
-            beatIcon32x32, beatIcon64x64, "#87cefa"
-        );
+        WMATICType = _defineSystemCurrency(address(this), CurrencyMetadata({
+            registered: true, name: "WMATIC", description: "Wrapped MATIC in this world",
+            color: "#ffd700", image: wmaticImage, icon16x16: wmaticIcon16x16,
+            icon32x32: wmaticIcon32x32, icon64x64: wmaticIcon64x64
+        }));
+        BEATType = _defineSystemCurrency(address(this), CurrencyMetadata({
+            registered: true, name: "BEAT", description: "BEAT coin",
+            color: "#87cefa", image: beatImage, icon16x16: beatIcon16x16,
+            icon32x32: beatIcon32x32, icon64x64: beatIcon64x64
+        }));
     }
 
     /**
@@ -348,16 +349,13 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      */
     function _setCurrencyMetadata(
         uint256 _tokenId, address _brandId, address _definedBy, uint256 _paidPrice,
-        string memory _name, string memory _description, string memory _image,
-        string memory _icon16x16, string memory _icon32x32, string memory _icon64x64,
-        string memory _color
+        CurrencyMetadata memory metadata
     ) private {
-        currencies[_tokenId] = CurrencyMetadata({
-            registered: true, name: _name, description: _description, color: _color,
-            image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
-            icon64x64: _icon64x64
-        });
-        emit CurrencyDefined(_tokenId, _brandId, _definedBy, _paidPrice, _name, _description);
+        currencies[_tokenId] = metadata;
+        emit CurrencyDefined(
+            _tokenId, _brandId, _definedBy, _paidPrice, metadata.name,
+            metadata.description
+        );
     }
 
     /**
@@ -365,16 +363,9 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      * of the account or contract that defines the system currency type is passed
      * to this method.
      */
-    function _defineSystemCurrency(
-        address _definedBy, string memory _name, string memory _description,
-        string memory _image, string memory _icon16x16, string memory _icon32x32,
-        string memory _icon64x64, string memory _color
-    ) private returns (uint256) {
+    function _defineSystemCurrency(address _definedBy, CurrencyMetadata memory metadata) private returns (uint256) {
         uint256 id = _defineNextSystemFTType();
-        _setCurrencyMetadata(
-            id, address(0), _definedBy, 0, _name, _description, _image,
-            _icon16x16, _icon32x32, _icon64x64, _color
-        );
+        _setCurrencyMetadata(id, address(0), _definedBy, 0, metadata);
         return id;
     }
 
@@ -385,16 +376,10 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      * will be used to mint this currency for is provided.
      */
     function _defineBrandCurrency(
-        address _brandId, uint256 _paidPrice,
-        address _definedBy, string memory _name, string memory _description,
-        string memory _image, string memory _icon16x16, string memory _icon32x32,
-        string memory _icon64x64, string memory _color
+        address _brandId, uint256 _paidPrice, address _definedBy, CurrencyMetadata memory metadata
     ) private returns (uint256) {
         uint256 id = _defineNextFTType(_brandId);
-        _setCurrencyMetadata(
-            id, _brandId, _definedBy, _paidPrice, _name, _description, _image,
-            _icon16x16, _icon32x32, _icon64x64, _color
-        );
+        _setCurrencyMetadata(id, _brandId, _definedBy, _paidPrice, metadata);
         return id;
     }
 
@@ -407,10 +392,12 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
         string memory _image, string memory _icon16x16, string memory _icon32x32,
         string memory _icon64x64, string memory _color
     ) public onlyMetaverseAllowed(METAVERSE_GIVE_SYSTEM_CURRENCIES) {
-        _defineSystemCurrency(
-            _definedBy, _name, _description, _image, _icon16x16, _icon32x32,
-            _icon64x64, _color
-        );
+        CurrencyMetadata memory metadata = CurrencyMetadata({
+            registered: true, name: _name, description: _description, color: _color,
+            image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
+            icon64x64: _icon64x64
+        });
+        _defineSystemCurrency(_definedBy, metadata);
     }
 
     /**
@@ -422,11 +409,13 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
         string memory _image, string memory _icon16x16, string memory _icon32x32,
         string memory _icon64x64, string memory _color
     ) public payable onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
-      hasNativeTokenPrice("CurrencyPlugin: brand currency definition", currencyDefinitionCost) {
-        _defineBrandCurrency(
-            _brandId, msg.value, msg.sender, _name, _description, _image,
-            _icon16x16, _icon32x32, _icon64x64, _color
-        );
+      hasNativeTokenPrice("CurrencyPlugin: brand currency definition", currencyDefinitionCost, 1) {
+        CurrencyMetadata memory metadata = CurrencyMetadata({
+            registered: true, name: _name, description: _description, color: _color,
+            image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
+            icon64x64: _icon64x64
+        });
+        _defineBrandCurrency(_brandId, msg.value, msg.sender, metadata);
         payable(earningsReceiver).transfer(msg.value);
     }
 
@@ -440,36 +429,46 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
         string memory _image, string memory _icon16x16, string memory _icon32x32,
         string memory _icon64x64, string memory _color
     ) public onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES) {
-        _defineBrandCurrency(
-            _brandId, 0, msg.sender, _name, _description, _image,
-            _icon16x16, _icon32x32, _icon64x64, _color
-        );
+        CurrencyMetadata memory metadata = CurrencyMetadata({
+            registered: true, name: _name, description: _description, color: _color,
+            image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
+            icon64x64: _icon64x64
+        });
+        _defineBrandCurrency(_brandId, 0, msg.sender, metadata);
     }
 
-    function mintSystemCurrency(
-        /** define */
-    ) public onlyMetaverseAllowed(METAVERSE_GIVE_SYSTEM_CURRENCIES) {
-
+    /**
+     * This is a mean granted only to plug-in contracts to mint any
+     * system currency. Due to the sensitivity of this feature, only
+     * plug-ins in the same metaverse are allowed to use this method.
+     */
+    function mintSystemCurrency(uint256 _id, uint256 bulks) public onlyPlugin inSystemFTRange(_id) {
+        require(bulks != 0, "CurrencyPlugin: minting (system scope) issued with no units");
+        // TODO implement.
     }
 
     function mintBrandCurrency(
-        address _brandId // TODO define.
+        address _to, address _brandId, uint256 _id, uint256 bulks
     ) public payable onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
-      hasNativeTokenPrice("CurrencyPlugin: brand currency mint", currencyMintCost) {
+      hasNativeTokenPrice("CurrencyPlugin: minting (for authorized brand)", currencyMintCost, bulks) {
         // TODO implement.
         payable(earningsReceiver).transfer(msg.value);
     }
 
     function mintBrandCurrencyFor(
-        // TODO define.
+        address _to, address _brandId, uint256 _id, uint256 bulks
     ) public onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES)  {
+        require(bulks != 0, "CurrencyPlugin: minting (for arbitrary brand) issued with no units");
         // TODO implement.
     }
 
-    function mintBEAT(
-        // TODO define.
-    ) public onlyMetaverseAllowed(METAVERSE_MINT_BEAT) {
-        // TODO implement.
+    /**
+     * Mints BEAT for a given address. This address may be a brand,
+     * a user, or a contract.
+     */
+    function mintBEAT(address _to, uint256 bulks) public onlyMetaverseAllowed(METAVERSE_MINT_BEAT) {
+        require(bulks != 0, "CurrencyPlugin: BEAT minting issued with no units");
+        _mintFTFor(_to, BEATType, bulks * currencyMintAmount, "BEAT mint");
     }
 
     // DONE: Public method to define a brand currency, being from the brand (and paying the definition fee).
@@ -478,6 +477,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
     // DONE: Public method to define a brand currency, being an admin with that permission.
     // TODO: Public method to mint a brand currency, being an admin with that permission.
     // TODO: - For address 0 (the brand itself) or a specific receiver address.
+    // TODO: Methods to maintain data of a currency: image, color, icons (16x16, 32x32, 64x64).
 
     /**
      * Receives WMATIC and BEAT. BEAT is burned and WMATIC is unwrapped.
