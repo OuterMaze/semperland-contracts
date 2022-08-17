@@ -164,12 +164,6 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
      */
     uint256 brandsCount;
 
-    /**
-     * Tells the current earnings, not yet withdrawn, from brand
-     * registrations.
-     */
-    uint256 public brandRegistrationCurrentEarnings;
-
     // ********** Brand management goes here **********
 
     /**
@@ -251,10 +245,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
         require(bytes(_description).length != 0, "BrandRegistry: use a non-empty description");
         require(bytes(_image).length != 0, "BrandRegistry: use a non-empty image url");
 
-        // 1. Annotate the non-withdrawn earnings with the new amount.
-        brandRegistrationCurrentEarnings += msg.value;
-
-        // 2. Increment the counter and generate the new brand address.
+        // 1. Increment the counter and generate the new brand address.
         //    In the extremely unlikely case that the brand id is 0, this
         //    call will revert.
         brandsCount += 1;
@@ -269,17 +260,17 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
             "BrandRegistry: this brand cannot be minted now - try again later"
         );
 
-        // 3. Register the brand.
+        // 2. Register the brand.
         brands[brandId] = BrandMetadata({
             name: _name, description: _description, challengeUrl: "about:blank",
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
             icon64x64: _icon64x64, owner: _sender, committed: _committed
         });
 
-        // 4. Mint the brand into the economic system for the sender.
+        // 3. Mint the brand into the economic system for the sender.
         IMetaverse(metaverse).mintBrandFor(_sender, brandId);
 
-        // 5. Trigger the event.
+        // 4. Trigger the event.
         emit BrandRegistered(_sender, brandId, _name, _description, msg.value, _mintedBy);
     }
 
@@ -466,10 +457,9 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
             "BrandRegistry: earnings amount must not be 0"
         );
         require(
-            brandRegistrationCurrentEarnings >= amount,
+            address(this).balance >= amount,
             "BrandRegistry: earnings amount is less than the requested amount"
         );
-        brandRegistrationCurrentEarnings -= amount;
         payable(sender).transfer(amount);
     }
 

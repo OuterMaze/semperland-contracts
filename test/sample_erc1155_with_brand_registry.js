@@ -489,7 +489,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   });
 
   it("must have an earnings balance of 6 tokens", async function() {
-    let balance = await contract.brandRegistrationCurrentEarnings();
+    let balance = new BN(await web3.eth.getBalance(contract.address));
     assert.isTrue(
       balance.cmp(new BN("6000000000000000000")) === 0,
       "the current registration earnings are " + balance.toString() + " but they should be 6000000000000000000"
@@ -522,7 +522,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   });
 
   it("must have an earnings balance of 3 tokens", async function() {
-    let balance = await contract.brandRegistrationCurrentEarnings();
+    let balance = new BN(await web3.eth.getBalance(contract.address));
     assert.isTrue(
       balance.cmp(new BN("3000000000000000000")) === 0,
       revertReason(
@@ -587,7 +587,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   });
 
   it("must have an earnings balance of 0 tokens", async function() {
-    let balance = await contract.brandRegistrationCurrentEarnings();
+    let balance = new BN(await web3.eth.getBalance(contract.address));
     assert.isTrue(
       balance.cmp(new BN("0")) === 0,
       "the current registration earnings are " + balance.toString() + " but they should be 0"
