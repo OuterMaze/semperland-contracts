@@ -16,6 +16,13 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
  */
 contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
     /**
+     * The address that will receive earnings from currency
+     * definition & mint operations (executed by brand users
+     * which are appropriately allowed by the brand owner).
+     */
+    address public earningsReceiver;
+
+    /**
      * The current price of the definition of a new currency
      * for a brand. 0 means the definition is disabled by this
      * public mean, until the administration sets a price.
@@ -190,12 +197,13 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      * This plug-in does not require extra details on construction.
      */
     constructor(
-        address _metaverse,
+        address _metaverse, address _earningsReceiver,
         string memory _wmaticImage, string memory _wmaticIcon16x16,
         string memory _wmaticIcon32x32, string memory _wmaticIcon64x64,
         string memory _beatImage, string memory _beatIcon16x16,
         string memory _beatIcon32x32, string memory _beatIcon64x64
     ) MetaversePlugin(_metaverse) {
+        require(_earningsReceiver != address(0), "CurrencyPlugin: the earnings receiver must not be 0");
         wmaticImage = _wmaticImage;
         wmaticIcon16x16 = _wmaticIcon16x16;
         wmaticIcon32x32 = _wmaticIcon32x32;
@@ -204,6 +212,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
         beatIcon16x16 = _beatIcon16x16;
         beatIcon32x32 = _beatIcon32x32;
         beatIcon64x64 = _beatIcon64x64;
+        earningsReceiver = _earningsReceiver;
     }
 
     /**
@@ -291,6 +300,26 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
         onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         currencyMintAmount = newAmount;
+    }
+
+    /**
+     * An event for when the brand currency actions earnings
+     * receiver is changed.
+     */
+    event BrandCurrencyActionsEarningsReceiverUpdated(address newReceiver);
+
+    /**
+     * Set the new brand currency actions earnings receiver.
+     */
+    function setBrandCurrencyActionsEarningsReceiver(address _newReceiver) public
+        onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+    {
+        require(
+            _newReceiver != address(0),
+            "CurrencyPlugin: the brand currency actions earnings receiver must not be the 0 address"
+        );
+        earningsReceiver = _newReceiver;
+        emit BrandCurrencyActionsEarningsReceiverUpdated(_newReceiver);
     }
 
     /**
@@ -398,7 +427,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
             _brandId, msg.value, msg.sender, _name, _description, _image,
             _icon16x16, _icon32x32, _icon64x64, _color
         );
-        // TODO send money to earnings receiver.
+        payable(earningsReceiver).transfer(msg.value);
     }
 
     /**
@@ -428,7 +457,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
     ) public payable onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
       hasNativeTokenPrice("CurrencyPlugin: brand currency mint", currencyMintCost) {
         // TODO implement.
-        // TODO send money to earnings receiver.
+        payable(earningsReceiver).transfer(msg.value);
     }
 
     function mintBrandCurrencyFor(
