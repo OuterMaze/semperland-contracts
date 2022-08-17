@@ -25,6 +25,11 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     address public metaverse;
 
     /**
+     * Tells whether this plug-in is initialized into the metaverse or not.
+     */
+    bool public initialized;
+
+    /**
      * Creating a metaverse plug-in requires a valid metaverse
      * registrar as its owner.
      */
@@ -105,6 +110,7 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
      */
     function initialize() public onlyMetaverse {
         _initialize();
+        initialized = true;
     }
 
     /**
