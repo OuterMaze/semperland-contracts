@@ -100,6 +100,13 @@ contract CurrencyPlugin is MetaversePlugin {
     mapping(uint256 => CurrencyMetadata) currencies;
 
     /**
+     * This permission allows users to define the costs and the
+     * mint amount defined in this contract (e.g. to define and
+     * mint currencies being a brand, paying the fees).
+     */
+    bytes32 constant METAVERSE_MANAGE_CURRENCIES_SETTINGS = keccak256("CurrencyPlugin::Settings::Manage");
+
+    /**
      * This permission allows users to define currencies for free
      * for a brand and/or mint currencies for free for a brand.
      */
@@ -232,6 +239,52 @@ contract CurrencyPlugin is MetaversePlugin {
     }
 
     /**
+     * An event for when the currency definition cost is updated.
+     * Updating it to 0 disables it completely.
+     */
+    event CurrencyDefinitionCostUpdated(uint256 newCost);
+
+    /**
+     * Sets the currency definition cost.
+     */
+    function setCurrencyDefinitionCost(uint256 newCost) public
+        onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+    {
+        currencyDefinitionCost = newCost;
+    }
+
+    /**
+     * An event for when the currency mint cost is updated.
+     * Updating it to 0 disables it completely.
+     */
+    event CurrencyMintCostUpdated(uint256 newCost);
+
+    /**
+     * Sets the currency mint cost.
+     */
+    function setCurrencyMintCost(uint256 newCost) public
+        onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+    {
+        currencyMintCost = newCost;
+    }
+
+    /**
+     * An event for when the currency mint amount is updated.
+     * Typically, this value will be something like 1000 eth
+     * (1000 * 10^18). Updating it to 0 disables it completely.
+     */
+    event CurrencyMintAmountUpdated(uint256 newCost);
+
+    /**
+     * Sets the currency mint amount.
+     */
+    function setCurrencyMintAmount(uint256 newAmount) public
+        onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+    {
+        currencyMintAmount = newAmount;
+    }
+
+    /**
      * This event is triggered when a currency is defined.
      */
     event CurrencyDefined(
@@ -307,17 +360,11 @@ contract CurrencyPlugin is MetaversePlugin {
         return id;
     }
 
-    // An internal method goes here.
+    // TODO: Public method to define a brand currency, being the brand (and paying the definition fee).
+    // TODO: Public method to mint a brand currency, being the brand (in the mint amount, and paying the mint fee).
+    // TODO: - For address 0 (the brand itself) or a specific receiver address.
+    // TODO: Public method to define a brand currency, being an admin with that permission.
+    // TODO: Public method to mint a brand currency, being an admin with that permission.
+    // TODO: - For address 0 (the brand itself) or a specific receiver address.
 
-    // DONE: {1} private method to define a currency type for a brand.
-    // TODO: {2} a cost of currency definition, in MATIC.
-    // TODO: {3} a cost of currency mint, in MATIC.
-    // TODO: {4} an amount of currency mint, when the cost is paid (default: 1000 * 10^18).
-    // TODO: {5} a permission to set the definition cost, mint cost & mint amount.
-    // TODO: {6} an event for when the definition cost is set.
-    // TODO: {7} a public method involving {6}, {5} and {2}.
-    // TODO: {8} and event for when the mint cost is set.
-    // TODO: {9} a public method involving {8}, {5} and {3}.
-    // TODO: {10} an event for when the mint amount is set.
-    // TODO: {11} a public method involving {10}, {5} and and {4}.
 }
