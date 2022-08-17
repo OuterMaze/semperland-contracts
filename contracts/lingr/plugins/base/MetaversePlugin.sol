@@ -43,10 +43,32 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     function title() public view virtual returns (string memory);
 
     /**
-     * This modifier restricts function to be only invoked by the metaverse.
+     * This modifier restricts the function to be only invoked by the metaverse.
      */
     modifier onlyMetaverse() {
         require(_msgSender() == metaverse, "MetaversePlugin: only the owning metaverse can invoke this method");
+        _;
+    }
+
+    /**
+     * This modifier restricts the function to be only invoked by the metaverse's economy.
+     */
+    modifier onlyEconomy() {
+        require(
+            _msgSender() == IMetaverse(metaverse).economy(),
+            "MetaversePlugin: only the owning metaverse's economy can invoke this method"
+        );
+        _;
+    }
+
+    /**
+     * This modifier restricts the function to be only invoked by a metaverse's plug-in.
+     */
+    modifier onlyPlugin() {
+        require(
+            IMetaverse(metaverse).plugins(_msgSender()),
+            "MetaversePlugin: only one of the owning metaverse's plug-ins can invoke this method"
+        );
         _;
     }
 
@@ -183,4 +205,6 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     function _burnNFTs(uint256[] memory _tokenIds) internal {
         IMetaverse(metaverse).burnNFTs(_tokenIds);
     }
+
+
 }
