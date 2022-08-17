@@ -3,6 +3,7 @@ pragma solidity >=0.8 <0.9.0;
 
 import "./base/MetaversePlugin.sol";
 import "../../NativePayable.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 
 /**
  * The currency plug-in defines two currencies (WMATIC, which
@@ -13,7 +14,7 @@ import "../../NativePayable.sol";
  *
  * Currencies will hold their metadata in their own structure.
  */
-contract CurrencyPlugin is MetaversePlugin, NativePayable {
+contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
     /**
      * The current price of the definition of a new currency
      * for a brand. 0 means the definition is disabled by this
@@ -397,6 +398,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable {
             _brandId, msg.value, msg.sender, _name, _description, _image,
             _icon16x16, _icon32x32, _icon64x64, _color
         );
+        // TODO send money to earnings receiver.
     }
 
     /**
@@ -416,28 +418,29 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable {
     }
 
     function mintSystemCurrency(
-
+        /** define */
     ) public onlyMetaverseAllowed(METAVERSE_GIVE_SYSTEM_CURRENCIES) {
 
     }
 
     function mintBrandCurrency(
-
+        address _brandId // TODO define.
     ) public payable onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
       hasNativeTokenPrice("CurrencyPlugin: brand currency mint", currencyMintCost) {
-
+        // TODO implement.
+        // TODO send money to earnings receiver.
     }
 
     function mintBrandCurrencyFor(
-
+        // TODO define.
     ) public onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES)  {
-
+        // TODO implement.
     }
 
     function mintBEAT(
-
+        // TODO define.
     ) public onlyMetaverseAllowed(METAVERSE_MINT_BEAT) {
-
+        // TODO implement.
     }
 
     // DONE: Public method to define a brand currency, being from the brand (and paying the definition fee).
@@ -447,4 +450,55 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable {
     // TODO: Public method to mint a brand currency, being an admin with that permission.
     // TODO: - For address 0 (the brand itself) or a specific receiver address.
 
+    /**
+     * Receives WMATIC and BEAT. BEAT is burned and WMATIC is unwrapped.
+     * Other tokens are all rejected.
+     */
+    function _receiveToken(address operator, address from, uint256 id, uint256 value) private {
+        if (id == WMATICType) {
+            require(
+                operator == from,
+                "CurrencyPlugin: for safety, only the owner is able to unwrap these tokens"
+            );
+            payable(from).transfer(value);
+        } else if (id == BEATType) {
+            _burnFT(BEATType, value);
+        } else {
+            revert("CurrencyPlugin: cannot receive other tokens than WMATIC and BEAT");
+        }
+    }
+
+    /**
+     * Callback to manage the reception of ERC-1155 tokens from the Economy.
+     * This callback can only be invoked from the economy system.
+     */
+    function onERC1155Received(
+        address operator, address from, uint256 id, uint256 value, bytes calldata data
+    ) external onlyEconomy returns (bytes4) {
+        _receiveToken(operator, from, id, value);
+        return 0xf23a6e61;
+    }
+
+    /**
+     * Callback to manage the reception of ERC-1155 tokens from the Economy.
+     * This callback can only be invoked from the economy system.
+     */
+    function onERC1155BatchReceived(
+        address operator, address from, uint256[] calldata ids, uint256[] calldata values,
+        bytes calldata data
+    ) external onlyEconomy returns (bytes4) {
+        uint256 length = ids.length;
+        for(uint256 index = 0; index < length; index++) {
+            _receiveToken(operator, from, ids[index], values[index]);
+        }
+        return 0xbc197c81;
+    }
+
+    /**
+     * Receiving MATIC involves automatically wrapping it into WMATIC tokens
+     * for the exact address sender.
+     */
+    receive() {
+        _mintFTFor(_msgSender(), WMATICType, msg.value, "WMATIC mint");
+    }
 }
