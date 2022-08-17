@@ -131,9 +131,64 @@ contract CurrencyPlugin is MetaversePlugin {
     uint256 public BEATType;
 
     /**
+     * The main image for WMATIC.
+     */
+    string private wmaticImage;
+
+    /**
+     * The 16x16 icon for WMATIC.
+     */
+    string private wmaticIcon16x16;
+
+    /**
+     * The 32x32 icon for WMATIC.
+     */
+    string private wmaticIcon32x32;
+
+    /**
+     * The 64x64 icon for WMATIC.
+     */
+    string private wmaticIcon64x64;
+
+    /**
+     * The main image for BEAT.
+     */
+    string private beatImage;
+
+    /**
+     * The 16x16 icon for BEAT.
+     */
+    string private beatIcon16x16;
+
+    /**
+     * The 32x32 icon for BEAT.
+     */
+    string private beatIcon32x32;
+
+    /**
+     * The 64x64 icon for BEAT.
+     */
+    string private beatIcon64x64;
+
+    /**
      * This plug-in does not require extra details on construction.
      */
-    constructor(address _metaverse) MetaversePlugin(_metaverse) {}
+    constructor(
+        address _metaverse,
+        string memory _wmaticImage, string memory _wmaticIcon16x16,
+        string memory _wmaticIcon32x32, string memory _wmaticIcon64x64,
+        string memory _beatImage, string memory _beatIcon16x16,
+        string memory _beatIcon32x32, string memory _beatIcon64x64
+    ) MetaversePlugin(_metaverse) {
+        wmaticImage = _wmaticImage;
+        wmaticIcon16x16 = _wmaticIcon16x16;
+        wmaticIcon32x32 = _wmaticIcon32x32;
+        wmaticIcon64x64 = _wmaticIcon64x64;
+        beatImage = _beatImage;
+        beatIcon16x16 = _beatIcon16x16;
+        beatIcon32x32 = _beatIcon32x32;
+        beatIcon64x64 = _beatIcon64x64;
+    }
 
     /**
      * The title of the current plug-in is "Currency".
@@ -147,8 +202,15 @@ contract CurrencyPlugin is MetaversePlugin {
      * empty) for when the plugin is added to the metaverse.
      */
     function _initialize() internal override {
-        WMATICType = _defineNextSystemFTType();
-        BEATType = _defineNextSystemFTType();
+        WMATICType = _defineSystemCurrency(
+            address(this), "WMATIC", "Wrapped MATIC in this metaverse",
+            wmaticImage, wmaticIcon16x16, wmaticIcon32x32, wmaticIcon64x64,
+            "#ffd700"
+        );
+        BEATType = _defineSystemCurrency(
+            address(this), "BEAT", "BEAT coin", beatImage, beatIcon16x16,
+            beatIcon32x32, beatIcon64x64, "#87cefa"
+        );
     }
 
     /**
@@ -174,7 +236,7 @@ contract CurrencyPlugin is MetaversePlugin {
      */
     event CurrencyDefined(
         uint256 indexed tokenId, address indexed brandId, address indexed definedBy,
-        string name, string description
+        uint256 paidPrice, string name, string description
     );
 
     /**
@@ -193,8 +255,8 @@ contract CurrencyPlugin is MetaversePlugin {
      * no collision, so the entry can be added -and an event can be triggered- to
      * the currencies metadata.
      */
-    function _defineCurrency(
-        uint256 _tokenId, address _brandId, address _definedBy, uint256 _pricePaid,
+    function _setCurrencyMetadata(
+        uint256 _tokenId, address _brandId, address _definedBy, uint256 _paidPrice,
         string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64,
         string memory _color
@@ -204,12 +266,50 @@ contract CurrencyPlugin is MetaversePlugin {
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
             icon64x64: _icon64x64
         });
-        emit CurrencyDefined(_tokenId, _brandId, _definedBy, _name, _description);
+        emit CurrencyDefined(_tokenId, _brandId, _definedBy, _paidPrice, _name, _description);
+    }
+
+    /**
+     * Defines a new system currency type. Aside from the metadata, the address
+     * of the account or contract that defines the system currency type is passed
+     * to this method.
+     */
+    function _defineSystemCurrency(
+        address _definedBy, string memory _name, string memory _description,
+        string memory _image, string memory _icon16x16, string memory _icon32x32,
+        string memory _icon64x64, string memory _color
+    ) private returns (uint256) {
+        uint256 id = _defineNextSystemFTType();
+        _setCurrencyMetadata(
+            id, address(0), _definedBy, 0, _name, _description, _image,
+            _icon16x16, _icon32x32, _icon64x64, _color
+        );
+        return id;
+    }
+
+    /**
+     * Defines a new brand currency type. Aside from the metadata, the address
+     * of the account or contract that defines the brand currency type, and the
+     * price paid for this type definition are provided. Also, the brand that
+     * will be used to mint this currency for is provided.
+     */
+    function _defineBrandCurrency(
+        address _brandId, uint256 _paidPrice,
+        address _definedBy, string memory _name, string memory _description,
+        string memory _image, string memory _icon16x16, string memory _icon32x32,
+        string memory _icon64x64, string memory _color
+    ) private returns (uint256) {
+        uint256 id = _defineNextFTType(_brandId);
+        _setCurrencyMetadata(
+            id, _brandId, _definedBy, _paidPrice, _name, _description, _image,
+            _icon16x16, _icon32x32, _icon64x64, _color
+        );
+        return id;
     }
 
     // An internal method goes here.
 
-    // TODO: {1} private method to define a currency type for a brand.
+    // DONE: {1} private method to define a currency type for a brand.
     // TODO: {2} a cost of currency definition, in MATIC.
     // TODO: {3} a cost of currency mint, in MATIC.
     // TODO: {4} an amount of currency mint, when the cost is paid (default: 1000 * 10^18).
