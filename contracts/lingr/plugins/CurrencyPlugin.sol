@@ -473,7 +473,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      * This callback can only be invoked from the economy system.
      */
     function onERC1155Received(
-        address operator, address from, uint256 id, uint256 value, bytes calldata data
+        address operator, address from, uint256 id, uint256 value, bytes calldata
     ) external onlyEconomy returns (bytes4) {
         _receiveToken(operator, from, id, value);
         return 0xf23a6e61;
@@ -485,7 +485,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      */
     function onERC1155BatchReceived(
         address operator, address from, uint256[] calldata ids, uint256[] calldata values,
-        bytes calldata data
+        bytes calldata
     ) external onlyEconomy returns (bytes4) {
         uint256 length = ids.length;
         for(uint256 index = 0; index < length; index++) {
@@ -498,7 +498,11 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      * Receiving MATIC involves automatically wrapping it into WMATIC tokens
      * for the exact address sender.
      */
-    receive() {
-        _mintFTFor(_msgSender(), WMATICType, msg.value, "WMATIC mint");
+    receive() external payable {
+        require(
+            initialized,
+            "CurrencyPlugin: cannot receive MATIC because the plug-in is not yet initialized"
+        );
+        _mintFTFor(_msgSender(), WMATICType, msg.value, "Currency wrapping");
     }
 }
