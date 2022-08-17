@@ -2,6 +2,7 @@
 pragma solidity >=0.8 <0.9.0;
 
 import "./base/MetaversePlugin.sol";
+import "../../NativePayable.sol";
 
 /**
  * The currency plug-in defines two currencies (WMATIC, which
@@ -12,7 +13,7 @@ import "./base/MetaversePlugin.sol";
  *
  * Currencies will hold their metadata in their own structure.
  */
-contract CurrencyPlugin is MetaversePlugin {
+contract CurrencyPlugin is MetaversePlugin, NativePayable {
     /**
      * The current price of the definition of a new currency
      * for a brand. 0 means the definition is disabled by this
@@ -107,10 +108,17 @@ contract CurrencyPlugin is MetaversePlugin {
     bytes32 constant METAVERSE_MANAGE_CURRENCIES_SETTINGS = keccak256("CurrencyPlugin::Settings::Manage");
 
     /**
+     * This permission allows users to define currencies in the
+     * system scope. This permission will only be granted to
+     * other plug-in contracts, actually.
+     */
+    bytes32 constant METAVERSE_GIVE_SYSTEM_CURRENCIES = keccak256("CurrencyPlugin::Currencies::System::Give");
+
+    /**
      * This permission allows users to define currencies for free
      * for a brand and/or mint currencies for free for a brand.
      */
-    bytes32 constant METAVERSE_GIVE_BRAND_CURRENCIES = keccak256("CurrencyPlugin::Currencies::Give");
+    bytes32 constant METAVERSE_GIVE_BRAND_CURRENCIES = keccak256("CurrencyPlugin::Currencies::Brands::Give");
 
     /**
      * This permission allows users to mint BEAT for a given
@@ -125,7 +133,7 @@ contract CurrencyPlugin is MetaversePlugin {
      * user edit the metadata of an existing currency (that operation
      * is free).
      */
-    bytes32 constant BRAND_MANAGE_CURRENCY = keccak256("CurrencyPlugin::Brand::Currencies::Manage");
+    bytes32 constant BRAND_MANAGE_CURRENCIES = keccak256("CurrencyPlugin::Brand::Currencies::Manage");
 
     /**
      * The id of the WMATIC type. Set on initialization.
@@ -360,10 +368,82 @@ contract CurrencyPlugin is MetaversePlugin {
         return id;
     }
 
-    // TODO: Public method to define a brand currency, being the brand (and paying the definition fee).
+    /**
+     * Defines a new system currency. This is meant to be called from
+     * other contracts.
+     */
+    function defineSystemCurrency(
+        address _definedBy, string memory _name, string memory _description,
+        string memory _image, string memory _icon16x16, string memory _icon32x32,
+        string memory _icon64x64, string memory _color
+    ) public onlyMetaverseAllowed(METAVERSE_GIVE_SYSTEM_CURRENCIES) {
+        _defineSystemCurrency(
+            _definedBy, _name, _description, _image, _icon16x16, _icon32x32,
+            _icon64x64, _color
+        );
+    }
+
+    /**
+     * Defines a new brand currency. This is meant to be called by users
+     * that are authorized inside a brand, and has an associated cost.
+     */
+    function defineBrandCurrency(
+        address _brandId, string memory _name, string memory _description,
+        string memory _image, string memory _icon16x16, string memory _icon32x32,
+        string memory _icon64x64, string memory _color
+    ) public payable onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
+      hasNativeTokenPrice("CurrencyPlugin: brand currency definition", currencyDefinitionCost) {
+        _defineBrandCurrency(
+            _brandId, msg.value, msg.sender, _name, _description, _image,
+            _icon16x16, _icon32x32, _icon64x64, _color
+        );
+    }
+
+    /**
+     * Defines a new brand currency. This is meant to be called by users
+     * that are authorized by the metaverse (defining brand currencies
+     * for an arbitrary brand), and this operation has no cost.
+     */
+    function defineBrandCurrencyFor(
+        address _brandId, string memory _name, string memory _description,
+        string memory _image, string memory _icon16x16, string memory _icon32x32,
+        string memory _icon64x64, string memory _color
+    ) public onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES) {
+        _defineBrandCurrency(
+            _brandId, 0, msg.sender, _name, _description, _image,
+            _icon16x16, _icon32x32, _icon64x64, _color
+        );
+    }
+
+    function mintSystemCurrency(
+
+    ) public onlyMetaverseAllowed(METAVERSE_GIVE_SYSTEM_CURRENCIES) {
+
+    }
+
+    function mintBrandCurrency(
+
+    ) public payable onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
+      hasNativeTokenPrice("CurrencyPlugin: brand currency mint", currencyMintCost) {
+
+    }
+
+    function mintBrandCurrencyFor(
+
+    ) public onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES)  {
+
+    }
+
+    function mintBEAT(
+
+    ) public onlyMetaverseAllowed(METAVERSE_MINT_BEAT) {
+
+    }
+
+    // DONE: Public method to define a brand currency, being from the brand (and paying the definition fee).
     // TODO: Public method to mint a brand currency, being the brand (in the mint amount, and paying the mint fee).
     // TODO: - For address 0 (the brand itself) or a specific receiver address.
-    // TODO: Public method to define a brand currency, being an admin with that permission.
+    // DONE: Public method to define a brand currency, being an admin with that permission.
     // TODO: Public method to mint a brand currency, being an admin with that permission.
     // TODO: - For address 0 (the brand itself) or a specific receiver address.
 
