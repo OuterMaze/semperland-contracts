@@ -19,10 +19,16 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   var metaverse = null;
   var contract = null;
 
+  const SUPERUSER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+  const BRAND_EDITOR = web3.utils.soliditySha3("BrandRegistry::Brand::Edit");
+  const METAVERSE_MANAGE_REGISTRATION_SETTINGS = web3.utils.soliditySha3("BrandRegistry::Settings::Manage");
+  const METAVERSE_SET_BRAND_COMMITMENT = web3.utils.soliditySha3("BrandRegistry::SetBrandCommitment");
+  const METAVERSE_MINT_BRAND_FOR = web3.utils.soliditySha3("BrandRegistry::Brands::MintFor");
+
   before(async function () {
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
-    contract = await BrandRegistry.new(metaverse.address, { from: accounts[0] });
+    contract = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(contract.address, { from: accounts[0] });
   });
@@ -99,7 +105,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
 
   // 7. Create a mew brand (a happy case), using account 1 and spending 2 ether.
   //    Also expect the appropriate events.
-  it("must successfully create a brand", async function () {
+  it("must successfully create a brand (account 9 will receive 2 eth)", async function () {
     let hash = web3.utils.soliditySha3(
       "0xd6", "0x94", contract.address, accounts[1], 1
     );
@@ -115,6 +121,54 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
         "description": "My awesome brand 1", "price": new BN("2000000000000000000"),
         "mintedBy": constants.ZERO_ADDRESS
       }
+    );
+
+    let balance = new BN(await web3.eth.getBalance(accounts[9]));
+    assert.isTrue(
+      balance.cmp(new BN("102000000000000000000")) === 0,
+      revertReason(
+        "BrandRegistry: the current registration earnings are " + balance.toString() +
+        " but they should be 102000000000000000000 for account 9 (base 100 eth + 2 new eth)"
+      )
+    );
+  });
+
+  it("must not allow account 1 to set the earnings receiver", async function() {
+    await expectRevert(
+      contract.setBrandRegistrationEarningsReceiver(accounts[8], { from: accounts[1] }),
+      revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must allow account 0 to grant the permission to set earnings receiver to account 1", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_REGISTRATION_SETTINGS, accounts[1], true, {from: accounts[0]}),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_REGISTRATION_SETTINGS, "user": accounts[1], "set": true, sender: accounts[0]
+      }
+    );
+  });
+
+  it("must allow the account 0 to set the brand registration price to 4 ether", async function () {
+    await expectEvent(
+      await contract.setBrandRegistrationEarningsReceiver(accounts[8], { from: accounts[1] }),
+      "BrandRegistrationEarningsReceiverUpdated", {"newReceiver": accounts[8]}
+    );
+  });
+
+  it("must allow account 0 to revoke the permission to set earnings receiver to account 1", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_REGISTRATION_SETTINGS, accounts[1], false, {from: accounts[0]}),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_REGISTRATION_SETTINGS, "user": accounts[1], "set": false, sender: accounts[0]
+      }
+    );
+  });
+
+  it("must not allow account 1 to set the earnings receiver", async function() {
+    await expectRevert(
+      contract.setBrandRegistrationEarningsReceiver(accounts[8], { from: accounts[1] }),
+      revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
     );
   });
 
@@ -155,7 +209,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
 
   // 10. Create a new brand (a happy case), using account 1 and spending 4 ether.
   //     Also expect the appropriate events.
-  it("must successfully create a brand", async function () {
+  it("must successfully create a brand (account 8 will receive 4 eth)", async function () {
     let hash = web3.utils.soliditySha3(
         "0xd6", "0x94", contract.address, accounts[1], 2
     );
@@ -171,6 +225,15 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
         "description": "My awesome brand 2", "price": new BN("4000000000000000000"),
         "mintedBy": constants.ZERO_ADDRESS
       }
+    );
+
+    let balance = new BN(await web3.eth.getBalance(accounts[8]));
+    assert.isTrue(
+      balance.cmp(new BN("104000000000000000000")) === 0,
+      revertReason(
+        "BrandRegistry: the current registration earnings are " + balance.toString() +
+        " but they should be 104000000000000000000 for account 8 (base 100 eth + 4 new eth)"
+      )
     );
   });
 
@@ -349,12 +412,6 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
     });
   });
 
-  const SUPERUSER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-  const BRAND_EDITOR = web3.utils.soliditySha3("BrandRegistry::Brand::Edit");
-  const METAVERSE_WITHDRAW_EARNINGS = web3.utils.soliditySha3("BrandRegistry::WithdrawBrandRegistrationEarnings");
-  const METAVERSE_SET_BRAND_COMMITMENT = web3.utils.soliditySha3("BrandRegistry::SetBrandCommitment");
-  const METAVERSE_MINT_BRAND_FOR = web3.utils.soliditySha3("BrandRegistry::Brands::MintFor");
-
   // 29. Change brand icon 64 (using addresses[1]).
   // 30. Test the JSON metadata for brand 1.
   // 31. This must revert: Change brand icon 64 (using addresses[0]).
@@ -486,117 +543,6 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
         "committed":false
       }
     });
-  });
-
-  it("must have an earnings balance of 6 tokens", async function() {
-    let balance = new BN(await web3.eth.getBalance(contract.address));
-    assert.isTrue(
-      balance.cmp(new BN("6000000000000000000")) === 0,
-      "the current registration earnings are " + balance.toString() + " but they should be 6000000000000000000"
-    );
-  });
-
-  it("must not allow the account 1 to withdraw earnings (3 tokens)", async function() {
-    await expectRevert(
-      contract.withdrawBrandRegistrationEarnings(new BN("3000000000000000000"), {from: accounts[1]}),
-      revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must not allow the account 0 to withdraw more than 6 tokens", async function() {
-    await expectRevert(
-      contract.withdrawBrandRegistrationEarnings(new BN("6000000000000000001"), {from: accounts[0]}),
-      revertReason("BrandRegistry: earnings amount is less than the requested amount")
-    );
-  });
-
-  it("must not allow the account 0 to withdraw 0 tokens", async function() {
-    await expectRevert(
-      contract.withdrawBrandRegistrationEarnings(new BN("0"), {from: accounts[0]}),
-      revertReason("BrandRegistry: earnings amount must not be 0")
-    );
-  });
-
-  it("must allow the account 0 to withdraw 3 tokens", async function() {
-    await contract.withdrawBrandRegistrationEarnings(new BN("3000000000000000000"), {from: accounts[0]});
-  });
-
-  it("must have an earnings balance of 3 tokens", async function() {
-    let balance = new BN(await web3.eth.getBalance(contract.address));
-    assert.isTrue(
-      balance.cmp(new BN("3000000000000000000")) === 0,
-      revertReason(
-        "BrandRegistry: the current registration earnings are " + balance.toString() +
-        " but they should be 3000000000000000000"
-      )
-    );
-  });
-
-  it("must not allow the account 0 to withdraw more than 3 tokens", async function() {
-    await expectRevert(
-      contract.withdrawBrandRegistrationEarnings(new BN("3000000000000000001"), {from: accounts[0]}),
-      revertReason("BrandRegistry: earnings amount is less than the requested amount")
-    );
-  });
-
-  it("must not allow the account 1 to grant withdraw permission on itself", async function() {
-    await expectRevert(
-      metaverse.setPermission(METAVERSE_WITHDRAW_EARNINGS, accounts[1], false, {from: accounts[1]}),
-      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must allow the account 0 to grant the withdraw permission to account 1", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_WITHDRAW_EARNINGS, accounts[1], true, {from: accounts[0]}),
-      "PermissionChanged", {
-        "permission": METAVERSE_WITHDRAW_EARNINGS, "user": accounts[1], "set": true, sender: accounts[0]
-      }
-    );
-  });
-
-  it("must allow the account 1 to withdraw 2 tokens", async function() {
-    await contract.withdrawBrandRegistrationEarnings(new BN("2000000000000000000"), {from: accounts[1]});
-  });
-
-  it("must not allow the account 2 to revoke the withdraw permission to account 1", async function() {
-    await expectRevert(
-      metaverse.setPermission(METAVERSE_WITHDRAW_EARNINGS, accounts[1], false, {from: accounts[2]}),
-      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must allow the account 0 to revoke the withdraw permission to account 1", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_WITHDRAW_EARNINGS, accounts[1], false, {from: accounts[0]}),
-      "PermissionChanged", {
-        "permission": METAVERSE_WITHDRAW_EARNINGS, "user": accounts[1], "set": false, sender: accounts[0]
-      }
-    );
-  });
-
-  it("must not allow the account 1 to withdraw 1 token", async function() {
-    await expectRevert(
-      contract.withdrawBrandRegistrationEarnings(new BN("1000000000000000000"), {from: accounts[1]}),
-      revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must allow the account 0 to withdraw 1 token", async function() {
-    await contract.withdrawBrandRegistrationEarnings(new BN("1000000000000000000"), {from: accounts[0]});
-  });
-
-  it("must have an earnings balance of 0 tokens", async function() {
-    let balance = new BN(await web3.eth.getBalance(contract.address));
-    assert.isTrue(
-      balance.cmp(new BN("0")) === 0,
-      "the current registration earnings are " + balance.toString() + " but they should be 0"
-    );
-    let nativeBalance = new BN(await web3.eth.getBalance(contract.address));
-    assert.isTrue(
-      nativeBalance.cmp(new BN(0)) === 0,
-      "the current native balance must be 0, but it is " + nativeBalance.toString()
-    );
   });
 
   it("must not allow account 1 to set the brand commitment", async function() {

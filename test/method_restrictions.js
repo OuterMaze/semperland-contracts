@@ -22,7 +22,7 @@ contract("SampleERC1155WithBrandRegistry", function (accounts) {
   before(async function () {
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
-    contract = await BrandRegistry.new(metaverse.address, { from: accounts[0] });
+    contract = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(contract.address, { from: accounts[0] });
   });

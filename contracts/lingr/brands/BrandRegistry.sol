@@ -28,6 +28,12 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
     address public metaverse;
 
     /**
+     * The address who will receive the earnings of the brand
+     * registration process (when triggered by the public mean).
+     */
+    address public brandEarningsReceiver;
+
+    /**
      * The cost to register a new brand. This can be changed in
      * the future and must be able to be known in the ABI for the
      * users to be aware of the statistic. By default, defining
@@ -124,7 +130,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
      * (Metaverse-scope) Permission: The user is allowed to set
      * the brand registration cost.
      */
-    bytes32 constant METAVERSE_SET_BRAND_REGISTRATION_COST = keccak256("BrandRegistry::SetBrandRegistrationCost");
+    bytes32 constant METAVERSE_MANAGE_REGISTRATION_SETTINGS = keccak256("BrandRegistry::Settings::Manage");
 
     /**
      * (Metaverse-scope) Permission: The user is allowed to set
@@ -133,14 +139,6 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
      * metaverse's social commitment views.
      */
     bytes32 constant METAVERSE_SET_BRAND_COMMITMENT = keccak256("BrandRegistry::SetBrandCommitment");
-
-    /**
-     * (Metaverse-scope) Permission: The user is allowed to withdraw
-     * the earnings from brand registrations, which reside in this
-     * contract since the very moment a brand is registered.
-     */
-    bytes32 constant METAVERSE_WITHDRAW_BRAND_REGISTRATION_EARNINGS =
-        keccak256("BrandRegistry::WithdrawBrandRegistrationEarnings");
 
     /**
      * (Metaverse-scope) Permission: The user is allowed to mint
@@ -172,16 +170,23 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
     event BrandRegistrationCostUpdated(uint256 newCost);
 
     /**
+     * An event for when the brand registration earnings receiver is changed.
+     */
+    event BrandRegistrationEarningsReceiverUpdated(address newReceiver);
+
+    /**
      * Creating a brand registry requires a valid metaverse
      * registrar as its owner.
      */
-    constructor(address _metaverse) {
+    constructor(address _metaverse, address _brandEarningsReceiver) {
+        require(_brandEarningsReceiver != address(0), "BrandRegistry: the earnings receiver must not be 0");
         require(_metaverse != address(0), "BrandRegistry: the owner contract must not be 0");
         require(
             _metaverse.supportsInterface(type(IMetaverse).interfaceId),
             "BrandRegistry: the owner contract must implement IMetaverse"
         );
         metaverse = _metaverse;
+        brandEarningsReceiver = _brandEarningsReceiver;
     }
 
     /**
@@ -196,7 +201,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
      * Sets the new brand registration cost.
      */
     function setBrandRegistrationCost(uint256 _newCost) public
-        onlyMetaverseAllowed(METAVERSE_SET_BRAND_REGISTRATION_COST)
+        onlyMetaverseAllowed(METAVERSE_MANAGE_REGISTRATION_SETTINGS)
     {
         require(
             _newCost == 0 || _newCost >= (1 ether) / 100,
@@ -204,6 +209,20 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
         );
         brandRegistrationCost = _newCost;
         emit BrandRegistrationCostUpdated(_newCost);
+    }
+
+    /**
+     * Set the new brand registration earnings receiver.
+     */
+    function setBrandRegistrationEarningsReceiver(address _newReceiver) public
+        onlyMetaverseAllowed(METAVERSE_MANAGE_REGISTRATION_SETTINGS)
+    {
+        require(
+            _newReceiver != address(0),
+            "BrandRegistry: the brand registry earnings receiver must not be the 0 address"
+        );
+        brandEarningsReceiver = _newReceiver;
+        emit BrandRegistrationEarningsReceiverUpdated(_newReceiver);
     }
 
     // ********** Brand registration & management goes here **********
@@ -283,9 +302,14 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
         string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
     ) public payable hasNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost) {
+        require(
+            brandEarningsReceiver != address(0),
+            "BrandRegistry: brand registration is disabled since no setup is done for the earnings receiver"
+        );
         _registerBrand(
             _msgSender(), address(0), _name, _description, _image, _icon16x16, _icon32x32, _icon64x64, false
         );
+        payable(brandEarningsReceiver).transfer(msg.value);
     }
 
     /**
@@ -439,29 +463,6 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
     }
 
     // ********** Brand registration earnings management goes here **********
-
-    /**
-     * This event is triggered when brand earnings were withdrawn successfully.
-     */
-    event BrandEarningsWithdrawn(address indexed withdrawnBy, uint256 amount);
-
-    /**
-     * Allows the sender to withdraw brand registration earnings.
-     */
-    function withdrawBrandRegistrationEarnings(uint256 amount) public
-        onlyMetaverseAllowed(METAVERSE_WITHDRAW_BRAND_REGISTRATION_EARNINGS)
-    {
-        address sender = _msgSender();
-        require(
-            amount > 0,
-            "BrandRegistry: earnings amount must not be 0"
-        );
-        require(
-            address(this).balance >= amount,
-            "BrandRegistry: earnings amount is less than the requested amount"
-        );
-        payable(sender).transfer(amount);
-    }
 
     /**
      * A brand registry satisfies the IBrandRegistry and IERC165.
