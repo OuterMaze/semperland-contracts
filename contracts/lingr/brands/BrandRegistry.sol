@@ -28,7 +28,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
     address public metaverse;
 
     /**
-     * The address who will receive the earnings of the brand
+     * The address that will receive the earnings of the brand
      * registration process (when triggered by the public mean).
      */
     address public brandEarningsReceiver;
