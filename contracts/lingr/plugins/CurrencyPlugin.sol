@@ -385,13 +385,13 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
 
     /**
      * Defines a new system currency. This is meant to be called from
-     * other contracts.
+     * other plug-ins.
      */
     function defineSystemCurrency(
         address _definedBy, string memory _name, string memory _description,
         string memory _image, string memory _icon16x16, string memory _icon32x32,
         string memory _icon64x64, string memory _color
-    ) public onlyMetaverseAllowed(METAVERSE_GIVE_SYSTEM_CURRENCIES) {
+    ) public onlyPlugin {
         CurrencyMetadata memory metadata = CurrencyMetadata({
             registered: true, name: _name, description: _description, color: _color,
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
@@ -499,7 +499,13 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
         } else if (id == BEATType) {
             _burnFT(BEATType, value);
         } else {
-            revert("CurrencyPlugin: cannot receive other tokens than WMATIC and BEAT");
+            // Only plug-ins can burn currencies (and only currencies)
+            // by safe-transferring them to this contract.
+            if (IMetaverse(metaverse).plugins(_msgSender()) && currencies[id].registered) {
+                _burnFT(id, value);
+            } else {
+                revert("CurrencyPlugin: cannot receive, from users, other tokens than WMATIC and BEAT");
+            }
         }
     }
 
