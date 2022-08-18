@@ -438,28 +438,39 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
     }
 
     /**
+     * This modifier requires the mint amount to be nonzero.
+     */
+    modifier nonzeroMintAmount() {
+        require(currencyMintAmount != 0, "CurrencyPlugin: minting is disabled while the mint to amount per bulk is 0");
+        _;
+    }
+
+    /**
      * This is a mean granted only to plug-in contracts to mint any
      * system currency. Due to the sensitivity of this feature, only
      * plug-ins in the same metaverse are allowed to use this method.
      */
-    function mintSystemCurrency(uint256 _id, uint256 bulks) public onlyPlugin inSystemFTRange(_id) {
+    function mintSystemCurrency(
+        address _to, uint256 _id, uint256 bulks
+    ) public onlyPlugin inSystemFTRange(_id) nonzeroMintAmount {
         require(bulks != 0, "CurrencyPlugin: minting (system scope) issued with no units");
-        // TODO implement.
+        _mintFTFor(_to, _id, bulks * currencyMintAmount, "system currency mint");
     }
 
     function mintBrandCurrency(
         address _to, address _brandId, uint256 _id, uint256 bulks
-    ) public payable onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
+    ) public payable inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
+      nonzeroMintAmount
       hasNativeTokenPrice("CurrencyPlugin: minting (for authorized brand)", currencyMintCost, bulks) {
-        // TODO implement.
         payable(earningsReceiver).transfer(msg.value);
+        _mintFTFor(_to, _id, bulks * currencyMintAmount, "paid brand mint");
     }
 
     function mintBrandCurrencyFor(
-        address _to, address _brandId, uint256 _id, uint256 bulks
-    ) public onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES)  {
-        require(bulks != 0, "CurrencyPlugin: minting (for arbitrary brand) issued with no units");
-        // TODO implement.
+        address _to, uint256 _id, uint256 bulks
+    ) public inBrandFTRange(address(0), _id) onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES) nonzeroMintAmount {
+        require(bulks != 0, "CurrencyPlugin: minting (system scope) issued with no units");
+        _mintFTFor(_to, _id, bulks * currencyMintAmount, "gifted brand mint");
     }
 
     /**
@@ -471,12 +482,6 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
         _mintFTFor(_to, BEATType, bulks * currencyMintAmount, "BEAT mint");
     }
 
-    // DONE: Public method to define a brand currency, being from the brand (and paying the definition fee).
-    // TODO: Public method to mint a brand currency, being the brand (in the mint amount, and paying the mint fee).
-    // TODO: - For address 0 (the brand itself) or a specific receiver address.
-    // DONE: Public method to define a brand currency, being an admin with that permission.
-    // TODO: Public method to mint a brand currency, being an admin with that permission.
-    // TODO: - For address 0 (the brand itself) or a specific receiver address.
     // TODO: Methods to maintain data of a currency: image, color, icons (16x16, 32x32, 64x64).
 
     /**
@@ -489,6 +494,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
                 operator == from,
                 "CurrencyPlugin: for safety, only the owner is able to unwrap these tokens"
             );
+            _burnFT(WMATICType, value);
             payable(from).transfer(value);
         } else if (id == BEATType) {
             _burnFT(BEATType, value);
