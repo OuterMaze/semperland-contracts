@@ -116,13 +116,6 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
     bytes32 constant METAVERSE_MANAGE_CURRENCIES_SETTINGS = keccak256("CurrencyPlugin::Settings::Manage");
 
     /**
-     * This permission allows users to define currencies in the
-     * system scope. This permission will only be granted to
-     * other plug-in contracts, actually.
-     */
-    bytes32 constant METAVERSE_GIVE_SYSTEM_CURRENCIES = keccak256("CurrencyPlugin::Currencies::System::Give");
-
-    /**
      * This permission allows users to define currencies for free
      * for a brand and/or mint currencies for free for a brand.
      */
@@ -483,6 +476,19 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
     }
 
     // TODO: Methods to maintain data of a currency: image, color, icons (16x16, 32x32, 64x64).
+    // setBrandCurrencyImage (triggers event CurrencyUpdated(_msgSender(), id))
+    // setBrandCurrencyColor (triggers event CurrencyUpdated(_msgSender(), id))
+    // setBrandCurrencyIcon16x16 (triggers event CurrencyUpdated(_msgSender(), id))
+    // setBrandCurrencyIcon32x32 (triggers event CurrencyUpdated(_msgSender(), id))
+    // setBrandCurrencyIcon64x64 (triggers event CurrencyUpdated(_msgSender(), id))
+    // setSystemCurrencyImage (triggers event CurrencyUpdated(_msgSender(), id))
+    // setSystemCurrencyColor (triggers event CurrencyUpdated(_msgSender(), id))
+    // setSystemCurrencyIcon16x16 (triggers event CurrencyUpdated(_msgSender(), id))
+    // setSystemCurrencyIcon32x32 (triggers event CurrencyUpdated(_msgSender(), id))
+    // setSystemCurrencyIcon64x64 (triggers event CurrencyUpdated(_msgSender(), id))
+    // The requested permissions are:
+    // - System currencies changes: in-metaverse METAVERSE_MANAGE_CURRENCIES_SETTINGS.
+    // - Brand currencies changes: in-brand BRAND_MANAGE_CURRENCIES.
 
     /**
      * Receives WMATIC and BEAT. BEAT is burned and WMATIC is unwrapped.
