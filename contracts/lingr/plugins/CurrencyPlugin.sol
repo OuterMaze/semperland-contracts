@@ -439,13 +439,25 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
     }
 
     /**
+     * This modifier restricts the token id to belong to an already
+     * defined currency type.
+     */
+    modifier definedCurrency(uint256 _tokenId) {
+        require(
+            currencies[_tokenId].registered,
+            "CurrencyPlugin: the specified token id is not of a regisrered currency type"
+        );
+        _;
+    }
+
+    /**
      * This is a mean granted only to plug-in contracts to mint any
      * system currency. Due to the sensitivity of this feature, only
      * plug-ins in the same metaverse are allowed to use this method.
      */
     function mintSystemCurrency(
         address _to, uint256 _id, uint256 bulks
-    ) public onlyPlugin inSystemFTRange(_id) nonzeroMintAmount {
+    ) public onlyPlugin inSystemFTRange(_id) definedCurrency(_id) nonzeroMintAmount {
         require(bulks != 0, "CurrencyPlugin: minting (system scope) issued with no units");
         _mintFTFor(_to, _id, bulks * currencyMintAmount, "system currency mint");
     }
@@ -453,7 +465,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
     function mintBrandCurrency(
         address _to, address _brandId, uint256 _id, uint256 bulks
     ) public payable inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
-      nonzeroMintAmount
+      definedCurrency(_id) nonzeroMintAmount
       hasNativeTokenPrice("CurrencyPlugin: minting (for authorized brand)", currencyMintCost, bulks) {
         payable(earningsReceiver).transfer(msg.value);
         _mintFTFor(_to, _id, bulks * currencyMintAmount, "paid brand mint");
@@ -461,7 +473,8 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
 
     function mintBrandCurrencyFor(
         address _to, uint256 _id, uint256 bulks
-    ) public inBrandFTRange(address(0), _id) onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES) nonzeroMintAmount {
+    ) public inBrandFTRange(address(0), _id) onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES)
+      definedCurrency(_id) nonzeroMintAmount {
         require(bulks != 0, "CurrencyPlugin: minting (system scope) issued with no units");
         _mintFTFor(_to, _id, bulks * currencyMintAmount, "gifted brand mint");
     }
@@ -475,20 +488,119 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
         _mintFTFor(_to, BEATType, bulks * currencyMintAmount, "BEAT mint");
     }
 
-    // TODO: Methods to maintain data of a currency: image, color, icons (16x16, 32x32, 64x64).
-    // setBrandCurrencyImage (triggers event CurrencyUpdated(_msgSender(), id))
-    // setBrandCurrencyColor (triggers event CurrencyUpdated(_msgSender(), id))
-    // setBrandCurrencyIcon16x16 (triggers event CurrencyUpdated(_msgSender(), id))
-    // setBrandCurrencyIcon32x32 (triggers event CurrencyUpdated(_msgSender(), id))
-    // setBrandCurrencyIcon64x64 (triggers event CurrencyUpdated(_msgSender(), id))
-    // setSystemCurrencyImage (triggers event CurrencyUpdated(_msgSender(), id))
-    // setSystemCurrencyColor (triggers event CurrencyUpdated(_msgSender(), id))
-    // setSystemCurrencyIcon16x16 (triggers event CurrencyUpdated(_msgSender(), id))
-    // setSystemCurrencyIcon32x32 (triggers event CurrencyUpdated(_msgSender(), id))
-    // setSystemCurrencyIcon64x64 (triggers event CurrencyUpdated(_msgSender(), id))
-    // The requested permissions are:
-    // - System currencies changes: in-metaverse METAVERSE_MANAGE_CURRENCIES_SETTINGS.
-    // - Brand currencies changes: in-brand BRAND_MANAGE_CURRENCIES.
+    /**
+     * Notifies that the metadata of a currency is updated.
+     */
+    event CurrencyMetadataUpdated(uint256 indexed tokenId);
+
+    /**
+     * This modifier post-decorates the code to emit an event for the
+     * currency metadata being updated.
+     */
+    modifier emitCurrencyUpdate(uint256 _tokenId) {
+        _;
+        emit CurrencyMetadataUpdated(_tokenId);
+    }
+
+    /**
+     * Updates the image in a brand currency.
+     */
+    function setBrandCurrencyImage(
+        string memory _brandId, uint256 _id, string memory _image
+    ) public inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
+      definedCurrency(_id) emitCurrencyUpdate(_id) {
+        currencies[_id].image = _image;
+    }
+
+    /**
+     * Updates the color in a brand currency.
+     */
+    function setBrandCurrencyColor(
+        string memory _brandId, uint256 _id, string memory _color
+    ) public inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
+      definedCurrency(_id) emitCurrencyUpdate(_id) {
+        currencies[_id].color = _color;
+    }
+
+    /**
+     * Updates the 16x16 icon in a brand currency.
+     */
+    function setBrandCurrencyIcon16x16(
+        string memory _brandId, uint256 _id, string memory _icon16x16
+    ) public inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
+      definedCurrency(_id) emitCurrencyUpdate(_id) {
+        currencies[_id].icon16x16 = _icon16x16;
+    }
+
+    /**
+     * Updates the 32x32 icon in a brand currency.
+     */
+    function setBrandCurrencyIcon32x32(
+        string memory _brandId, uint256 _id, string memory _icon32x32
+    ) public inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
+      definedCurrency(_id) emitCurrencyUpdate(_id) {
+        currencies[_id].icon32x32 = _icon32x32;
+    }
+
+    /**
+     * Updates the 64x64 icon in a brand currency.
+     */
+    function setBrandCurrencyIcon64x64(
+        string memory _brandId, uint256 _id, string memory _icon64x64
+    ) public inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
+      definedCurrency(_id) emitCurrencyUpdate(_id) {
+        currencies[_id].icon64x64 = _icon64x64;
+    }
+
+    /**
+     * Updates the image in a system currency.
+     */
+    function setSystemCurrencyImage(
+        uint256 _id, string memory _image
+    ) public inSystemFTRange(_id) onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+      definedCurrency(_id) emitCurrencyUpdate(_id) {
+        currencies[_id].image = _image;
+    }
+
+    /**
+     * Updates the color in a system currency.
+     */
+    function setSystemCurrencyColor(
+        uint256 _id, string memory _color
+    ) public inSystemFTRange(_id) onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+      definedCurrency(_id) emitCurrencyUpdate(_id) {
+        currencies[_id].color = _color;
+    }
+
+    /**
+     * Updates the 16x16 icon in a system currency.
+     */
+    function setSystemCurrencyIcon16x16(
+        uint256 _id, string memory _icon16x16
+    ) public inSystemFTRange(_id) onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+      definedCurrency(_id) emitCurrencyUpdate(_id) {
+        currencies[_id].icon16x16 = _icon16x16;
+    }
+
+    /**
+     * Updates the 32x32 icon in a system currency.
+     */
+    function setSystemCurrencyIcon32x32(
+        uint256 _id, string memory _icon32x32
+    ) public inSystemFTRange(_id) onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+      definedCurrency(_id) emitCurrencyUpdate(_id) {
+        currencies[_id].icon32x32 = _icon32x32;
+    }
+
+    /**
+     * Updates the 64x64 icon in a system currency.
+     */
+    function setSystemCurrencyIcon64x64(
+        uint256 _id, string memory _icon64x64
+    ) public inSystemFTRange(_id) onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+      definedCurrency(_id) emitCurrencyUpdate(_id) {
+        currencies[_id].icon64x64 = _icon64x64;
+    }
 
     /**
      * Receives WMATIC and BEAT. BEAT is burned and WMATIC is unwrapped.
