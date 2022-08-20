@@ -14,7 +14,7 @@ const {
  * Ethereum client
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
-contract("SampleERC1155WithBrandRegistry", function (accounts) {
+contract("Metaverse", function (accounts) {
   var economy = null;
   var metaverse = null;
   var contract = null;

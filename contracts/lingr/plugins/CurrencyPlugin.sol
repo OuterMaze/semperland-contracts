@@ -506,7 +506,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      * Updates the image in a brand currency.
      */
     function setBrandCurrencyImage(
-        string memory _brandId, uint256 _id, string memory _image
+        address _brandId, uint256 _id, string memory _image
     ) public inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
       definedCurrency(_id) emitCurrencyUpdate(_id) {
         currencies[_id].image = _image;
@@ -516,7 +516,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      * Updates the color in a brand currency.
      */
     function setBrandCurrencyColor(
-        string memory _brandId, uint256 _id, string memory _color
+        address _brandId, uint256 _id, string memory _color
     ) public inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
       definedCurrency(_id) emitCurrencyUpdate(_id) {
         currencies[_id].color = _color;
@@ -526,7 +526,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      * Updates the 16x16 icon in a brand currency.
      */
     function setBrandCurrencyIcon16x16(
-        string memory _brandId, uint256 _id, string memory _icon16x16
+        address _brandId, uint256 _id, string memory _icon16x16
     ) public inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
       definedCurrency(_id) emitCurrencyUpdate(_id) {
         currencies[_id].icon16x16 = _icon16x16;
@@ -536,7 +536,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      * Updates the 32x32 icon in a brand currency.
      */
     function setBrandCurrencyIcon32x32(
-        string memory _brandId, uint256 _id, string memory _icon32x32
+        address _brandId, uint256 _id, string memory _icon32x32
     ) public inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
       definedCurrency(_id) emitCurrencyUpdate(_id) {
         currencies[_id].icon32x32 = _icon32x32;
@@ -546,7 +546,7 @@ contract CurrencyPlugin is MetaversePlugin, NativePayable, IERC1155Receiver {
      * Updates the 64x64 icon in a brand currency.
      */
     function setBrandCurrencyIcon64x64(
-        string memory _brandId, uint256 _id, string memory _icon64x64
+        address _brandId, uint256 _id, string memory _icon64x64
     ) public inBrandFTRange(_brandId, _id) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
       definedCurrency(_id) emitCurrencyUpdate(_id) {
         currencies[_id].icon64x64 = _icon64x64;
