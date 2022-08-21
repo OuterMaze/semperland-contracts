@@ -20,6 +20,11 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     using ERC165Checker for address;
 
     /**
+     * The brand 0 stands for the system.
+     */
+    address constant SYSTEM_SCOPE = address(0);
+
+    /**
      * This mask captures all the enabled bits of for the id / type
      * of a FT asset.
      */
@@ -62,7 +67,7 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     /**
      * The title of this metaverse plug-in.
      */
-    function title() public view virtual returns (string memory);
+    function title() external view virtual returns (string memory);
 
     /**
      * This modifier restricts the function to be only invoked by the metaverse.
@@ -118,6 +123,28 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
         _;
     }
 
+    /**
+     * This modifier requires a specific permission or being the owner of the
+     * appropriate scope to perform an action. If the scope is 0, then it will
+     * test a metaverse-scoped permission. Otherwise, the scope will be a brand
+     * and it will test a brand-scoped permission (on that brand).
+     */
+    modifier onlyScopeAllowed(address _scopeId, bytes32 _metaversePermission, bytes32 _brandPermission) {
+        if (_scopeId == SYSTEM_SCOPE) {
+            require(
+                IMetaverse(metaverse).isAllowed(_metaversePermission, _msgSender()),
+                "MetaversePlugin: caller is not metaverse owner, and does not have the required permission"
+            );
+        } else {
+            require(
+                IBrandRegistry(IMetaverse(metaverse).brandRegistry()).isBrandAllowed(
+                    _scopeId, _brandPermission, _msgSender()
+                ),
+                "MetaversePlugin: caller is not brand owner nor approved, and does not have the required permission"
+            );
+        }
+        _;
+    }
 
     /**
      * Requires an id to be in the system's FT id/type range.
@@ -165,7 +192,7 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
      * metaverse that owns this plugin, and the underlying
      * implementation is defined by _initialize() instead.
      */
-    function initialize() public onlyMetaverse {
+    function initialize() external onlyMetaverse {
         _initialize();
         initialized = true;
     }
@@ -182,7 +209,7 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
      * spend a lot of gas if invoked inside a transaction, so
      * doing that is strongly discouraged.
      */
-    function uri(uint256 _tokenId) public view returns (string memory) {
+    function uri(uint256 _tokenId) external view returns (string memory) {
         bytes memory metadata = _tokenMetadata(_tokenId);
         if (metadata.length == 0) return "";
         return string(abi.encodePacked("data:application/json;base64,", Base64.encode(metadata)));
