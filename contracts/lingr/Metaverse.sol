@@ -358,7 +358,7 @@ contract Metaverse is Ownable, IMetaverse {
     /**
      * Adds a plug-in contract to this metaverse.
      */
-    function addPlugin(address _contract) public onlyAllowed(ADD_PLUGIN) {
+    function addPlugin(address _contract) external onlyAllowed(ADD_PLUGIN) {
         require(
             _isPluginForThisMetaverse(_contract),
             "Metaverse: the address does not belong to a valid plug-in contract for this metaverse"
@@ -374,7 +374,7 @@ contract Metaverse is Ownable, IMetaverse {
     /**
      * This is the count of registered plug-ins.
      */
-    function pluginsCount() public view returns (uint256) {
+    function pluginsCount() external view returns (uint256) {
         return pluginsList.length;
     }
 
@@ -398,7 +398,7 @@ contract Metaverse is Ownable, IMetaverse {
     /**
      * Adds a plug-in contract to this metaverse.
      */
-    function setBrandRegistry(address _contract) public onlyAllowed(SET_BRAND_REGISTRY) {
+    function setBrandRegistry(address _contract) external onlyAllowed(SET_BRAND_REGISTRY) {
         require(
             _isBrandRegistryForThisMetaverse(_contract),
             "Metaverse: the address does not belong to a valid brand registry contract for this metaverse"
@@ -429,7 +429,7 @@ contract Metaverse is Ownable, IMetaverse {
     /**
      * Set the economy contract to this metaverse.
      */
-    function setEconomy(address _contract) public onlyAllowed(SET_ECONOMY) {
+    function setEconomy(address _contract) external onlyAllowed(SET_ECONOMY) {
         require(
             _isEconomyForThisMetaverse(_contract),
             "Metaverse: the address does not belong to a valid economy contract for this metaverse"
@@ -451,7 +451,7 @@ contract Metaverse is Ownable, IMetaverse {
     /**
      * A metaverse satisfies the IMetaverse and IERC165 interfaces.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
         return interfaceId == type(IERC165).interfaceId || interfaceId == type(IMetaverse).interfaceId;
     }
 
@@ -492,7 +492,7 @@ contract Metaverse is Ownable, IMetaverse {
      * approved operators, or allowed superusers. However, superuser cannot
      * set, in particular, the SUPERUSER permission itself.
      */
-    function setPermission(bytes32 _permission, address _user, bool _allowed) public onlyAllowed(SUPERUSER) {
+    function setPermission(bytes32 _permission, address _user, bool _allowed) external onlyAllowed(SUPERUSER) {
         address sender = _msgSender();
         require(_user != address(0), "Metaverse: cannot grant a permission to address 0");
         require(
