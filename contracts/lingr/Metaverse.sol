@@ -133,27 +133,10 @@ contract Metaverse is Ownable, IMetaverse {
     mapping(bytes32 => mapping(address => bool)) permissions;
 
     /**
-     * This modifier requires the sender to be one of the authorized contracts.
-     */
-    modifier onlyPlugin() {
-        require(plugins[_msgSender()], "Metaverse: the sender must be a plug-in");
-        _;
-    }
-
-    /**
      * This modifier requires the token type to be already registered.
      */
     modifier onlyExistingTokenType(uint256 _tokenType) {
         require(tokenTypeResolvers[_tokenType] != address(0), "Metaverse: unknown / non-mintable token type id");
-        _;
-    }
-
-    /**
-     * This modifier requires the token type to be already registered
-     * by the plug-in that requests it.
-     */
-    modifier onlyPluginTokenType(uint256 _tokenType) {
-        require(tokenTypeResolvers[_tokenType] == _msgSender(), "Metaverse: not a type registered by this plug-in");
         _;
     }
 
@@ -247,7 +230,7 @@ contract Metaverse is Ownable, IMetaverse {
      * Mints a specific fungible token type, in a certain amount.
      */
     function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data)
-        external onlyPlugin onlyPluginTokenType(_tokenId) onlyFTRange(_tokenId)
+        external onlyPlugin onlyFTRange(_tokenId)
     {
         IEconomy(economy).mintFor(_to, _tokenId, _amount, _data);
     }
@@ -259,7 +242,7 @@ contract Metaverse is Ownable, IMetaverse {
      * type is not for that plug-in.
      */
     function mintNFTFor(address _to, uint256 _tokenType, bytes memory _data)
-        external onlyPlugin onlyPluginTokenType(_tokenType) onlyNFTRange(_tokenType) returns (uint256)
+        external onlyPlugin onlyNFTRange(_tokenType) returns (uint256)
     {
         require(_tokenType >= 2, "Metaverse: NFT types 0 (invalid) and 1 (brand) cannot be minted");
         uint256 tokenId = nextNFTIndex;
@@ -279,47 +262,50 @@ contract Metaverse is Ownable, IMetaverse {
     }
 
     /**
-     * Burns any FT the sender has, provided the sender is a plugin and also defines
-     * the type of the token being burned.
+     * Mints a specific brand token for a given user. The brand is stated as its address.
      */
-    function burnFT(uint256 _tokenId, uint256 _amount) external onlyPlugin onlyPluginTokenType(_tokenId) {
+    function mintBrandFor(address _to, address _brandId) external onlyBrandRegistry {
+        require(_msgSender() == brandRegistry, "Metaverse: the only allowed sender is the brand registry");
+        IEconomy(economy).mintFor(_to, uint256(uint160(_brandId)), 1, "Metaverse: Minting a brand");
+    }
+
+    /**
+     * Burns any FT the sender has. This is only allowed for plug-ins, and they will
+     * be responsible enough to coordinate themselves when burning tokens (e.g. they
+     * will articulate on updating token counts, if needed).
+     */
+    function burnFT(uint256 _tokenId, uint256 _amount) external onlyPlugin {
         IEconomy(economy).burn(_msgSender(), _tokenId, _amount);
     }
 
     /**
-     * Burns many FT the sender has, provided the sender is a plugin and also defines
-     * the type of the token being burned.
+     * Burns many FT the sender has. This is only allowed for plug-ins, and they will
+     * be responsible enough to coordinate themselves when burning tokens (e.g. they
+     * will articulate on updating token counts, if needed).
      */
-    function burnFTs(uint256[] memory _tokenIds, uint256[] memory _amounts) external
-        onlyPlugin onlyFTPluginTokenTypes(_tokenIds) {
+    function burnFTs(uint256[] memory _tokenIds, uint256[] memory _amounts) external onlyPlugin {
         IEconomy(economy).burnBatch(_msgSender(), _tokenIds, _amounts);
     }
 
     /**
-     * Burns any NFT the sender has, provided the sender is a plugin and also defines
-     * the type of the tokens being burned.
+     * Burns any NFT the sender has. This is only allowed for plug-ins, and they will
+     * be responsible enough to coordinate themselves when burning tokens (e.g. they
+     * will articulate on removing the metadata appropriately).
      */
-    function burnNFT(uint256 _tokenId) external onlyPlugin onlyPluginTokenType(nftTypes[_tokenId]) {
+    function burnNFT(uint256 _tokenId) external onlyPlugin {
         IEconomy(economy).burn(_msgSender(), _tokenId, 1);
     }
 
     /**
-     * Burns many NFT the sender has, provided the sender is a plugin and also defines
-     * the type of the tokens being burned.
+     * Burns many NFT the sender has. This is only allowed for plug-ins, and they will
+     * be responsible enough to coordinate themselves when burning tokens (e.g. they
+     * will articulate on removing the metadata appropriately).
      */
-    function burnNFTs(uint256[] memory _tokenIds) external onlyPlugin onlyNFTPluginTokenTypes(_tokenIds) {
+    function burnNFTs(uint256[] memory _tokenIds) external onlyPlugin {
         uint256 length = _tokenIds.length;
         uint256[] memory amounts = new uint[](length);
         for (uint i = 0; i < length; i++) amounts[i] = 1;
         IEconomy(economy).burnBatch(_msgSender(), _tokenIds, amounts);
-    }
-
-    /**
-     * Mints a specific brand token for a given user. The brand is stated as its address.
-     */
-    function mintBrandFor(address _to, address _brandId) external {
-        require(_msgSender() == brandRegistry, "Metaverse: the only allowed sender is the brand registry");
-        IEconomy(economy).mintFor(_to, uint256(uint160(_brandId)), 1, "Metaverse: Minting a brand");
     }
 
     /**
@@ -393,6 +379,14 @@ contract Metaverse is Ownable, IMetaverse {
     }
 
     /**
+     * This modifier requires the sender to be one of the authorized contracts.
+     */
+    modifier onlyPlugin() {
+        require(plugins[_msgSender()], "Metaverse: the sender must be a plug-in");
+        _;
+    }
+
+    /**
      * Tells whether an address is a valid brand registry contract for
      * this metaverse in particular.
      */
@@ -413,6 +407,14 @@ contract Metaverse is Ownable, IMetaverse {
             brandRegistry == address(0), "Metaverse: a brand registry is already set into this metaverse"
         );
         brandRegistry = _contract;
+    }
+
+    /**
+     * This modifier requires the sender to be the linked brand registry.
+     */
+    modifier onlyBrandRegistry() {
+        require(_msgSender() == brandRegistry, "Metaverse: the only allowed sender is the brand registry");
+        _;
     }
 
     /**

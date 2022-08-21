@@ -113,10 +113,31 @@ contract("Metaverse", function (accounts) {
     );
   });
 
-  it("must fail when calling Metaverse::mintNFTFor for common accounts", async function() {
+  it("must fail when calling Metaverse::burnFTs for common accounts", async function() {
     await expectRevert(
       metaverse.burnFTs([1], [1], {from: accounts[0]}),
       revertReason("Metaverse: the sender must be a plug-in")
+    );
+  });
+
+  it("must fail when calling Metaverse::burnNFT for common accounts", async function() {
+    await expectRevert(
+      metaverse.burnNFT(1, {from: accounts[0]}),
+      revertReason("Metaverse: the sender must be a plug-in")
+    );
+  });
+
+  it("must fail when calling Metaverse::burnNFTs for common accounts", async function() {
+    await expectRevert(
+      metaverse.burnNFTs([1], {from: accounts[0]}),
+      revertReason("Metaverse: the sender must be a plug-in")
+    );
+  });
+
+  it("must fail when calling Metaverse::mintBrandFor for common accounts", async function() {
+    await expectRevert(
+      metaverse.mintBrandFor(accounts[0], "0x0123456789012345678901234567890123456789", {from: accounts[0]}),
+      revertReason("Metaverse: the only allowed sender is the brand registry")
     );
   });
 });
