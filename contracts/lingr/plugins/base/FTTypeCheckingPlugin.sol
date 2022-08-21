@@ -43,7 +43,7 @@ abstract contract FTTypeCheckingPlugin is Context, IMetaversePlugin {
     function _requireFTRange(uint256 _tokenId) internal returns (address) {
         require(
             _tokenId == (_tokenId & FT_MASK),
-            "ScopedFTAwarePlugin: the given token id is not in the FT range"
+            "FTTypeCheckingPlugin: the given token id is not in the FT range"
         );
         return address((_tokenId >> 64) & BRAND_MASK);
     }
@@ -54,7 +54,7 @@ abstract contract FTTypeCheckingPlugin is Context, IMetaversePlugin {
     function _requireSystemScope(address _scope) internal {
         require(
             _scope == SYSTEM_SCOPE,
-            "ScopedFTAwarePlugin: this function is only available for the system"
+            "FTTypeCheckingPlugin: this function is only available for the system"
         );
     }
 
@@ -64,7 +64,7 @@ abstract contract FTTypeCheckingPlugin is Context, IMetaversePlugin {
     function _requireBrandScope(address _scope) internal {
         require(
             _scope != SYSTEM_SCOPE,
-            "ScopedFTAwarePlugin: this function is only available for brands"
+            "FTTypeCheckingPlugin: this function is only available for brands"
         );
     }
 
