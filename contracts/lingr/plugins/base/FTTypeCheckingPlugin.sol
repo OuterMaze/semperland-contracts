@@ -4,7 +4,7 @@ pragma solidity >=0.8 <0.9.0;
 import "@openzeppelin/contracts/utils/Context.sol";
 import "../../IMetaverse.sol";
 import "../../brands/IBrandRegistry.sol";
-import "./IMetaversePlugin.sol";
+import "./MetaversePlugin.sol";
 
 /**
  * This trait defines utilities that test when a FT belongs to
@@ -12,7 +12,7 @@ import "./IMetaversePlugin.sol";
  * particular permission is satisfied on that scope. Also, tests
  * that the specified token id is in the FT range.
  */
-abstract contract FTTypeCheckingPlugin is Context, IMetaversePlugin {
+abstract contract FTTypeCheckingPlugin is Context, MetaversePlugin {
     /**
      * The address 0 stands for the system scope.
      */
@@ -28,12 +28,6 @@ abstract contract FTTypeCheckingPlugin is Context, IMetaversePlugin {
      * This mask captures the scope of a FT asset id / type.
      */
     uint256 constant BRAND_MASK = ((1 << 160) - 1);
-
-    /**
-     * The metaverse this plug-in belongs to. This abstract definition
-     * extends it to be public (to use this one locally).
-     */
-    function metaverse() public virtual override returns (address);
 
     /**
      * This function requires a token id to be in the FT range, and extracts
@@ -77,12 +71,12 @@ abstract contract FTTypeCheckingPlugin is Context, IMetaversePlugin {
     function _requireScopeAllowed(address _scopeId, bytes32 _metaversePermission, bytes32 _brandPermission) internal {
         if (_scopeId == SYSTEM_SCOPE) {
             require(
-                IMetaverse(metaverse()).isAllowed(_metaversePermission, _msgSender()),
+                IMetaverse(metaverse).isAllowed(_metaversePermission, _msgSender()),
                 "MetaversePlugin: caller is not metaverse owner, and does not have the required permission"
             );
         } else {
             require(
-                IBrandRegistry(IMetaverse(metaverse()).brandRegistry()).isBrandAllowed(
+                IBrandRegistry(IMetaverse(metaverse).brandRegistry()).isBrandAllowed(
                     _scopeId, _brandPermission, _msgSender()
                 ),
                 "MetaversePlugin: caller is not brand owner nor approved, and does not have the required permission"

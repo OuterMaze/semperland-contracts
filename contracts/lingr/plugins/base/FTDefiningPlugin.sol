@@ -4,20 +4,14 @@ pragma solidity >=0.8 <0.9.0;
 import "@openzeppelin/contracts/utils/Context.sol";
 import "../../IMetaverse.sol";
 import "../../brands/IBrandRegistry.sol";
-import "./IMetaversePlugin.sol";
+import "./MetaversePlugin.sol";
 
 /**
  * This trait defines utilities that define new FT types,
  * both for brands and th system scope. These ones are
  * internal.
  */
-abstract contract FTDefiningPlugin is Context, IMetaversePlugin {
-    /**
-     * The metaverse this plug-in belongs to. This abstract definition
-     * extends it to be public (to use this one locally).
-     */
-    function metaverse() public virtual override returns (address);
-
+abstract contract FTDefiningPlugin is Context, MetaversePlugin {
     /**
      * Defines a new FT type in the system scope (i.e. not a brand at all).
      * Returns its id.
@@ -31,6 +25,6 @@ abstract contract FTDefiningPlugin is Context, IMetaversePlugin {
      * FT types). Returns its id.
      */
     function _defineNextFTType(address _brandId) internal returns (uint256) {
-        return IMetaverse(metaverse()).defineNextFTType(_brandId);
+        return IMetaverse(metaverse).defineNextFTType(_brandId);
     }
 }
