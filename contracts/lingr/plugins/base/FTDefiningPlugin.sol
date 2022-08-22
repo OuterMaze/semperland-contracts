@@ -8,7 +8,8 @@ import "./IMetaversePlugin.sol";
 
 /**
  * This trait defines utilities that define new FT types,
- * both for brands and th system scope.
+ * both for brands and th system scope. These ones are
+ * internal.
  */
 abstract contract FTDefiningPlugin is Context, IMetaversePlugin {
     /**

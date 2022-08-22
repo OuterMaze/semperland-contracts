@@ -22,6 +22,6 @@ abstract contract NFTMintingPlugin is IMetaversePlugin {
      * the newly minted id.
      */
     function _mintNFTFor(address _to, uint256 _tokenType, bytes memory _data) internal returns (uint256) {
-        return IMetaverse(metaverse).mintNFTFor(_to, _tokenType, _data);
+        return IMetaverse(metaverse()).mintNFTFor(_to, _tokenType, _data);
     }
 }

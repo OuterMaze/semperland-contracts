@@ -21,7 +21,7 @@ abstract contract NFTBurningPlugin is IMetaversePlugin {
      * unless there are good reasons to do otherwise).
      */
     function _burnNFT(uint256 _tokenId) internal {
-        IMetaverse(metaverse).burnNFT(_tokenId);
+        IMetaverse(metaverse()).burnNFT(_tokenId);
     }
 
     /**
@@ -29,6 +29,6 @@ abstract contract NFTBurningPlugin is IMetaversePlugin {
      * unless there are good reasons to do otherwise).
      */
     function _burnNFTs(uint256[] memory _tokenIds) internal {
-        IMetaverse(metaverse).burnNFTs(_tokenIds);
+        IMetaverse(metaverse()).burnNFTs(_tokenIds);
     }
 }

@@ -23,7 +23,7 @@ abstract contract FTMintingPlugin is IMetaversePlugin {
     function _mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data)
         internal
     {
-        IMetaverse(metaverse).mintFTFor(_to, _tokenId, _amount, _data);
+        IMetaverse(metaverse()).mintFTFor(_to, _tokenId, _amount, _data);
     }
 
     /**
@@ -33,6 +33,6 @@ abstract contract FTMintingPlugin is IMetaversePlugin {
     function _mintFTsFor(address _to, uint256[] memory _tokenIds, uint256[] memory _amounts, bytes memory _data)
         internal
     {
-        IMetaverse(metaverse).mintFTsFor(_to, _tokenIds, _amounts, _data);
+        IMetaverse(metaverse()).mintFTsFor(_to, _tokenIds, _amounts, _data);
     }
 }

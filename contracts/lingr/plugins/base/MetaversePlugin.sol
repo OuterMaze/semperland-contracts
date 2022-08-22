@@ -20,28 +20,6 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     using ERC165Checker for address;
 
     /**
-     * The brand 0 stands for the system.
-     */
-    address constant SYSTEM_SCOPE = address(0);
-
-    /**
-     * This mask captures all the enabled bits of for the id / type
-     * of a FT asset.
-     */
-    uint256 constant FT_MASK = (1 << 255) | ((1 << 224) - 1);
-
-    /**
-     * This mask captures all the enabled bits of for the id / type
-     * of a system FT asset.
-     */
-    uint256 constant SYSTEM_FT_MASK = (1 << 255) | ((1 << 64) - 1);
-
-    /**
-     * This mask captures all the NFT ids and types.
-     */
-    uint256 constant NFT_MASK = (1 << 255) - 1;
-
-    /**
      * The metaverse that will own this plug-in.
      */
     address public metaverse;
@@ -124,57 +102,6 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     }
 
     /**
-     * This modifier requires a specific permission or being the owner of the
-     * appropriate scope to perform an action. If the scope is 0, then it will
-     * test a metaverse-scoped permission. Otherwise, the scope will be a brand
-     * and it will test a brand-scoped permission (on that brand).
-     */
-    modifier onlyScopeAllowed(address _scopeId, bytes32 _metaversePermission, bytes32 _brandPermission) {
-        if (_scopeId == SYSTEM_SCOPE) {
-            require(
-                IMetaverse(metaverse).isAllowed(_metaversePermission, _msgSender()),
-                "MetaversePlugin: caller is not metaverse owner, and does not have the required permission"
-            );
-        } else {
-            require(
-                IBrandRegistry(IMetaverse(metaverse).brandRegistry()).isBrandAllowed(
-                    _scopeId, _brandPermission, _msgSender()
-                ),
-                "MetaversePlugin: caller is not brand owner nor approved, and does not have the required permission"
-            );
-        }
-        _;
-    }
-
-    /**
-     * Requires an id to be in the system's FT id/type range.
-     */
-    modifier inSystemFTRange(uint256 _id) {
-        require(
-            _id == (_id & SYSTEM_FT_MASK),
-            "MetaversePlugin: a valid system FT-ranged value is required"
-        );
-        _;
-    }
-
-    /**
-     * Requires an id to be in the brands' FT id/type range(s).
-     * If brand 0 is specified, then the only thing required in
-     * the match is that it belongs to any brand. Otherwise, it
-     * is also required that the brand matches the one in the
-     * FT id being used.
-     */
-    modifier inBrandFTRange(address _brandId, uint256 _id) {
-        bool rangeMatch = _id == (_id & FT_MASK);
-        if (_brandId != address(0)) {
-            address brandPart = address(uint160((_id >> 64) & ((1 << 160) - 1)));
-            rangeMatch = rangeMatch && brandPart == _brandId;
-        }
-        require(rangeMatch, "MetaversePlugin: a valid brand FT-ranged value is required");
-        _;
-    }
-
-    /**
      * Requires an (asset or type) id to be in the NFT range.
      */
     modifier inNFTRange(uint256 _id) {
@@ -228,71 +155,5 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
         return interfaceId == type(IERC165).interfaceId || interfaceId == type(IMetaversePlugin).interfaceId;
-    }
-
-    /**
-     * Defines a new FT type in the system scope (i.e. not a brand at all).
-     * Returns its id.
-     */
-    function _defineNextSystemFTType() internal returns (uint256) {
-        return _defineNextFTType(address(0));
-    }
-
-    /**
-     * Defines a new FT type, tied to a brand (use address 0 for metaverse-wide
-     * FT types). Returns its id.
-     */
-    function _defineNextFTType(address _brandId) internal returns (uint256) {
-        return IMetaverse(metaverse).defineNextFTType(_brandId);
-    }
-
-    /**
-     * Defines a new NFT type. Returns its id.
-     */
-    function _defineNextNFTType() internal returns (uint256) {
-        return IMetaverse(metaverse).defineNextNFTType();
-    }
-
-    /**
-     * Mints a FT for a user (only types defined by this contract are available).
-     */
-    function _mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) internal {
-        IMetaverse(metaverse).mintFTFor(_to, _tokenId, _amount, _data);
-    }
-
-    /**
-     * Mints a NFT for a user (only types defined by this contract are available).
-     * Returns the newly minted id.
-     */
-    function _mintNFTFor(address _to, uint256 _tokenType, bytes memory _data) internal returns (uint256) {
-        return IMetaverse(metaverse).mintNFTFor(_to, _tokenType, _data);
-    }
-
-    /**
-     * Burns a FT in certain amount (only types defined by this contract are available).
-     */
-    function _burnFT(uint256 _tokenId, uint256 _amount) internal {
-        IMetaverse(metaverse).burnFT(_tokenId, _amount);
-    }
-
-    /**
-     * Burns many FTs in certain amounts (only types defined by this contract are available).
-     */
-    function _burnFTs(uint256[] memory _tokenIds, uint256[] memory _amounts) internal {
-        IMetaverse(metaverse).burnFTs(_tokenIds, _amounts);
-    }
-
-    /**
-     * Burns a NFT (only types defined by this contract are available).
-     */
-    function _burnNFT(uint256 _tokenId) internal {
-        IMetaverse(metaverse).burnNFT(_tokenId);
-    }
-
-    /**
-     * Burns many NFT (only types defined by this contract are available).
-     */
-    function _burnNFTs(uint256[] memory _tokenIds) internal {
-        IMetaverse(metaverse).burnNFTs(_tokenIds);
     }
 }

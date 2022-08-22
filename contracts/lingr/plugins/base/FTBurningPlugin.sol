@@ -21,7 +21,7 @@ abstract contract FTBurningPlugin is IMetaversePlugin {
      * save for good reasons to do otherwise).
      */
     function _burnFT(uint256 _tokenId, uint256 _amount) internal {
-        IMetaverse(metaverse).burnFT(_tokenId, _amount);
+        IMetaverse(metaverse()).burnFT(_tokenId, _amount);
     }
 
     /**
@@ -29,6 +29,6 @@ abstract contract FTBurningPlugin is IMetaversePlugin {
      * save for good reasons to do otherwise).
      */
     function _burnFTs(uint256[] memory _tokenIds, uint256[] memory _amounts) internal {
-        IMetaverse(metaverse).burnFTs(_tokenIds, _amounts);
+        IMetaverse(metaverse()).burnFTs(_tokenIds, _amounts);
     }
 }
