@@ -228,11 +228,40 @@ contract Metaverse is Ownable, IMetaverse {
 
     /**
      * Mints a specific fungible token type, in a certain amount.
+     * Requsts the type id to be in the FT range.
      */
-    function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data)
-        external onlyPlugin onlyFTRange(_tokenId)
+    function _mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data)
+        internal onlyFTRange(_tokenId)
     {
         IEconomy(economy).mintFor(_to, _tokenId, _amount, _data);
+    }
+
+    /**
+     * Mints a specific fungible token type, in a certain amount.
+     * This is only allowed for plug-ins.
+     */
+    function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data)
+        external onlyPlugin
+    {
+        _mintFTFor(_to, _tokenId, _amount, _data);
+    }
+
+    /**
+     * Mints many specific fungible token types, in certain amounts.
+     * The array of types and amounts are both nonempty and same length.
+     * This is only allowed for plug-ins.
+     */
+    function mintFTsFor(address _to, uint256[] memory _tokenIds, uint256[] memory _amounts, bytes memory _data)
+        external onlyPlugin
+    {
+        require(
+            _tokenIds.length == _amounts.length && _amounts.length != 0,
+            "Metaverse: token ids and amounts array must be both non-empty and of same length"
+        );
+        for(uint256 index = 0; index < _tokenIds.length; index++)
+        {
+            _mintFTFor(_to, _tokenIds[index], _amounts[index], _data);
+        }
     }
 
     /**
@@ -241,8 +270,8 @@ contract Metaverse is Ownable, IMetaverse {
      * types are reserved for being invalid or brands. Also, it is an error if the chosen
      * type is not for that plug-in.
      */
-    function mintNFTFor(address _to, uint256 _tokenType, bytes memory _data)
-        external onlyPlugin onlyNFTRange(_tokenType) returns (uint256)
+    function _mintNFTFor(address _to, uint256 _tokenType, bytes memory _data)
+        internal onlyNFTRange(_tokenType) returns (uint256)
     {
         require(_tokenType >= 2, "Metaverse: NFT types 0 (invalid) and 1 (brand) cannot be minted");
         uint256 tokenId = nextNFTIndex;
@@ -259,6 +288,35 @@ contract Metaverse is Ownable, IMetaverse {
         IEconomy(economy).mintFor(_to, tokenId, 1, _data);
         nftTypes[tokenId] = _tokenType;
         return tokenId;
+    }
+
+    /**
+     * Mints a specific non-fungible token, using a specific type (and always using
+     * an amount of 1) id. This is only allowed for plug-ins.
+     */
+    function mintNFTFor(address _to, uint256 _tokenType, bytes memory _data)
+        external onlyPlugin returns (uint256)
+    {
+        return _mintNFTFor(_to, _tokenType, _data);
+    }
+
+    /**
+     * Mints many specific non-fungible tokens, using specific types (and always using
+     * an amount of 1) ids. This is only allowed for plug-ins.
+     */
+    function mintNFTsFor(address _to, uint256[] memory _tokenTypes, bytes memory _data)
+        external onlyPlugin returns (uint256[] memory)
+    {
+        require(
+            _tokenTypes.length != 0,
+            "Metaverse: token type ids must be a non-empty array"
+        );
+        uint256[] memory result = new uint256[](_tokenTypes.length);
+        for(uint256 index = 0; index < _tokenTypes.length; index++)
+        {
+            return _mintNFTFor(_to, _tokenTypes[index], _data);
+        }
+        return result;
     }
 
     /**

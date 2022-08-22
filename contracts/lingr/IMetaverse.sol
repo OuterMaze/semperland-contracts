@@ -58,11 +58,25 @@ interface IMetaverse is IERC165 {
     function mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) external;
 
     /**
+     * Mints many specific fungible token types, in certain amounts.
+     * The array of types and amounts are both nonempty and same length.
+     */
+    function mintFTsFor(address _to, uint256[] _tokenIds, uint256[] _amounts, bytes memory _data) external;
+
+    /**
      * Mints a specific non-fungible token type, using a specific type (and always using
      * an amount of 1). It is an error if the chosen type is unknown or < 2, since those
      * types are reserved for being invalid or brands.
      */
     function mintNFTFor(address _to, uint256 _tokenType, bytes memory _data) external returns (uint256);
+
+    /**
+     * Mints many specific non-fungible token types, using specific types (and always using
+     * an amount of 1). It is an error if the chosen types are unknown or < 2, since those
+     * types are reserved for being invalid or brands. The token types array must not be
+     * empty.
+     */
+    function mintNFTsFor(address _to, uint256[] _tokenType, bytes memory _data) external returns (uint256);
 
     /**
      * Mints a specific brand token for a given user. The brand is stated as its address.
