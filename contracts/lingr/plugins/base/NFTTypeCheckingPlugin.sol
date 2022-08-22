@@ -10,7 +10,7 @@ import "./MetaversePlugin.sol";
  * This trait defines utilities that test that the specified token
  * id is in the FT range.
  */
-abstract contract FTTypeCheckingPlugin is MetaversePlugin {
+abstract contract NFTTypeCheckingPlugin is MetaversePlugin {
     /**
      * This mask is matched by all the NFT types and ids.
      */
