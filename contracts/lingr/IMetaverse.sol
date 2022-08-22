@@ -40,6 +40,11 @@ interface IMetaverse is IERC165 {
     function economy() external view returns (address);
 
     /**
+     * Returns the type of an NFT id.
+     */
+    function nftTypes(uint256 _id) external view returns (uint256);
+
+    /**
      * Defines the resolution of a fungible token type. The token id must be
      * in the range of the fungible token ids.
      */

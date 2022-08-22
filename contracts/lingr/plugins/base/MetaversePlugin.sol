@@ -102,17 +102,6 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     }
 
     /**
-     * Requires an (asset or type) id to be in the NFT range.
-     */
-    modifier inNFTRange(uint256 _id) {
-        require(
-            _id == (_id & NFT_MASK),
-            "MetaversePlugin: a valid NFT-ranged value is required"
-        );
-        _;
-    }
-
-    /**
      * This function holds an implementation (which could be
      * empty) for when the plugin is added to the metaverse.
      * The implementation requires the sender to be the same

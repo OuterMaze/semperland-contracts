@@ -7,7 +7,7 @@ import "../../brands/IBrandRegistry.sol";
 import "./IMetaversePlugin.sol";
 
 /**
- * This trait defines utilities that test when an FT belongs to
+ * This trait defines utilities that test when a FT belongs to
  * a particular scope (brand, or the system scope), and that a
  * particular permission is satisfied on that scope. Also, tests
  * that the specified token id is in the FT range.
