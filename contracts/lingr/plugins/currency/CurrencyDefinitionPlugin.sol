@@ -167,7 +167,7 @@ contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FT
     string private beatIcon64x64;
 
     /**
-     * This plug-in does not require extra details on construction.
+     * This plug-in takes the WMATIC & BEAT details on construction.
      */
     constructor(
         address _metaverse, address _earningsReceiver,
