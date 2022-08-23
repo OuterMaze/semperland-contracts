@@ -45,7 +45,7 @@ abstract contract FTTypeCheckingPlugin is Context, MetaversePlugin {
     /**
      * Requires a brand permission on the sender.
      */
-    function _requireBrandPermission(address _brandId, bytes32 _permission) private {
+    function _requireBrandPermission(address _brandId, bytes32 _permission) private view {
         if (_permission == 0x0) return;
 
         require(
@@ -57,7 +57,7 @@ abstract contract FTTypeCheckingPlugin is Context, MetaversePlugin {
     /**
      * Requires a metaverse permission on the user.
      */
-    function _requireMetaversePermission(bytes32 _permission) private {
+    function _requireMetaversePermission(bytes32 _permission) private view {
         if (_permission == 0x0) return;
 
         require(
