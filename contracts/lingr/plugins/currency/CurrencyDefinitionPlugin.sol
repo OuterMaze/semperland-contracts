@@ -97,9 +97,8 @@ contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FT
     mapping(uint256 => CurrencyMetadata) currencies;
 
     /**
-     * This permission allows users to define the costs and the
-     * mint amount defined in this contract (e.g. to define and
-     * mint currencies being a brand, paying the fees).
+     * This permission allows users to set the definition costs
+     * for brands to define new currency types.
      */
     bytes32 constant METAVERSE_MANAGE_CURRENCIES_SETTINGS = keccak256("Plugins::Currency::Settings::Manage");
 
