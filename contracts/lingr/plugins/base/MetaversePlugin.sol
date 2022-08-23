@@ -102,6 +102,14 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     }
 
     /**
+     * This modifier requires the plug-in to be initialized.
+     */
+    modifier onlyWhenInitialized() {
+        require(initialized, "MetaversePlugin: this plug-in is not yet initialized");
+        _;
+    }
+
+    /**
      * This function holds an implementation (which could be
      * empty) for when the plugin is added to the metaverse.
      * The implementation requires the sender to be the same

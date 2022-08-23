@@ -351,7 +351,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         address _definedBy, string memory _name, string memory _description,
         string memory _image, string memory _icon16x16, string memory _icon32x32,
         string memory _icon64x64, string memory _color
-    ) public onlyPlugin {
+    ) public onlyWhenInitialized onlyPlugin {
         CurrencyMetadata memory metadata = CurrencyMetadata({
             registered: true, name: _name, description: _description, color: _color,
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
@@ -368,7 +368,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         address _brandId, string memory _name, string memory _description,
         string memory _image, string memory _icon16x16, string memory _icon32x32,
         string memory _icon64x64, string memory _color
-    ) public payable onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
+    ) public payable onlyWhenInitialized onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
       hasNativeTokenPrice("CurrencyPlugin: brand currency definition", currencyDefinitionCost, 1) {
         CurrencyMetadata memory metadata = CurrencyMetadata({
             registered: true, name: _name, description: _description, color: _color,
@@ -388,7 +388,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         address _brandId, string memory _name, string memory _description,
         string memory _image, string memory _icon16x16, string memory _icon32x32,
         string memory _icon64x64, string memory _color
-    ) public onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES) {
+    ) public onlyWhenInitialized onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES) {
         CurrencyMetadata memory metadata = CurrencyMetadata({
             registered: true, name: _name, description: _description, color: _color,
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
@@ -415,7 +415,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Updates the image in a system / brand currency.
      */
     function setCurrencyImage(uint256 _id, string memory _image)
-        public definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
+        public onlyWhenInitialized definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
         currencies[_id].image = _image;
@@ -425,7 +425,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Updates the color in a system / brand currency.
      */
     function setCurrencyColor(uint256 _id, string memory _color)
-        public definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
+        public onlyWhenInitialized definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
         currencies[_id].color = _color;
@@ -435,7 +435,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Updates the 16x16 icon in a system / brand currency.
      */
     function setCurrencyIcon16x16(uint256 _id, string memory _icon16x16)
-        public definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
+        public onlyWhenInitialized definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
         currencies[_id].icon16x16 = _icon16x16;
@@ -445,7 +445,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Updates the 32x32 icon in a system / brand currency.
      */
     function setCurrencyIcon32x32(uint256 _id, string memory _icon32x32)
-        public definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
+        public onlyWhenInitialized definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
         currencies[_id].icon32x32 = _icon32x32;
@@ -455,7 +455,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Updates the 64x64 icon in a brand currency.
      */
     function setCurrencyIcon64x64(uint256 _id, string memory _icon64x64)
-        public definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
+        public onlyWhenInitialized definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
         currencies[_id].icon64x64 = _icon64x64;

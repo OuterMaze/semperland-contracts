@@ -109,7 +109,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     {
         require(
             _newReceiver != address(0),
-            "CurrencyPlugin: the brand currency minting earnings receiver must not be the 0 address"
+            "CurrencyMintingPlugin: the brand currency minting earnings receiver must not be the 0 address"
         );
         earningsReceiver = _newReceiver;
         emit BrandCurrencyMintingEarningsReceiverUpdated(_newReceiver);
@@ -152,7 +152,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     modifier nonzeroMintAmount() {
         require(
             currencyMintAmount != 0,
-            "CurrencyPlugin: minting is disabled while the mint to amount per bulk is 0"
+            "CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0"
         );
         _;
     }
@@ -171,11 +171,11 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * plug-ins in the same metaverse are allowed to use this method.
      */
     function mintSystemCurrency(address _to, uint256 _id, uint256 bulks)
-        public definedCurrency(_id) nonzeroMintAmount onlyPlugin
+        public onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount onlyPlugin
     {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireSystemScope(scope, 0x0);
-        require(bulks != 0, "CurrencyPlugin: minting (system scope) issued with no units");
+        require(bulks != 0, "CurrencyMintingPlugin: minting (system scope) issued with no units");
         _mintFTFor(_to, _id, bulks * currencyMintAmount, "system currency mint");
     }
 
@@ -185,8 +185,8 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * discretion of the brand users, and has a fee.
      */
     function mintBrandCurrency(address _to, uint256 _id, uint256 bulks)
-        public payable definedCurrency(_id) nonzeroMintAmount
-        hasNativeTokenPrice("CurrencyPlugin: minting (for authorized brand)", currencyMintCost, bulks)
+        public payable onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount
+        hasNativeTokenPrice("CurrencyMintingPlugin: minting (for authorized brand)", currencyMintCost, bulks)
     {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireBrandScope(scope, BRAND_MANAGE_CURRENCIES);
@@ -200,11 +200,12 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * the admins, but typically after coordinating with brand-allowed users.
      */
     function mintBrandCurrencyFor(address _to, uint256 _id, uint256 bulks)
-        public definedCurrency(_id) nonzeroMintAmount onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES)
+        public onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount
+        onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES)
     {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireBrandScope(scope, 0x0);
-        require(bulks != 0, "CurrencyPlugin: minting (system scope) issued with no units");
+        require(bulks != 0, "CurrencyMintingPlugin: minting (system scope) issued with no units");
         _mintFTFor(_to, _id, bulks * currencyMintAmount, "gifted brand mint");
     }
 
@@ -213,8 +214,10 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * a user, or a contract.
      */
     function mintBEAT(address _to, uint256 bulks) public onlyMetaverseAllowed(METAVERSE_MINT_BEAT) {
-        require(bulks != 0, "CurrencyPlugin: BEAT minting issued with no units");
-        _mintFTFor(_to, CurrencyDefinitionPlugin(definitionPlugin).BEATType(), bulks * currencyMintAmount, "BEAT mint");
+        require(bulks != 0, "CurrencyMintingPlugin: BEAT minting issued with no units");
+        uint256 BEATType = CurrencyDefinitionPlugin(definitionPlugin).BEATType();
+        require(BEATType != 0, "CurrencyMintingPlugin: definition plug-in is not initialized");
+        _mintFTFor(_to, BEATType, bulks * currencyMintAmount, "BEAT mint");
     }
 
     /**
@@ -224,10 +227,11 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     function _receiveToken(address operator, address from, uint256 id, uint256 value) private {
         uint256 WMATICType = CurrencyDefinitionPlugin(definitionPlugin).WMATICType();
         uint256 BEATType = CurrencyDefinitionPlugin(definitionPlugin).BEATType();
+        require(WMATICType != 0, "CurrencyMintingPlugin: definition plug-in is not initialized");
         if (id == WMATICType) {
             require(
                 operator == from,
-                "CurrencyPlugin: for safety, only the owner is able to unwrap these tokens"
+                "CurrencyMintingPlugin: for safety, only the owner is able to unwrap these tokens"
             );
             _burnFT(WMATICType, value);
             payable(from).transfer(value);
@@ -240,7 +244,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
                 CurrencyDefinitionPlugin(definitionPlugin).currencyExists(id)) {
                 _burnFT(id, value);
             } else {
-                revert("CurrencyPlugin: cannot receive, from users, other tokens than WMATIC and BEAT");
+                revert("CurrencyMintingPlugin: cannot receive, from users, other tokens than WMATIC and BEAT");
             }
         }
     }
@@ -276,10 +280,12 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * for the exact address sender.
      */
     receive() external payable {
+        uint256 WMATICType = CurrencyDefinitionPlugin(definitionPlugin).WMATICType();
+        require(WMATICType != 0, "CurrencyMintingPlugin: definition plug-in is not initialized");
         require(
             initialized,
-            "CurrencyPlugin: cannot receive MATIC because the plug-in is not yet initialized"
+            "CurrencyMintingPlugin: cannot receive MATIC because the plug-in is not yet initialized"
         );
-        _mintFTFor(_msgSender(), CurrencyDefinitionPlugin(definitionPlugin).WMATICType(), msg.value, "Currency wrapping");
+        _mintFTFor(_msgSender(), WMATICType, msg.value, "Currency wrapping");
     }
 }
