@@ -73,6 +73,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     constructor(address _metaverse, address _definitionPlugin, address _earningsReceiver) MetaversePlugin(_metaverse) {
         require(_earningsReceiver != address(0), "CurrencyMintingPlugin: the earnings receiver must not be 0");
         earningsReceiver = _earningsReceiver;
+        definitionPlugin = _definitionPlugin;
     }
 
     /**
@@ -90,7 +91,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     /**
      * Metadata is not implemented in this plug-in.
      */
-    function _tokenMetadata(uint256 _tokenId) internal view override returns (bytes memory) {
+    function _tokenMetadata(uint256) internal view override returns (bytes memory) {
         return "";
     }
 
