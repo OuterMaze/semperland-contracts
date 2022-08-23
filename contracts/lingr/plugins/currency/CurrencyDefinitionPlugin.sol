@@ -278,7 +278,7 @@ contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FT
     modifier definedCurrency(uint256 _tokenId, bytes32 _metaversePermission, bytes32 _brandPermission) {
         require(
             currencies[_tokenId].registered,
-            "CurrencyDefinitionPlugin: the specified token id is not of a regisrered currency type"
+            "CurrencyDefinitionPlugin: the specified token id is not of a registered currency type"
         );
         address _scopeId = address(uint160((_tokenId >> 64)) & ((1 << 160) - 1));
         _requireScope(_scopeId, _metaversePermission, _brandPermission);
