@@ -61,7 +61,7 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
      * forwarded using the metaverse.
      */
     function _afterTokenTransfer(
-        address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data
+        address, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory
     ) internal override {
         if (from != address(0)) {
             if (to != address(0)) {
