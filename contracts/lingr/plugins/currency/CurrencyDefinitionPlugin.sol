@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
-import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "../../../NativePayable.sol";
 import "../base/MetaversePlugin.sol";
 import "../base/FTDefiningPlugin.sol";
@@ -16,7 +15,7 @@ import "../base/FTBurningPlugin.sol";
  * but defining system currencies or brand currencies by an admin
  * or allowed user is free of charge).
  */
-contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FTTypeCheckingPlugin,
+contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeCheckingPlugin,
     FTMintingPlugin, FTBurningPlugin {
     /**
      * The address that will receive earnings from currency
@@ -104,7 +103,7 @@ contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FT
 
     /**
      * This permission allows users to define currencies for free
-     * for a brand and/or mint currencies for free for a brand.
+     * for a brand.
      */
     bytes32 constant METAVERSE_GIVE_BRAND_CURRENCIES = keccak256("Plugins::Currency::Currencies::Brands::Give");
 
@@ -209,6 +208,13 @@ contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FT
             color: "#87cefa", image: beatImage, icon16x16: beatIcon16x16,
             icon32x32: beatIcon32x32, icon64x64: beatIcon64x64
         }));
+    }
+
+    /**
+     * Tells whether a token id is registered as a currency type.
+     */
+    function currencyExists(uint256 _tokenId) external returns (bool) {
+        return currencies[_tokenId].registered;
     }
 
     /**

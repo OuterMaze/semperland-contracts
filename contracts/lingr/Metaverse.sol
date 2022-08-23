@@ -314,7 +314,7 @@ contract Metaverse is Ownable, IMetaverse {
         uint256[] memory result = new uint256[](_tokenTypes.length);
         for(uint256 index = 0; index < _tokenTypes.length; index++)
         {
-            return _mintNFTFor(_to, _tokenTypes[index], _data);
+            result[index] = _mintNFTFor(_to, _tokenTypes[index], _data);
         }
         return result;
     }

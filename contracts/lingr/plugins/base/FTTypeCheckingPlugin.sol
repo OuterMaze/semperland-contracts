@@ -39,7 +39,7 @@ abstract contract FTTypeCheckingPlugin is Context, MetaversePlugin {
             _tokenId == (_tokenId & FT_MASK),
             "FTTypeCheckingPlugin: the given token id is not in the FT range"
         );
-        return address((_tokenId >> 64) & BRAND_MASK);
+        return address(uint160((_tokenId >> 64) & BRAND_MASK));
     }
 
     /**

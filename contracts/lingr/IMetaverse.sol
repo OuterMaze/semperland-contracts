@@ -82,7 +82,8 @@ interface IMetaverse is IERC165 {
      * types are reserved for being invalid or brands. The token types array must not be
      * empty.
      */
-    function mintNFTsFor(address _to, uint256[] memory _tokenType, bytes memory _data) external returns (uint256);
+    function mintNFTsFor(address _to, uint256[] memory _tokenType, bytes memory _data)
+        external returns (uint256[] memory);
 
     /**
      * Mints a specific brand token for a given user. The brand is stated as its address.
