@@ -101,20 +101,20 @@ contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FT
      * mint amount defined in this contract (e.g. to define and
      * mint currencies being a brand, paying the fees).
      */
-    bytes32 constant METAVERSE_MANAGE_CURRENCIES_SETTINGS = keccak256("CurrencyDefinitionPlugin::Settings::Manage");
+    bytes32 constant METAVERSE_MANAGE_CURRENCIES_SETTINGS = keccak256("Plugins::Currency::Settings::Manage");
 
     /**
      * This permission allows users to define currencies for free
      * for a brand and/or mint currencies for free for a brand.
      */
-    bytes32 constant METAVERSE_GIVE_BRAND_CURRENCIES = keccak256("CurrencyDefinitionPlugin::Currencies::Brands::Give");
+    bytes32 constant METAVERSE_GIVE_BRAND_CURRENCIES = keccak256("Plugins::Currency::Currencies::Brands::Give");
 
     /**
      * This permission allows users to define currencies for a cost
      * for a brand. Additionally, this permissions lets the user edit
      * the metadata of an existing currency (that operation is free).
      */
-    bytes32 constant BRAND_MANAGE_CURRENCIES = keccak256("CurrencyDefinitionPlugin::Brand::Currencies::Manage");
+    bytes32 constant BRAND_MANAGE_CURRENCIES = keccak256("Plugins::Currency::Brand::Currencies::Manage");
 
     /**
      * The id of the WMATIC type. Set on initialization.
