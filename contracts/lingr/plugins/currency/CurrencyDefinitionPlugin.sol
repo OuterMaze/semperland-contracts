@@ -213,7 +213,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Tells whether a token id is registered as a currency type.
      */
-    function currencyExists(uint256 _tokenId) external returns (bool) {
+    function currencyExists(uint256 _tokenId) external view returns (bool) {
         return currencies[_tokenId].registered;
     }
 
