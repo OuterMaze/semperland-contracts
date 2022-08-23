@@ -34,7 +34,7 @@ abstract contract FTTypeCheckingPlugin is Context, MetaversePlugin {
      * the brand id related to that FT (if the brand id is 0, that one is the
      * system scope).
      */
-    function _requireFTRange(uint256 _tokenId) internal returns (address) {
+    function _requireFTRange(uint256 _tokenId) internal pure returns (address) {
         require(
             _tokenId == (_tokenId & FT_MASK),
             "FTTypeCheckingPlugin: the given token id is not in the FT range"
@@ -94,7 +94,9 @@ abstract contract FTTypeCheckingPlugin is Context, MetaversePlugin {
      * test a metaverse-scoped permission. Otherwise, the scope will be a brand
      * and it will test a brand-scoped permission (on that brand).
      */
-    function _requireScope(address _scope, bytes32 _metaversePermission, bytes32 _brandPermission) internal {
+    function _requireScopeAllowed(address _scope, bytes32 _metaversePermission, bytes32 _brandPermission)
+        internal view
+    {
         if (_scope == SYSTEM_SCOPE) {
             _requireMetaversePermission(_metaversePermission);
         } else {

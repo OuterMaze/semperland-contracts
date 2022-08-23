@@ -287,7 +287,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
             "CurrencyDefinitionPlugin: the specified token id is not of a registered currency type"
         );
         address _scopeId = address(uint160((_tokenId >> 64)) & ((1 << 160) - 1));
-        _requireScope(_scopeId, _metaversePermission, _brandPermission);
+        _requireScopeAllowed(_scopeId, _metaversePermission, _brandPermission);
         _;
     }
 
