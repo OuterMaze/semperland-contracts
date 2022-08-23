@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import "../../../NativePayable.sol";
 import "../base/MetaversePlugin.sol";
 import "../base/FTDefiningPlugin.sol";
 import "../base/FTTypeCheckingPlugin.sol";
-import "../../../NativePayable.sol";
-import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import "../base/FTMintingPlugin.sol";
+import "../base/FTBurningPlugin.sol";
 
 /**
  * This contract is the "definition" part of the Currency feature.
@@ -14,7 +16,8 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
  * but defining system currencies or brand currencies by an admin
  * or allowed user is free of charge).
  */
-contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FTTypeCheckingPlugin {
+contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FTTypeCheckingPlugin,
+    FTMintingPlugin, FTBurningPlugin {
     /**
      * The address that will receive earnings from currency
      * definition operations (executed by brand users which
@@ -186,15 +189,15 @@ contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FT
     }
 
     /**
-     * The title of the current plug-in is "Currency".
+     * The title of the current plug-in is "Currency (Definition)".
      */
     function title() public view override returns (string memory) {
-        return "Currency";
+        return "Currency (Definition)";
     }
 
     /**
-     * This function holds an implementation (which could be
-     * empty) for when the plugin is added to the metaverse.
+     * The definition plug-in is initialized with two currencies
+     * which belong to the system: WMATIC and BEAT.
      */
     function _initialize() internal override {
         WMATICType = _defineSystemCurrency(address(this), CurrencyMetadata({
@@ -210,8 +213,7 @@ contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FT
     }
 
     /**
-     * This function returns the uri for a given token id, with
-     * the same semantics of ERC1155.
+     * This function returns the JSON contents for the asset's URI.
      */
     function _tokenMetadata(uint256 _tokenId) internal view override returns (bytes memory) {
         CurrencyMetadata storage currency = currencies[_tokenId];
@@ -243,23 +245,23 @@ contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FT
     }
 
     /**
-     * An event for when the brand currency actions earnings
+     * An event for when the brand currency definition earnings
      * receiver is changed.
      */
-    event BrandCurrencyActionsEarningsReceiverUpdated(address newReceiver);
+    event BrandCurrencyDefinitionEarningsReceiverUpdated(address newReceiver);
 
     /**
      * Set the new brand currency actions earnings receiver.
      */
-    function setBrandCurrencyActionsEarningsReceiver(address _newReceiver) public
+    function setBrandCurrencyDefinitionEarningsReceiver(address _newReceiver) public
         onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         require(
             _newReceiver != address(0),
-            "CurrencyPlugin: the brand currency actions earnings receiver must not be the 0 address"
+            "CurrencyPlugin: the brand currency definition earnings receiver must not be the 0 address"
         );
         earningsReceiver = _newReceiver;
-        emit BrandCurrencyActionsEarningsReceiverUpdated(_newReceiver);
+        emit BrandCurrencyDefinitionEarningsReceiverUpdated(_newReceiver);
     }
 
     /**
@@ -280,7 +282,7 @@ contract CurrencyPlugin is NativePayable, IERC1155Receiver, FTDefiningPlugin, FT
             "CurrencyDefinitionPlugin: the specified token id is not of a regisrered currency type"
         );
         address _scopeId = address(uint160((_tokenId >> 64)) & ((1 << 160) - 1));
-        _requireScopeAllowed(_scopeId, _metaversePermission, _brandPermission);
+        _requireScope(_scopeId, _metaversePermission, _brandPermission);
         _;
     }
 

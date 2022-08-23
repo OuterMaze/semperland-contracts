@@ -43,23 +43,49 @@ abstract contract FTTypeCheckingPlugin is Context, MetaversePlugin {
     }
 
     /**
+     * Requires a brand permission on the sender.
+     */
+    function _requireBrandPermission(address _brandId, bytes32 _permission) private {
+        if (_permission == 0x0) return;
+
+        require(
+            IBrandRegistry(IMetaverse(metaverse).brandRegistry()).isBrandAllowed(_brandId, _permission, _msgSender()),
+            "FTTypeCheckingPlugin: caller is not brand owner nor approved, and does not have the required permission"
+        );
+    }
+
+    /**
+     * Requires a metaverse permission on the user.
+     */
+    function _requireMetaversePermission(bytes32 _permission) private {
+        if (_permission == 0x0) return;
+
+        require(
+            IMetaverse(metaverse).isAllowed(_permission, _msgSender()),
+            "FTTypeCheckingPlugin: caller is not metaverse owner, and does not have the required permission"
+        );
+    }
+
+    /**
      * This function requires the scope to be the system.
      */
-    function _requireSystemScope(address _scope) internal {
+    function _requireSystemScope(address _scope, bytes32 _permission) internal {
         require(
             _scope == SYSTEM_SCOPE,
             "FTTypeCheckingPlugin: this function is only available for the system"
         );
+        _requireMetaversePermission(_permission);
     }
 
     /**
      * This function requires a brand scope.
      */
-    function _requireBrandScope(address _scope) internal {
+    function _requireBrandScope(address _scope, bytes32 _permission) internal {
         require(
             _scope != SYSTEM_SCOPE,
             "FTTypeCheckingPlugin: this function is only available for brands"
         );
+        _requireBrandPermission(_scope, _permission);
     }
 
     /**
@@ -68,19 +94,11 @@ abstract contract FTTypeCheckingPlugin is Context, MetaversePlugin {
      * test a metaverse-scoped permission. Otherwise, the scope will be a brand
      * and it will test a brand-scoped permission (on that brand).
      */
-    function _requireScopeAllowed(address _scopeId, bytes32 _metaversePermission, bytes32 _brandPermission) internal {
-        if (_scopeId == SYSTEM_SCOPE) {
-            require(
-                IMetaverse(metaverse).isAllowed(_metaversePermission, _msgSender()),
-                "MetaversePlugin: caller is not metaverse owner, and does not have the required permission"
-            );
+    function _requireScope(address _scope, bytes32 _metaversePermission, bytes32 _brandPermission) internal {
+        if (_scope == SYSTEM_SCOPE) {
+            _requireMetaversePermission(_metaversePermission);
         } else {
-            require(
-                IBrandRegistry(IMetaverse(metaverse).brandRegistry()).isBrandAllowed(
-                    _scopeId, _brandPermission, _msgSender()
-                ),
-                "MetaversePlugin: caller is not brand owner nor approved, and does not have the required permission"
-            );
+            _requireBrandPermission(_scope, _brandPermission);
         }
     }
 }
