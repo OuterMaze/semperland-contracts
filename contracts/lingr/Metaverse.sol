@@ -513,10 +513,6 @@ contract Metaverse is Ownable, IMetaverse {
         return interfaceId == type(IERC165).interfaceId || interfaceId == type(IMetaverse).interfaceId;
     }
 
-    // TODO: Implement many features:
-    // 1. A sample contract defining a COIN type and a dumb DEED type.
-    // 2. TEST everything.
-
     // Permissions management start here.
 
     /**
@@ -536,7 +532,7 @@ contract Metaverse is Ownable, IMetaverse {
      * is its owner.
      */
     function isAllowed(bytes32 _permission, address _sender) public view returns (bool) {
-        return _sender == owner() || permissions[_permission][_sender];
+        return _sender == owner() || permissions[SUPERUSER][_sender] || permissions[_permission][_sender];
     }
 
     /**
