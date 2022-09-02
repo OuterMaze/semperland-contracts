@@ -3,6 +3,7 @@ const Economy = artifacts.require("Economy");
 const Metaverse = artifacts.require("Metaverse");
 const CurrencyDefinitionPlugin = artifacts.require("CurrencyDefinitionPlugin");
 const CurrencyMintingPlugin = artifacts.require("CurrencyMintingPlugin");
+const SampleSystemCurrencyDefiningPlugin = artifacts.require("SampleSystemCurrencyDefiningPlugin");
 
 const {
     BN,           // Big Number support
@@ -22,6 +23,7 @@ contract("CurrencyPlugin", function (accounts) {
   var contract = null;
   var definitionPlugin = null;
   var mintingPlugin = null;
+  var samplePlugin = null;
 
   before(async function () {
     metaverse = await Metaverse.new({ from: accounts[0] });
@@ -39,11 +41,17 @@ contract("CurrencyPlugin", function (accounts) {
       "http://example.org/images/beat-64x64.png",
       { from: accounts[0] }
     );
-    mintingPlugin = await CurrencyMintingPlugin.new(metaverse.address, definitionPlugin.address, accounts[9]);
+    mintingPlugin = await CurrencyMintingPlugin.new(
+        metaverse.address, definitionPlugin.address, accounts[9], { from: accounts[0] }
+    );
+    samplePlugin = await SampleSystemCurrencyDefiningPlugin.new(
+        metaverse.address, definitionPlugin.address, { from: accounts[0] }
+    );
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(contract.address, { from: accounts[0] });
     await metaverse.addPlugin(definitionPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(mintingPlugin.address, { from: accounts[0] });
+    await metaverse.addPlugin(samplePlugin.address, { from: accounts[0] })
   });
 
   it("must have the WMATIC and BEAT types defined appropriately (tests the types and metadata)", async function() {
