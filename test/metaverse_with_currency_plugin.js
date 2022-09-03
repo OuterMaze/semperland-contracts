@@ -20,7 +20,7 @@ const {
 contract("CurrencyPlugin", function (accounts) {
   var economy = null;
   var metaverse = null;
-  var contract = null;
+  var brandRegistry = null;
   var definitionPlugin = null;
   var mintingPlugin = null;
   var samplePlugin = null;
@@ -28,7 +28,7 @@ contract("CurrencyPlugin", function (accounts) {
   before(async function () {
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
-    contract = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
+    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
     definitionPlugin = await CurrencyDefinitionPlugin.new(
       metaverse.address, accounts[9],
       "http://example.org/images/wmatic-image.png",
@@ -48,10 +48,23 @@ contract("CurrencyPlugin", function (accounts) {
         metaverse.address, definitionPlugin.address, { from: accounts[0] }
     );
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
-    await metaverse.setBrandRegistry(contract.address, { from: accounts[0] });
+    await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
     await metaverse.addPlugin(definitionPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(mintingPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(samplePlugin.address, { from: accounts[0] })
+  });
+
+  it("must have the expected titles", async function() {
+    let definitionTitle = await definitionPlugin.title();
+    assert.isTrue(
+      definitionTitle === "Currency (Definition)",
+      "The title of the definition plug-in must be: Currency (Definition), not: " + definitionTitle
+    );
+    let mintingTitle = await mintingPlugin.title();
+    assert.isTrue(
+      mintingTitle === "Currency (Minting)",
+      "The title of the definition plug-in must be: Currency (Minting), not: " + mintingTitle
+    );
   });
 
   it("must have the WMATIC and BEAT types defined appropriately (tests the types and metadata)", async function() {
