@@ -25,6 +25,23 @@ contract("CurrencyPlugin", function (accounts) {
   var mintingPlugin = null;
   var samplePlugin = null;
 
+  function revertReason(message) {
+    return message + " -- Reason given: " + message;
+  }
+
+  function btoa(raw) {
+    return new Buffer(raw).toString("base64");
+  }
+
+  function atob(encoded) {
+    return new Buffer(encoded, 'base64').toString("ascii");
+  }
+
+  function jsonUrl(payload) {
+    new Buffer("pija");
+    return "data:application/json;base64," + btoa(JSON.stringify(payload));
+  }
+
   before(async function () {
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
@@ -78,5 +95,67 @@ contract("CurrencyPlugin", function (accounts) {
       BEAT.cmp(new BN("0x8000000000000000000000000000000000000000000000000000000000000001")) === 0,
       "The definition plug-in must have the BEAT token appropriately defined"
     );
+  });
+
+  it("must start with a definition cost of 0", async function() {
+    let currencyDefinitionCost = await definitionPlugin.currencyDefinitionCost();
+    assert.isTrue(
+      currencyDefinitionCost.cmp(new BN("0")) === 0,
+      "The initial definition cost must be 0, not " + currencyDefinitionCost.toString()
+    );
+  });
+
+  it("must start with the earnings receiver to be the 9th accounts", async function() {
+    let earningsReceiver = await definitionPlugin.brandCurrencyDefinitionEarningsReceiver();
+    assert.isTrue(
+      earningsReceiver === accounts[9],
+      "The initial earnings receiver must be " + accounts[0] + ", not " + earningsReceiver
+    );
+  });
+
+  it("has both WMATICType and BEATType as accessible from the metaverse itself", async function() {
+    let WMATIC = await definitionPlugin.WMATICType();
+    let BEAT = await definitionPlugin.BEATType();
+    let posterior = BEAT.add(new BN(1));
+    let WMATICMetadata = await economy.uri(WMATIC);
+    let BEATMetadata = await economy.uri(BEAT);
+    let posteriorMetadata = await economy.uri(posterior);
+
+    let expectedWMATICMetadata = jsonUrl({
+      name: "WMATIC", description: "Wrapped MATIC in this world",
+      image: "http://example.org/images/wmatic-image.png",
+      decimals: 18,
+      properties: {
+        icon16x16: "http://example.org/images/wmatic-16x16.png",
+        icon32x32: "http://example.org/images/wmatic-32x32.png",
+        icon64x64: "http://example.org/images/wmatic-64x64.png",
+        color: "#ffd700"
+      }
+    });
+    assert.isTrue(
+      WMATICMetadata === expectedWMATICMetadata,
+      "The WMATIC metadata should be: " + expectedWMATICMetadata + ", not: " + WMATICMetadata
+    );
+
+    let expectedBEATMetadata = jsonUrl({
+      name: "BEAT", description: "BEAT coin",
+      image: "http://example.org/images/beat-image.png",
+      decimals: 18,
+      properties: {
+        icon16x16: "http://example.org/images/beat-16x16.png",
+        icon32x32: "http://example.org/images/beat-32x32.png",
+        icon64x64: "http://example.org/images/beat-64x64.png",
+        color: "#87cefa"
+      },
+    });
+    assert.isTrue(
+      BEATMetadata === expectedBEATMetadata,
+      "The BEAT metadata should be: " + expectedBEATMetadata + ", not: " + BEATMetadata
+    );
+
+    assert.isTrue(
+      posteriorMetadata === "",
+      "The posterior token metadata (which does not exist, yet) should be empty, not: " + posteriorMetadata
+    )
   });
 });
