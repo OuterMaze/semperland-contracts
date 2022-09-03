@@ -22,7 +22,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * definition operations (executed by brand users which
      * are appropriately allowed by the brand owner).
      */
-    address public earningsReceiver;
+    address public brandCurrencyDefinitionEarningsReceiver;
 
     /**
      * The current price of the definition of a new currency
@@ -183,7 +183,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         beatIcon16x16 = _beatIcon16x16;
         beatIcon32x32 = _beatIcon32x32;
         beatIcon64x64 = _beatIcon64x64;
-        earningsReceiver = _earningsReceiver;
+        brandCurrencyDefinitionEarningsReceiver = _earningsReceiver;
     }
 
     /**
@@ -265,7 +265,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
             _newReceiver != address(0),
             "CurrencyDefinitionPlugin: the brand currency definition earnings receiver must not be the 0 address"
         );
-        earningsReceiver = _newReceiver;
+        brandCurrencyDefinitionEarningsReceiver = _newReceiver;
         emit BrandCurrencyDefinitionEarningsReceiverUpdated(_newReceiver);
     }
 
@@ -376,7 +376,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
             icon64x64: _icon64x64
         });
         _defineBrandCurrency(_brandId, msg.value, msg.sender, metadata);
-        payable(earningsReceiver).transfer(msg.value);
+        payable(brandCurrencyDefinitionEarningsReceiver).transfer(msg.value);
     }
 
     /**
