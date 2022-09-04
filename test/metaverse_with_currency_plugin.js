@@ -172,4 +172,29 @@ contract("CurrencyPlugin", function (accounts) {
       "The posterior token metadata (which does not exist, yet) should be empty, not: " + posteriorMetadata
     )
   });
+
+  it("must not allow to set the earnings receiver to 0x000...000", async function() {
+    await expectRevert(
+      definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(
+        "0x0000000000000000000000000000000000000000", { from: accounts[0] }
+      ),
+      revertReason(
+        "CurrencyDefinitionPlugin: the brand currency definition earnings receiver must not be the 0 address"
+      )
+    );
+  });
+
+  it("must allow account 0 to set the receiver to account 8", async function() {
+    await expectEvent(
+      await definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[8], { from: accounts[0] }),
+      "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[8] }
+    );
+  });
+
+  it("must allow account 0 to set the receiver to account 9, again", async function() {
+    await expectEvent(
+      await definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[9], { from: accounts[0] }),
+      "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[9] }
+    );
+  });
 });
