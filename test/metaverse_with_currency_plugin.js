@@ -25,6 +25,11 @@ contract("CurrencyPlugin", function (accounts) {
   var mintingPlugin = null;
   var samplePlugin = null;
 
+  const SUPERUSER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+  const METAVERSE_MANAGE_CURRENCIES_SETTINGS = web3.utils.soliditySha3("Plugins::Currency::Settings::Manage");
+  const METAVERSE_GIVE_BRAND_CURRENCIES = web3.utils.soliditySha3("Plugins::Currency::Currencies::Brands::Give");
+  const BRAND_MANAGE_CURRENCIES = web3.utils.soliditySha3("Plugins::Currency::Brand::Currencies::Manage");
+
   function revertReason(message) {
     return message + " -- Reason given: " + message;
   }
@@ -196,5 +201,26 @@ contract("CurrencyPlugin", function (accounts) {
       await definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[9], { from: accounts[0] }),
       "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[9] }
     );
+  });
+
+  it("must not allow account 7 to set the receiver to account 8, since it lacks of permissions", async function() {
+    await expectRevert(
+      definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[8], { from: accounts[7] }),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 7 to grant the METAVERSE_MANAGE_CURRENCIES_SETTINGS on itself", async function() {
+    await expectRevert(
+      metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[7] }),
+      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    )
+  });
+
+  it("must not allow account 7 to grant the SUPERUSER on itself", async function() {
+    await expectRevert(
+      metaverse.setPermission(SUPERUSER, accounts[7], true, { from: accounts[7] }),
+      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    )
   });
 });
