@@ -43,6 +43,7 @@ contract("CurrencyPlugin", function (accounts) {
   }
 
   before(async function () {
+    // Set up the metaverse and two plug-ins.
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
     brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
@@ -68,7 +69,20 @@ contract("CurrencyPlugin", function (accounts) {
     await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
     await metaverse.addPlugin(definitionPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(mintingPlugin.address, { from: accounts[0] });
-    await metaverse.addPlugin(samplePlugin.address, { from: accounts[0] })
+    await metaverse.addPlugin(samplePlugin.address, { from: accounts[0] });
+
+    // Mint some brands.
+    await brandRegistry.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[0] });
+    await brandRegistry.registerBrand(
+      "My Brand 1", "My awesome brand 1", "http://example.com/brand1.png", "http://example.com/icon1-16x16.png",
+      "http://example.com/icon1-32x32.png", "http://example.com/icon1-64x64.png",
+      {from: accounts[1], value: new BN("10000000000000000000")}
+    );
+    await brandRegistry.registerBrand(
+      "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/icon2-16x16.png",
+      "http://example.com/icon2-32x32.png", "http://example.com/icon2-64x64.png",
+      {from: accounts[2], value: new BN("10000000000000000000")}
+    );
   });
 
   it("must have the expected titles", async function() {
