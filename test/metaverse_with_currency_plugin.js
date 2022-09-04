@@ -246,4 +246,50 @@ contract("CurrencyPlugin", function (accounts) {
       "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[9] }
     );
   });
+
+  it("must not allow any of the first 10 accounts to define a system currency", async function() {
+    for(let index = 0; index < 10; index++) {
+      await expectRevert(
+        definitionPlugin.defineSystemCurrency(
+          accounts[index], "New System Currency", "A newly defined system currency",
+          "https://example.org/images/image-nsc.png",
+          "https://example.org/images/icon-nsc-16x16.png",
+          "https://example.org/images/icon-nsc-32x32.png",
+          "https://example.org/images/icon-nsc-64x64.png",
+          "#ff7700"
+        ),
+        revertReason("MetaversePlugin: only one of the owning metaverse's plug-ins can invoke this method")
+      );
+    }
+  });
+
+  it("must however allow the sample plug-in to define 3 system currencies", async function() {
+    let _id = new BN('0x8000000000000000000000000000000000000000000000000000000000000002');
+    for(let index = 0; index < 3; index++) {
+      await samplePlugin.defineSystemCurrency();
+      let expectedMetadata = jsonUrl({
+        name: "SysCurr #" + (index + 1), description: "System Currency #" + (index + 1),
+        image: "http://example.org/sys-currs/image-" + (index + 1) + ".png",
+        decimals: 18,
+        properties: {
+          icon16x16: "http://example.org/sys-currs/icon16-" + (index + 1) + ".png",
+          icon32x32: "http://example.org/sys-currs/icon32-" + (index + 1) + ".png",
+          icon64x64: "http://example.org/sys-currs/icon64-" + (index + 1) + ".png",
+          color: "#ddcc00"
+        }
+      });
+      let metadata = await economy.uri(_id);
+      console.log("Given");
+      console.log(metadata);
+      console.log("Expected");
+      console.log(expectedMetadata);
+      let len = "data:application/json;base64,".length;
+      assert.isTrue(
+        metadata === expectedMetadata,
+        "The system currency #" + (index + 1) + "'s metadata should be: " + atob(expectedMetadata.substr(len)) +
+        ", not: " + atob(metadata.substr(len))
+      );
+      _id = _id.add(new BN("1"));
+    }
+  })
 });
