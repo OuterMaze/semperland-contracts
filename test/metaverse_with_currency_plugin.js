@@ -214,13 +214,36 @@ contract("CurrencyPlugin", function (accounts) {
     await expectRevert(
       metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[7] }),
       revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
-    )
+    );
   });
 
   it("must not allow account 7 to grant the SUPERUSER on itself", async function() {
     await expectRevert(
       metaverse.setPermission(SUPERUSER, accounts[7], true, { from: accounts[7] }),
       revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
-    )
+    );
+  });
+
+  it("must allow account 0 to grant METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": true, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must allow account 0 to set the receiver to account 8", async function() {
+    await expectEvent(
+      await definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[8], { from: accounts[7] }),
+      "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[8] }
+    );
+  });
+
+  it("must allow account 0 to set the receiver to account 9, again", async function() {
+    await expectEvent(
+      await definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[9], { from: accounts[7] }),
+      "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[9] }
+    );
   });
 });
