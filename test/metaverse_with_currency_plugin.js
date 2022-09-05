@@ -24,6 +24,8 @@ contract("CurrencyPlugin", function (accounts) {
   var definitionPlugin = null;
   var mintingPlugin = null;
   var samplePlugin = null;
+  var brand1 = null;
+  var brand2 = null;
 
   const SUPERUSER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
   const METAVERSE_MANAGE_CURRENCIES_SETTINGS = web3.utils.soliditySha3("Plugins::Currency::Settings::Manage");
@@ -83,11 +85,18 @@ contract("CurrencyPlugin", function (accounts) {
       "http://example.com/icon1-32x32.png", "http://example.com/icon1-64x64.png",
       {from: accounts[1], value: new BN("10000000000000000000")}
     );
+    brand1 = web3.utils.toChecksumAddress('0x' + web3.utils.soliditySha3(
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 1
+    ).substr(26));
+
     await brandRegistry.registerBrand(
       "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/icon2-16x16.png",
       "http://example.com/icon2-32x32.png", "http://example.com/icon2-64x64.png",
       {from: accounts[2], value: new BN("10000000000000000000")}
     );
+    brand2 = web3.utils.toChecksumAddress('0x' + web3.utils.soliditySha3(
+        "0xd6", "0x94", brandRegistry.address, accounts[2], 2
+    ).substr(26));
   });
 
   it("must have the expected titles", async function() {
@@ -279,10 +288,6 @@ contract("CurrencyPlugin", function (accounts) {
         }
       });
       let metadata = await economy.uri(_id);
-      console.log("Given");
-      console.log(metadata);
-      console.log("Expected");
-      console.log(expectedMetadata);
       let len = "data:application/json;base64,".length;
       assert.isTrue(
         metadata === expectedMetadata,
@@ -291,5 +296,16 @@ contract("CurrencyPlugin", function (accounts) {
       );
       _id = _id.add(new BN("1"));
     }
-  })
+  });
+
+  it("must not allow the owner of brand #1 to define a currency, since the cost is 0", async function() {
+    await expectRevert(
+      definitionPlugin.defineBrandCurrency(
+        brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
+        "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
+        "http://example.org/images/brand1-1-icon64x64.png", "#001122", { from: accounts[1] }
+      ),
+      "CurrencyPlugin: brand currency definition is currently disabled (no price is set)"
+    )
+  });
 });
