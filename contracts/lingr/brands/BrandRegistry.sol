@@ -503,8 +503,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
      */
     function isBrandAllowed(address _brandId, bytes32 _permission, address _sender) public view returns (bool) {
         address owner = brands[_brandId].owner;
-        address sender = _msgSender();
-        return owner != address(0) && (sender == owner || _isBrandOwnerApproved(owner, sender) ||
+        return owner != address(0) && (_sender == owner || _isBrandOwnerApproved(owner, _sender) ||
                                        brandPermissions[_brandId][SUPERUSER][_sender] ||
                                        brandPermissions[_brandId][_permission][_sender]);
     }
