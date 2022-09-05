@@ -242,14 +242,14 @@ contract("CurrencyPlugin", function (accounts) {
     );
   });
 
-  it("must allow account 0 to set the receiver to account 8", async function() {
+  it("must allow account 7 to set the receiver to account 8", async function() {
     await expectEvent(
       await definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[8], { from: accounts[7] }),
       "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[8] }
     );
   });
 
-  it("must allow account 0 to set the receiver to account 9, again", async function() {
+  it("must allow account 7 to set the receiver to account 9, again", async function() {
     await expectEvent(
       await definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[9], { from: accounts[7] }),
       "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[9] }
@@ -305,7 +305,70 @@ contract("CurrencyPlugin", function (accounts) {
         "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
         "http://example.org/images/brand1-1-icon64x64.png", "#001122", { from: accounts[1] }
       ),
-      "CurrencyPlugin: brand currency definition is currently disabled (no price is set)"
-    )
+      revertReason("CurrencyPlugin: brand currency definition is currently disabled (no price is set)")
+    );
+  });
+
+  it("must not allow the 7th account to define a currency for brand 1, due to lacking of permission", async function() {
+    await expectRevert(
+      definitionPlugin.defineBrandCurrencyFor(
+        brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
+        "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
+        "http://example.org/images/brand1-1-icon64x64.png", "#001122", { from: accounts[7] }
+      ),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 7 to grant the METAVERSE_GIVE_BRAND_CURRENCIES on itself", async function() {
+    await expectRevert(
+      metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[7], true, { from: accounts[7] }),
+      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must allow account 0 to grant METAVERSE_GIVE_BRAND_CURRENCIES to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[7], true, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_GIVE_BRAND_CURRENCIES, "user": accounts[7], "set": true, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must allow the 7th account to define a currency for brand 1, now having permission", async function() {
+    let brandPart = brand1.substr(2).toLowerCase();
+    let index = "0000000000000000";
+    let id = new BN("0x80000000" + brandPart + index);
+
+    await expectEvent(
+      await definitionPlugin.defineBrandCurrencyFor(
+        brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
+        "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
+        "http://example.org/images/brand1-1-icon64x64.png", "#001122", { from: accounts[7] }
+      ),
+      "CurrencyDefined", {
+        "tokenId": id, "brandId": brand1, "definedBy": accounts[7], "paidPrice": new BN('0'),
+        "name": "Brand #1 Curr #1", "description": "Currency #1 of Brand #1"
+      }
+    );
+    let metadata = await economy.uri(id);
+    let expectedMetadata = jsonUrl({
+      name: "Brand #1 Curr #1", description: "Currency #1 of Brand #1",
+      image: "http://example.org/images/brand1-1-image.png",
+      decimals: 18,
+      properties: {
+        icon16x16: "http://example.org/images/brand1-1-icon16x16.png",
+        icon32x32: "http://example.org/images/brand1-1-icon32x32.png",
+        icon64x64: "http://example.org/images/brand1-1-icon64x64.png",
+        color: "#001122"
+      }
+    });
+    let len = "data:application/json;base64,".length;
+    assert.isTrue(
+      metadata === expectedMetadata,
+      "The new currency's metadata should be: " + atob(expectedMetadata.substr(len)) +
+      ", not: " + atob(metadata.substr(len))
+    );
   });
 });
