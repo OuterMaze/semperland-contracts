@@ -256,6 +256,15 @@ contract("CurrencyPlugin", function (accounts) {
     );
   });
 
+  it("must allow account 0 to revoke METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
+    await expectEvent(
+        await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], false, { from: accounts[0] }),
+        "PermissionChanged", {
+          "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": false, "sender": accounts[0]
+        }
+    );
+  });
+
   it("must not allow any of the first 10 accounts to define a system currency", async function() {
     for(let index = 0; index < 10; index++) {
       await expectRevert(
