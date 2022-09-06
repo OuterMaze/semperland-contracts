@@ -247,6 +247,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         currencyDefinitionCost = newCost;
+        emit CurrencyDefinitionCostUpdated(newCost);
     }
 
     /**

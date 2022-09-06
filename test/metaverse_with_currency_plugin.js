@@ -258,10 +258,10 @@ contract("CurrencyPlugin", function (accounts) {
 
   it("must allow account 0 to revoke METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
     await expectEvent(
-        await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], false, { from: accounts[0] }),
-        "PermissionChanged", {
-          "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": false, "sender": accounts[0]
-        }
+      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], false, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": false, "sender": accounts[0]
+      }
     );
   });
 
@@ -378,6 +378,79 @@ contract("CurrencyPlugin", function (accounts) {
       metadata === expectedMetadata,
       "The new currency's metadata should be: " + atob(expectedMetadata.substr(len)) +
       ", not: " + atob(metadata.substr(len))
+    );
+  });
+
+  it("must allow the owner to set the definition cost to 10 matic", async function() {
+    await expectEvent(
+      await definitionPlugin.setCurrencyDefinitionCost(new BN("10000000000000000000"), {from: accounts[0]}),
+      "CurrencyDefinitionCostUpdated", {
+        "newCost": new BN("10000000000000000000")
+      }
+    );
+  });
+
+  it("must not allow account 7 to set the cost to 5 matic, since it lacks of permissions", async function() {
+    await expectRevert(
+      definitionPlugin.setCurrencyDefinitionCost(new BN("5000000000000000000"), { from: accounts[7] }),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 7 to grant the METAVERSE_MANAGE_CURRENCIES_SETTINGS on itself", async function() {
+    await expectRevert(
+        metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[7] }),
+        revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 7 to grant the SUPERUSER on itself", async function() {
+    await expectRevert(
+        metaverse.setPermission(SUPERUSER, accounts[7], true, { from: accounts[7] }),
+        revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must allow account 0 to grant METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
+    await expectEvent(
+        await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[0] }),
+        "PermissionChanged", {
+          "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": true, "sender": accounts[0]
+        }
+    );
+  });
+
+  it("must allow account 7 to set the definition cost to 5 matic", async function() {
+    await expectEvent(
+      await definitionPlugin.setCurrencyDefinitionCost(new BN("5000000000000000000"), {from: accounts[7]}),
+      "CurrencyDefinitionCostUpdated", {
+        "newCost": new BN("5000000000000000000")
+      }
+    );
+  });
+
+  it("must allow account 7 to set the definition cost to 10 matic", async function() {
+    await expectEvent(
+      await definitionPlugin.setCurrencyDefinitionCost(new BN("10000000000000000000"), {from: accounts[7]}),
+      "CurrencyDefinitionCostUpdated", {
+        "newCost": new BN("10000000000000000000")
+      }
+    );
+  });
+
+  it("must allow account 0 to revoke METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], false, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": false, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must not allow account 7 to set the cost to 5 matic, since it lacks of permissions", async function() {
+    await expectRevert(
+        definitionPlugin.setCurrencyDefinitionCost(new BN("5000000000000000000"), { from: accounts[7] }),
+        revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
     );
   });
 });
