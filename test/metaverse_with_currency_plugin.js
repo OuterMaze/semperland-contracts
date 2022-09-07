@@ -453,4 +453,54 @@ contract("CurrencyPlugin", function (accounts) {
         revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
     );
   });
+
+  it("must not allow the owner of brand #1 to define a currency, since it paid a wrong cost", async function() {
+    await expectRevert(
+      definitionPlugin.defineBrandCurrency(
+        brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
+        "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
+        "http://example.org/images/brand1-1-icon64x64.png", "#001122",
+        { from: accounts[1], value: new BN("11000000000000000000"), gas: new BN("5000000") }
+      ),
+      revertReason("CurrencyPlugin: brand currency definition requires an exact payment of 10000000000000000000 " +
+                   "but 11000000000000000000 was given")
+    );
+  });
+
+  it("must allow the owner of brand #1 to define a currency, and have a matching metadata", async function() {
+    let brandPart = brand1.substr(2).toLowerCase();
+    let index = "0000000000000001";
+    let id = new BN("0x80000000" + brandPart + index);
+
+    await expectEvent(
+      await definitionPlugin.defineBrandCurrency(
+        brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
+        "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
+        "http://example.org/images/brand1-1-icon64x64.png", "#001122",
+        { from: accounts[1], value: new BN("10000000000000000000") }
+      ),
+      "CurrencyDefined", {
+        "tokenId": id, "brandId": brand1, "definedBy": accounts[1], "paidPrice": new BN("10000000000000000000"),
+        "name": "Brand #1 Curr #1", "description": "Currency #1 of Brand #1"
+      }
+    );
+    let metadata = await economy.uri(id);
+    let expectedMetadata = jsonUrl({
+      name: "Brand #1 Curr #1", description: "Currency #1 of Brand #1",
+      image: "http://example.org/images/brand1-1-image.png",
+      decimals: 18,
+      properties: {
+        icon16x16: "http://example.org/images/brand1-1-icon16x16.png",
+        icon32x32: "http://example.org/images/brand1-1-icon32x32.png",
+        icon64x64: "http://example.org/images/brand1-1-icon64x64.png",
+        color: "#001122"
+      }
+    });
+    let len = "data:application/json;base64,".length;
+    assert.isTrue(
+      metadata === expectedMetadata,
+      "The new currency's metadata should be: " + atob(expectedMetadata.substr(len)) +
+      ", not: " + atob(metadata.substr(len))
+    );
+  });
 });
