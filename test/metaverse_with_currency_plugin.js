@@ -751,7 +751,7 @@ contract("CurrencyPlugin", function (accounts) {
         );
       });
 
-      async function assertOK(e, m, which) {
+      async function assertOKInToken(e, m, which) {
         await m.method.call(e, e.tokenId(), m.newValue.call(e), which);
         let metadata = await economy.uri(e.tokenId());
         let expectedMetadata = jsonUrl(e.currentMetadata);
@@ -763,12 +763,29 @@ contract("CurrencyPlugin", function (accounts) {
         );
       }
 
-      it("must allow account " + e.allowed + " to change the currency's " + m.caption, async function() {
-        await assertOK(e, m, accounts[e.allowed]);
+      async function assertErrorInNonExistingToken(e, m, which) {
+        await expectRevert(
+          m.method.call(e, e.invalidTokenId(), m.newValue.call(e), which),
+          revertReason("CurrencyDefinitionPlugin: the specified token id is not of a registered currency type")
+        )
+      }
+
+      it("must allow owner account " + e.owner + " to change the currency's " + m.caption, async function() {
+        await assertOKInToken(e, m, accounts[e.owner]);
       });
 
-      it("must also allow account " + e.owner + " to change the currency's " + m.caption, async function() {
-        await assertOK(e, m, accounts[e.owner]);
+      it("must also allow account " + e.allowed + " to change the currency's " + m.caption, async function() {
+        await assertOKInToken(e, m, accounts[e.allowed]);
+      });
+
+      it("must not allow owner account " + e.owner + " to change the non-existing " +
+         "currency's " + m.caption, async function() {
+        await assertErrorInNonExistingToken(e, m, accounts[e.owner]);
+      });
+
+      it("must neither allow account " + e.allowed + " to change the non-existing " +
+          "currency's " + m.caption, async function() {
+        await assertErrorInNonExistingToken(e, m, accounts[e.allowed]);
       });
     });
   });
