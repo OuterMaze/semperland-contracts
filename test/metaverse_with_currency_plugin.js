@@ -503,4 +503,273 @@ contract("CurrencyPlugin", function (accounts) {
       ", not: " + atob(metadata.substr(len))
     );
   });
+
+  it("must not allow 3rd account to define a currency in brand 1, since it lacks of permission", async function() {
+    await expectRevert(
+      definitionPlugin.defineBrandCurrency(
+        brand1, "Brand #1 Curr #2", "Currency #2 of Brand #1", "http://example.org/images/brand1-2-image.png",
+        "http://example.org/images/brand1-2-icon16x16.png", "http://example.org/images/brand1-2-icon32x32.png",
+        "http://example.org/images/brand1-2-icon64x64.png", "#001122", { from: accounts[3] }
+      ),
+      revertReason("MetaversePlugin: caller is not brand owner nor approved, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 3 to grant the BRAND_MANAGE_CURRENCIES of brand #1 on itself", async function() {
+    await expectRevert(
+      brandRegistry.brandSetPermission(
+        brand1, BRAND_MANAGE_CURRENCIES, accounts[3], true, { from: accounts[3] }
+      ),
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 3 to grant the SUPERUSER of brand #1 on itself", async function() {
+    await expectRevert(
+      brandRegistry.brandSetPermission(
+        brand1, SUPERUSER, accounts[3], true, { from: accounts[3] }
+      ),
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 0 to grant the BRAND_MANAGE_CURRENCIES of brand #1 on account 3", async function() {
+    await expectRevert(
+      brandRegistry.brandSetPermission(
+        brand1, BRAND_MANAGE_CURRENCIES, accounts[3], true, { from: accounts[0] }
+      ),
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
+    );
+  });
+
+  it("must allow account 1 to grant the BRAND_MANAGE_CURRENCIES of brand #1 on account 3", async function() {
+    await expectEvent(
+      await brandRegistry.brandSetPermission(
+        brand1, BRAND_MANAGE_CURRENCIES, accounts[3], true, { from: accounts[1] }
+      ),
+      "BrandPermissionChanged", {
+        "brandId": brand1, "permission": BRAND_MANAGE_CURRENCIES, "user": accounts[3],
+        "set": true, "sender": accounts[1]
+      }
+    );
+  });
+
+  it("must allow account 3 to define the new currency, now", async function() {
+    let brandPart = brand1.substr(2).toLowerCase();
+    let index = "0000000000000002";
+    let id = new BN("0x80000000" + brandPart + index);
+
+    await expectEvent(
+      await definitionPlugin.defineBrandCurrency(
+        brand1, "Brand #1 Curr #3", "Currency #3 of Brand #1", "http://example.org/images/brand1-3-image.png",
+        "http://example.org/images/brand1-3-icon16x16.png", "http://example.org/images/brand1-3-icon32x32.png",
+        "http://example.org/images/brand1-3-icon64x64.png", "#001122",
+        { from: accounts[3], value: new BN("10000000000000000000") }
+      ),
+      "CurrencyDefined", {
+        "tokenId": id, "brandId": brand1, "definedBy": accounts[3], "paidPrice": new BN("10000000000000000000"),
+        "name": "Brand #1 Curr #3", "description": "Currency #3 of Brand #1"
+      }
+    );
+    let metadata = await economy.uri(id);
+    let expectedMetadata = jsonUrl({
+      name: "Brand #1 Curr #3", description: "Currency #3 of Brand #1",
+      image: "http://example.org/images/brand1-3-image.png",
+      decimals: 18,
+      properties: {
+        icon16x16: "http://example.org/images/brand1-3-icon16x16.png",
+        icon32x32: "http://example.org/images/brand1-3-icon32x32.png",
+        icon64x64: "http://example.org/images/brand1-3-icon64x64.png",
+        color: "#001122"
+      }
+    });
+    let len = "data:application/json;base64,".length;
+    assert.isTrue(
+      metadata === expectedMetadata,
+      "The new currency's metadata should be: " + atob(expectedMetadata.substr(len)) +
+      ", not: " + atob(metadata.substr(len))
+    );
+  });
+
+  it("must still allow the account 7 to define a currency for that brand", async function() {
+    let brandPart = brand1.substr(2).toLowerCase();
+    let index = "0000000000000003";
+    let id = new BN("0x80000000" + brandPart + index);
+
+    await expectEvent(
+      await definitionPlugin.defineBrandCurrencyFor(
+        brand1, "Brand #1 Curr #4", "Currency #4 of Brand #1", "http://example.org/images/brand1-4-image.png",
+        "http://example.org/images/brand1-4-icon16x16.png", "http://example.org/images/brand1-4-icon32x32.png",
+        "http://example.org/images/brand1-4-icon64x64.png", "#001122", { from: accounts[7] }
+      ),
+      "CurrencyDefined", {
+        "tokenId": id, "brandId": brand1, "definedBy": accounts[7], "paidPrice": new BN('0'),
+        "name": "Brand #1 Curr #4", "description": "Currency #4 of Brand #1"
+      }
+    );
+    let metadata = await economy.uri(id);
+    let expectedMetadata = jsonUrl({
+      name: "Brand #1 Curr #4", description: "Currency #4 of Brand #1",
+      image: "http://example.org/images/brand1-4-image.png",
+      decimals: 18,
+      properties: {
+        icon16x16: "http://example.org/images/brand1-4-icon16x16.png",
+        icon32x32: "http://example.org/images/brand1-4-icon32x32.png",
+        icon64x64: "http://example.org/images/brand1-4-icon64x64.png",
+        color: "#001122"
+      }
+    });
+    let len = "data:application/json;base64,".length;
+    assert.isTrue(
+      metadata === expectedMetadata,
+      "The new currency's metadata should be: " + atob(expectedMetadata.substr(len)) +
+      ", not: " + atob(metadata.substr(len))
+    );
+  });
+
+  it("must allow account 0 to grant, again, METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": true, "sender": accounts[0]
+      }
+    );
+  });
+
+  let metadataChangeStages = [
+    {
+      tokenId: () => new BN("0x8000000000000000000000000000000000000000000000000000000000000000"),
+      invalidTokenId: () => new BN("0x800000000000000000000000000000000000000000000000000000000000000f"),
+      allowed: 7,
+      disallowed: 6,
+      owner: 0,
+      errorMessage: "FTTypeCheckingPlugin: caller is not metaverse owner, and does not have the required permission",
+      caption: "the first system currency",
+      newValues: {
+        image: "http://example.org/images/wmatic-image-new.png",
+        icon16x16: "http://example.org/images/wmatic-16x16-new.png",
+        icon32x32: "http://example.org/images/wmatic-32x32-new.png",
+        icon64x64: "http://example.org/images/wmatic-64x64-new.png",
+        color: "#112233"
+      },
+      currentMetadata: {
+        name: "WMATIC", description: "Wrapped MATIC in this world",
+        image: "http://example.org/images/wmatic-image.png",
+        decimals: 18,
+        properties: {
+          icon16x16: "http://example.org/images/wmatic-16x16.png",
+          icon32x32: "http://example.org/images/wmatic-32x32.png",
+          icon64x64: "http://example.org/images/wmatic-64x64.png",
+          color: "#ffd700"
+        }
+      },
+    },
+    {
+      tokenId: () => new BN("0x80000000" + brand1.substr(2).toLowerCase() + "0000000000000000"),
+      invalidTokenId: () => new BN("0x80000000" + brand1.substr(2).toLowerCase() + "000000000000000f"),
+      allowed: 3,
+      disallowed: 4,
+      owner: 1,
+      errorMessage: "FTTypeCheckingPlugin: caller is not brand owner nor approved, and does not have the required permission",
+      caption: "the first currency of brand #1",
+      newValues: {
+        image: "http://example.org/images/brand1-1-image-new.png",
+        icon16x16: "http://example.org/images/brand1-1-16x16-new.png",
+        icon32x32: "http://example.org/images/brand1-1-32x32-new.png",
+        icon64x64: "http://example.org/images/brand1-1-64x64-new.png",
+        color: "#445566"
+      },
+      currentMetadata: {
+        name: "Brand #1 Curr #1", description: "Currency #1 of Brand #1",
+        image: "http://example.org/images/brand1-1-image.png",
+        decimals: 18,
+        properties: {
+          icon16x16: "http://example.org/images/brand1-1-icon16x16.png",
+          icon32x32: "http://example.org/images/brand1-1-icon32x32.png",
+          icon64x64: "http://example.org/images/brand1-1-icon64x64.png",
+          color: "#001122"
+        }
+      }
+    }
+  ];
+
+  let methods = [
+    {
+      caption: "main image",
+      newValue: function() { return this.newValues.image; },
+      method: async function(id, image, sender) {
+        let value = await definitionPlugin.setCurrencyImage(id, image, { from: sender });
+        this.currentMetadata.image = image;
+        return value;
+      }
+    },
+    {
+      caption: "16x16 icon",
+      newValue: function() { return this.newValues.icon16x16; },
+      method: async function(id, image, sender) {
+        let value = await definitionPlugin.setCurrencyIcon16x16(id, image, { from: sender });
+        this.currentMetadata.properties.icon16x16 = image;
+        return value;
+      }
+    },
+    {
+      caption: "32x32 icon",
+      newValue: function() { return this.newValues.icon32x32; },
+      method: async function(id, image, sender) {
+        let value = await definitionPlugin.setCurrencyIcon32x32(id, image, { from: sender });
+        this.currentMetadata.properties.icon32x32 = image;
+        return value;
+      }
+    },
+    {
+      caption: "64x64 icon",
+      newValue: function() { return this.newValues.icon64x64; },
+      method: async function(id, image, sender) {
+        let value = await definitionPlugin.setCurrencyIcon64x64(id, image, { from: sender });
+        this.currentMetadata.properties.icon64x64 = image;
+        return value;
+      }
+    },
+    {
+      caption: "color",
+      newValue: function() { return this.newValues.color; },
+      method: async function(id, color, sender) {
+        let value = await definitionPlugin.setCurrencyColor(id, color, { from: sender });
+        this.currentMetadata.properties.color = color;
+        return value;
+      }
+    },
+  ]
+
+  metadataChangeStages.forEach(function(e) {
+    methods.forEach(function(m) {
+      it("must not allow account " + e.disallowed + " to change the currency's " + m.caption +
+         " since it lacks of permissions", async function() {
+        await expectRevert(
+          m.method.call(e, e.tokenId(), m.newValue.call(e), accounts[e.disallowed]),
+          revertReason(e.errorMessage)
+        );
+      });
+
+      async function assertOK(e, m, which) {
+        await m.method.call(e, e.tokenId(), m.newValue.call(e), which);
+        let metadata = await economy.uri(e.tokenId());
+        let expectedMetadata = jsonUrl(e.currentMetadata);
+        let len = "data:application/json;base64,".length;
+        assert.isTrue(
+          metadata === expectedMetadata,
+          "The new currency's metadata should be: " + atob(expectedMetadata.substr(len)) +
+          ", not: " + atob(metadata.substr(len))
+        );
+      }
+
+      it("must allow account " + e.allowed + " to change the currency's " + m.caption, async function() {
+        await assertOK(e, m, accounts[e.allowed]);
+      });
+
+      it("must also allow account " + e.owner + " to change the currency's " + m.caption, async function() {
+        await assertOK(e, m, accounts[e.owner]);
+      });
+    });
+  });
 });
