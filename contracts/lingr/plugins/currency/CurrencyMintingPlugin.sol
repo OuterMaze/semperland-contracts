@@ -246,7 +246,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
                 CurrencyDefinitionPlugin(definitionPlugin).currencyExists(id)) {
                 _burnFT(id, value);
             } else {
-                revert("CurrencyMintingPlugin: cannot receive, from users, other tokens than WMATIC and BEAT");
+                revert("CurrencyMintingPlugin: cannot receive, from users, non-currency tokens");
             }
         }
     }
