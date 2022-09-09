@@ -128,6 +128,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
         onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         currencyMintCost = newCost;
+        emit CurrencyMintCostUpdated(newCost);
     }
 
     /**
@@ -144,6 +145,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
         onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         currencyMintAmount = newAmount;
+        emit CurrencyMintAmountUpdated(newAmount);
     }
 
     /**
