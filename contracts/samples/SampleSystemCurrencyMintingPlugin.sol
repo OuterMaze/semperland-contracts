@@ -21,6 +21,18 @@ contract SampleSystemCurrencyMintingPlugin is MetaversePlugin {
         CurrencyMintingPlugin(currencyMintingPlugin).mintSystemCurrency(_to, _id, _amount);
     }
 
+    function invokeTokenReceivedCallback() public {
+        CurrencyMintingPlugin(currencyMintingPlugin).onERC1155Received(address(0), address(0), 0, 0, "");
+    }
+
+    function invokeBatchTokenReceivedCallback() public {
+        uint256[] memory ids = new uint256[](1);
+        uint256[] memory amounts = new uint256[](1);
+        ids[0] = 0;
+        amounts[0] = 0;
+        CurrencyMintingPlugin(currencyMintingPlugin).onERC1155BatchReceived(address(0), address(0), ids, amounts, "");
+    }
+
     function title() public view override returns (string memory) {
         return "Sample System Currency Minting";
     }
