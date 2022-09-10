@@ -26,7 +26,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * mint operations (executed by brand users which are
      * appropriately allowed by the brand owner).
      */
-    address public earningsReceiver;
+    address public brandCurrencyMintingEarningsReceiver;
 
     /**
      * The current price of the mint of a currency for a brand.
@@ -72,7 +72,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      */
     constructor(address _metaverse, address _definitionPlugin, address _earningsReceiver) MetaversePlugin(_metaverse) {
         require(_earningsReceiver != address(0), "CurrencyMintingPlugin: the earnings receiver must not be 0");
-        earningsReceiver = _earningsReceiver;
+        brandCurrencyMintingEarningsReceiver = _earningsReceiver;
         definitionPlugin = _definitionPlugin;
     }
 
@@ -111,7 +111,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
             _newReceiver != address(0),
             "CurrencyMintingPlugin: the brand currency minting earnings receiver must not be the 0 address"
         );
-        earningsReceiver = _newReceiver;
+        brandCurrencyMintingEarningsReceiver = _newReceiver;
         emit BrandCurrencyMintingEarningsReceiverUpdated(_newReceiver);
     }
 
@@ -192,7 +192,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireBrandScope(scope, BRAND_MANAGE_CURRENCIES);
-        payable(earningsReceiver).transfer(msg.value);
+        payable(brandCurrencyMintingEarningsReceiver).transfer(msg.value);
         _mintFTFor(_to, _id, bulks * currencyMintAmount, "paid brand mint");
     }
 
