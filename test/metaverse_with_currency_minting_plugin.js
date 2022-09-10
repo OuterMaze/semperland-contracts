@@ -156,4 +156,36 @@ contract("CurrencyMintingPlugin", function (accounts) {
       "The title of the definition plug-in must be: Currency (Minting), not: " + mintingTitle
     );
   });
+
+  it("must start with the definition plug-in set appropriately", async function() {
+    let definitionPluginAddress = await mintingPlugin.definitionPlugin();
+    assert.isTrue(
+      definitionPlugin.address === definitionPluginAddress,
+      "The definition plug-in is not the expected one"
+    );
+  });
+
+  it("must start with currency mint cost set to 0", async function() {
+    let currencyMintCost = await mintingPlugin.currencyMintCost();
+    assert.isTrue(
+      currencyMintCost.cmp(new BN("0")) === 0,
+      "The initial mint cost must be 0, not " + currencyMintCost.toString()
+    );
+  });
+
+  it("must start with currency mint amount set to 0", async function() {
+    let currencyMintAmount = await mintingPlugin.currencyMintAmount();
+    assert.isTrue(
+      currencyMintAmount.cmp(new BN("0")) === 0,
+      "The initial mint amount must be 0, not " + currencyMintAmount.toString()
+    );
+  });
+
+  it("must start with the earnings receiver to be the 9th accounts", async function() {
+    let earningsReceiver = await mintingPlugin.brandCurrencyMintingEarningsReceiver();
+    assert.isTrue(
+      earningsReceiver === accounts[9],
+      "The initial earnings receiver must be " + accounts[9] + ", not " + earningsReceiver
+    );
+  });
 });
