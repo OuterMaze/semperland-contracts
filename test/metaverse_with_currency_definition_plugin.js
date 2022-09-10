@@ -126,7 +126,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     let earningsReceiver = await definitionPlugin.brandCurrencyDefinitionEarningsReceiver();
     assert.isTrue(
       earningsReceiver === accounts[9],
-      "The initial earnings receiver must be " + accounts[0] + ", not " + earningsReceiver
+      "The initial earnings receiver must be " + accounts[9] + ", not " + earningsReceiver
     );
   });
 
