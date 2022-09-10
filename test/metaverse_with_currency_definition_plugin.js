@@ -2,7 +2,6 @@ const BrandRegistry = artifacts.require("BrandRegistry");
 const Economy = artifacts.require("Economy");
 const Metaverse = artifacts.require("Metaverse");
 const CurrencyDefinitionPlugin = artifacts.require("CurrencyDefinitionPlugin");
-const CurrencyMintingPlugin = artifacts.require("CurrencyMintingPlugin");
 const SampleSystemCurrencyDefiningPlugin = artifacts.require("SampleSystemCurrencyDefiningPlugin");
 
 const {
@@ -22,7 +21,6 @@ contract("CurrencyPlugin", function (accounts) {
   var metaverse = null;
   var brandRegistry = null;
   var definitionPlugin = null;
-  var mintingPlugin = null;
   var samplePlugin = null;
   var brand1 = null;
   var brand2 = null;
@@ -66,16 +64,12 @@ contract("CurrencyPlugin", function (accounts) {
       "http://example.org/images/beat-64x64.png",
       { from: accounts[0] }
     );
-    mintingPlugin = await CurrencyMintingPlugin.new(
-        metaverse.address, definitionPlugin.address, accounts[9], { from: accounts[0] }
-    );
     samplePlugin = await SampleSystemCurrencyDefiningPlugin.new(
         metaverse.address, definitionPlugin.address, { from: accounts[0] }
     );
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
     await metaverse.addPlugin(definitionPlugin.address, { from: accounts[0] });
-    await metaverse.addPlugin(mintingPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(samplePlugin.address, { from: accounts[0] });
 
     // Mint some brands.
@@ -104,11 +98,6 @@ contract("CurrencyPlugin", function (accounts) {
     assert.isTrue(
       definitionTitle === "Currency (Definition)",
       "The title of the definition plug-in must be: Currency (Definition), not: " + definitionTitle
-    );
-    let mintingTitle = await mintingPlugin.title();
-    assert.isTrue(
-      mintingTitle === "Currency (Minting)",
-      "The title of the definition plug-in must be: Currency (Minting), not: " + mintingTitle
     );
   });
 
