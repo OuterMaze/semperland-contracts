@@ -188,4 +188,82 @@ contract("CurrencyMintingPlugin", function (accounts) {
       "The initial earnings receiver must be " + accounts[9] + ", not " + earningsReceiver
     );
   });
+
+  it("must not allow to set the earnings receiver to 0x000...000", async function() {
+    await expectRevert(
+      mintingPlugin.setBrandCurrencyMintingEarningsReceiver(
+        "0x0000000000000000000000000000000000000000", { from: accounts[0] }
+      ),
+      revertReason(
+        "CurrencyMintingPlugin: the brand currency minting earnings receiver must not be the 0 address"
+      )
+    );
+  });
+
+  it("must allow account 0 to set the receiver to account 8", async function() {
+    await expectEvent(
+      await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[8], { from: accounts[0] }),
+      "BrandCurrencyMintingEarningsReceiverUpdated", { "newReceiver": accounts[8] }
+    );
+  });
+
+  it("must allow account 0 to set the receiver to account 9, again", async function() {
+    await expectEvent(
+      await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[9], { from: accounts[0] }),
+      "BrandCurrencyMintingEarningsReceiverUpdated", { "newReceiver": accounts[9] }
+    );
+  });
+
+  it("must not allow account 7 to set the receiver to account 8, since it lacks of permissions", async function() {
+    await expectRevert(
+      mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[8], { from: accounts[7] }),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 7 to grant the METAVERSE_MANAGE_CURRENCIES_SETTINGS on itself", async function() {
+    await expectRevert(
+      metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[7] }),
+      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 7 to grant the SUPERUSER on itself", async function() {
+    await expectRevert(
+      metaverse.setPermission(SUPERUSER, accounts[7], true, { from: accounts[7] }),
+      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must allow account 0 to grant METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": true, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must allow account 7 to set the receiver to account 8", async function() {
+    await expectEvent(
+      await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[8], { from: accounts[7] }),
+      "BrandCurrencyMintingEarningsReceiverUpdated", { "newReceiver": accounts[8] }
+    );
+  });
+
+  it("must allow account 7 to set the receiver to account 9, again", async function() {
+    await expectEvent(
+      await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[9], { from: accounts[7] }),
+      "BrandCurrencyMintingEarningsReceiverUpdated", { "newReceiver": accounts[9] }
+    );
+  });
+
+  it("must allow account 0 to revoke METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], false, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": false, "sender": accounts[0]
+      }
+    );
+  });
 });
