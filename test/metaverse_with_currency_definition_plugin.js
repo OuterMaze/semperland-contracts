@@ -16,12 +16,12 @@ const {
  * Ethereum client
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
-contract("CurrencyPlugin", function (accounts) {
+contract("CurrencyDefinitionPlugin", function (accounts) {
   var economy = null;
   var metaverse = null;
   var brandRegistry = null;
   var definitionPlugin = null;
-  var samplePlugin = null;
+  var sampleDefinitionPlugin = null;
   var brand1 = null;
   var brand2 = null;
 
@@ -64,13 +64,13 @@ contract("CurrencyPlugin", function (accounts) {
       "http://example.org/images/beat-64x64.png",
       { from: accounts[0] }
     );
-    samplePlugin = await SampleSystemCurrencyDefiningPlugin.new(
+    sampleDefinitionPlugin = await SampleSystemCurrencyDefiningPlugin.new(
         metaverse.address, definitionPlugin.address, { from: accounts[0] }
     );
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
     await metaverse.addPlugin(definitionPlugin.address, { from: accounts[0] });
-    await metaverse.addPlugin(samplePlugin.address, { from: accounts[0] });
+    await metaverse.addPlugin(sampleDefinitionPlugin.address, { from: accounts[0] });
 
     // Mint some brands.
     await brandRegistry.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[0] });
@@ -273,7 +273,7 @@ contract("CurrencyPlugin", function (accounts) {
   it("must however allow the sample plug-in to define 3 system currencies", async function() {
     let _id = new BN('0x8000000000000000000000000000000000000000000000000000000000000002');
     for(let index = 0; index < 3; index++) {
-      await samplePlugin.defineSystemCurrency();
+      await sampleDefinitionPlugin.defineSystemCurrency();
       let expectedMetadata = jsonUrl({
         name: "SysCurr #" + (index + 1), description: "System Currency #" + (index + 1),
         image: "http://example.org/sys-currs/image-" + (index + 1) + ".png",
