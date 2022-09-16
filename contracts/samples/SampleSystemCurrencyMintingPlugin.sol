@@ -17,8 +17,8 @@ contract SampleSystemCurrencyMintingPlugin is MetaversePlugin {
         currencyMintingPlugin = _currencyMintingPlugin;
     }
 
-    function mintSystemCurrency(address _to, uint256 _id, uint256 _amount) public {
-        CurrencyMintingPlugin(currencyMintingPlugin).mintSystemCurrency(_to, _id, _amount);
+    function mintSystemCurrency(address _to, uint256 _id, uint256 _bulks) public {
+        CurrencyMintingPlugin(currencyMintingPlugin).mintSystemCurrency(_to, _id, _bulks);
     }
 
     function invokeTokenReceivedCallback() public {

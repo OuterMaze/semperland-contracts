@@ -215,7 +215,10 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * Mints BEAT for a given address. This address may be a brand,
      * a user, or a contract.
      */
-    function mintBEAT(address _to, uint256 bulks) public onlyMetaverseAllowed(METAVERSE_MINT_BEAT) {
+    function mintBEAT(address _to, uint256 bulks)
+        public onlyWhenInitialized nonzeroMintAmount
+        onlyMetaverseAllowed(METAVERSE_MINT_BEAT)
+    {
         require(bulks != 0, "CurrencyMintingPlugin: BEAT minting issued with no units");
         uint256 BEATType = CurrencyDefinitionPlugin(definitionPlugin).BEATType();
         require(BEATType != 0, "CurrencyMintingPlugin: definition plug-in is not initialized");
