@@ -136,7 +136,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * Typically, this value will be something like 1000 eth
      * (1000 * 10^18). Updating it to 0 disables it completely.
      */
-    event CurrencyMintAmountUpdated(uint256 newCost);
+    event CurrencyMintAmountUpdated(uint256 newAmount);
 
     /**
      * Sets the currency mint amount.
