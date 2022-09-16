@@ -114,12 +114,14 @@ contract("CurrencyMintingPlugin", function (accounts) {
     // Foresee the brand ids.
     let brand1Part = brand1.substr(2).toLowerCase();
     let brand2Part = brand2.substr(2).toLowerCase();
+    let system = "0000000000000000000000000000000000000000";
     let index1 = "0000000000000000";
     let index2 = "0000000000000001";
     brand1Currency1 = new BN("0x80000000" + brand1Part + index1);
     brand1Currency2 = new BN("0x80000000" + brand1Part + index2);
     brand2Currency1 = new BN("0x80000000" + brand2Part + index1);
     brand2Currency2 = new BN("0x80000000" + brand2Part + index2);
+    sysCurrency1 = new BN("0x80000000" + system + index1);
 
     // Define 2 brand currencies (in brand #1).
     await definitionPlugin.defineBrandCurrencyFor(
@@ -146,7 +148,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
 
     // Define 1 system currency.
-    sysCurrency1 = await sampleDefinitionPlugin.defineSystemCurrency();
+    await sampleDefinitionPlugin.defineSystemCurrency();
   });
 
   it("must have the expected titles", async function() {
@@ -267,12 +269,38 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
-  // TODO: These cases must fail:
-  // 1. accounts[1] to mint brand1Currency1. Reason: Either mint amount not set, or mint cost not set.
-  // 2. accounts[2] to mint brand2Currency1. Reason: Either mint amount not set, or mint cost not set.
-  // 3. accounts[0] to mint brand1Currency1 for brand 1. Reason: mint amount not set.
-  // 4. sampleMintingPlugin to mint sysCurrency1. Reason: mint amount not set.
-  // 5. accounts[0] to mint BEAT. Reason: mint amount not set.
+  it("must not allow account 1/2 to mint currency 1 of brand 1/2, since the mint amount is not set", async function() {
+    await expectRevert(
+      mintingPlugin.mintBrandCurrency(accounts[1], brand1Currency1, 2, {from: accounts[1]}),
+      revertReason("CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0")
+    );
+
+    await expectRevert(
+      mintingPlugin.mintBrandCurrency(accounts[2], brand2Currency1, 2, {from: accounts[2]}),
+      revertReason("CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0")
+    );
+  });
+
+  it("must not allow account 0 to mint currency 1 of brand 1, since the mint amount is not set", async function() {
+    await expectRevert(
+      mintingPlugin.mintBrandCurrencyFor(accounts[2], brand2Currency1, 2, {from: accounts[0]}),
+      revertReason("CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0")
+    );
+  });
+
+  it("must not allow the sample plugin to mint sys. currency 1, since the mint amount is not set", async function() {
+    await expectRevert(
+      sampleMintingPlugin.mintSystemCurrency(accounts[0], sysCurrency1, 1, {from: accounts[0]}),
+      revertReason("CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0")
+    );
+  });
+
+  it("must not allow minting BEAT, since the mint amount is not set", async function() {
+    await expectRevert(
+      mintingPlugin.mintBEAT(accounts[0], 1, {from: accounts[0]}),
+      revertReason("CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0")
+    );
+  });
 
   /**
   it("must NOT allow minting SysCurr #1 from any external account, but from a registered plug-in", async function() {
@@ -358,4 +386,10 @@ contract("CurrencyMintingPlugin", function (accounts) {
         revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
     );
   });
+
+  // 1. accounts[1] to mint brand1Currency1. Reason: Mint cost not set.
+  // 2. accounts[2] to mint brand2Currency1. Reason: Mint cost not set.
+  // 3. accounts[0] to mint brand1Currency1 for brand 1. Reason: mint amount not set.
+  // 4. sampleMintingPlugin to mint sysCurrency1. Reason: mint amount not set.
+  // 5. accounts[0] to mint BEAT. Reason: mint amount not set.
 });
