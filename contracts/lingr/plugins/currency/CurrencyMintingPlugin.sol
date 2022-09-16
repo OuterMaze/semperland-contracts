@@ -172,13 +172,13 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * system currency. Due to the sensitivity of this feature, only
      * plug-ins in the same metaverse are allowed to use this method.
      */
-    function mintSystemCurrency(address _to, uint256 _id, uint256 bulks)
+    function mintSystemCurrency(address _to, uint256 _id, uint256 _bulks)
         public onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount onlyPlugin
     {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireSystemScope(scope, 0x0);
-        require(bulks != 0, "CurrencyMintingPlugin: minting (system scope) issued with no units");
-        _mintFTFor(_to, _id, bulks * currencyMintAmount, "system currency mint");
+        require(_bulks != 0, "CurrencyMintingPlugin: minting (system scope) issued with no units");
+        _mintFTFor(_to, _id, _bulks * currencyMintAmount, "system currency mint");
     }
 
     /**
