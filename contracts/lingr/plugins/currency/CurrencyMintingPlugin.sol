@@ -221,7 +221,6 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     {
         require(bulks != 0, "CurrencyMintingPlugin: BEAT minting issued with no units");
         uint256 BEATType = CurrencyDefinitionPlugin(definitionPlugin).BEATType();
-        require(BEATType != 0, "CurrencyMintingPlugin: definition plug-in is not initialized");
         _mintFTFor(_to, BEATType, bulks * currencyMintAmount, "BEAT mint");
     }
 

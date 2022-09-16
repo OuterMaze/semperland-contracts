@@ -33,6 +33,8 @@ contract("CurrencyMintingPlugin", function (accounts) {
   var brand2Currency1 = null;
   var brand2Currency2 = null;
   var sysCurrency1 = null;
+  var WMATIC = null;
+  var BEAT = null;
 
   const SUPERUSER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
   const METAVERSE_MANAGE_CURRENCIES_SETTINGS = web3.utils.soliditySha3("Plugins::Currency::Settings::Manage");
@@ -111,7 +113,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
         "0xd6", "0x94", brandRegistry.address, accounts[2], 2
     ).substr(26));
 
-    // Foresee the brand ids.
+    // Foresee the brand ids and currency ids.
     let brand1Part = brand1.substr(2).toLowerCase();
     let brand2Part = brand2.substr(2).toLowerCase();
     let system = "0000000000000000000000000000000000000000";
@@ -122,6 +124,9 @@ contract("CurrencyMintingPlugin", function (accounts) {
     brand2Currency1 = new BN("0x80000000" + brand2Part + index1);
     brand2Currency2 = new BN("0x80000000" + brand2Part + index2);
     sysCurrency1 = new BN("0x80000000" + system + index1);
+    // Also get the default tokens:
+    WMATIC = await definitionPlugin.WMATICType();
+    BEAT = await definitionPlugin.BEATType();
 
     // Define 2 brand currencies (in brand #1).
     await definitionPlugin.defineBrandCurrencyFor(
@@ -384,6 +389,68 @@ contract("CurrencyMintingPlugin", function (accounts) {
         revertReason("MetaversePlugin: only one of the owning metaverse's plug-ins can invoke this method")
       );
     }
+  });
+
+  it("must not allow account 0 to mint 0 bulks", async function() {
+    await expectRevert(
+      mintingPlugin.mintBEAT(accounts[4], 0, {from: accounts[0]}),
+      revertReason("CurrencyMintingPlugin: BEAT minting issued with no units")
+    )
+  });
+
+  it("must allow minting BEAT to account 0", async function() {
+    await mintingPlugin.mintBEAT(accounts[4], 2, {from: accounts[0]});
+  });
+
+  it("must not allow account 7 to mint 2 bulks to account 4", async function() {
+    await expectRevert(
+      mintingPlugin.mintBEAT(accounts[4], 2, {from: accounts[7]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    )
+  });
+
+  it("must not allow account 7 to grant METAVERSE_MINT_BEAT on itself", async function() {
+    await expectRevert(
+      metaverse.setPermission(METAVERSE_MINT_BEAT, accounts[7], true, { from: accounts[7] }),
+      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must allow account 0 to grant METAVERSE_MINT_BEAT to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MINT_BEAT, accounts[7], true, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_MINT_BEAT, "user": accounts[7], "set": true, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must allow account 7 to mint BEAT to account 4", async function() {
+    await mintingPlugin.mintBEAT(accounts[4], 2, {from: accounts[7]});
+  });
+
+  it("must allow account 0 to revoke METAVERSE_MINT_BEAT to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MINT_BEAT, accounts[7], false, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_MINT_BEAT, "user": accounts[7], "set": false, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must not allow account 7 to mint 2 bulks to account 4", async function() {
+    await expectRevert(
+      mintingPlugin.mintBEAT(accounts[4], 2, {from: accounts[7]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must find that account 4 has 40 BEAT tokens", async function() {
+    let balance = await economy.balanceOf(accounts[4], BEAT);
+    assert.isTrue(
+      balance.cmp(new BN("40000000000000000000")) === 0,
+      "The amount of BEAT tokens in the account 4 must be 40 full tokens"
+    )
   });
 
   // 1. accounts[1] to mint brand1Currency1 must fail. Reason: Mint cost not set.
