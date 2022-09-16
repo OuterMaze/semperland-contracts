@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IEconomy.sol";
 import "../IMetaverse.sol";
-import "../../SafeExchange.sol";
+import "./SafeExchange.sol";
 
 /**
  * An economy system is a regular ERC1155, but the url will
