@@ -302,16 +302,6 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
-  /**
-  it("must NOT allow minting SysCurr #1 from any external account, but from a registered plug-in", async function() {
-    for(let index = 0; index < 10; index++) {
-      await expectRevert(
-        mintingPlugin.mintSystemCurrency(accounts[index])
-      );
-    }
-  });
-  */
-
   it("must have the mint amount starting with 0", async function() {
     let mintAmount = await mintingPlugin.currencyMintAmount();
     assert.isTrue(
@@ -387,9 +377,18 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
-  // 1. accounts[1] to mint brand1Currency1. Reason: Mint cost not set.
-  // 2. accounts[2] to mint brand2Currency1. Reason: Mint cost not set.
-  // 3. accounts[0] to mint brand1Currency1 for brand 1. Reason: mint amount not set.
-  // 4. sampleMintingPlugin to mint sysCurrency1. Reason: mint amount not set.
-  // 5. accounts[0] to mint BEAT. Reason: mint amount not set.
+  it("must NOT allow minting SysCurr #1 from any external account, but from a registered plug-in", async function() {
+    for(let index = 0; index < 10; index++) {
+      await expectRevert(
+        mintingPlugin.mintSystemCurrency(accounts[index], sysCurrency1, 2, {from: accounts[index]}),
+        revertReason("MetaversePlugin: only one of the owning metaverse's plug-ins can invoke this method")
+      );
+    }
+  });
+
+  // 1. accounts[1] to mint brand1Currency1 must fail. Reason: Mint cost not set.
+  // 2. accounts[2] to mint brand2Currency1 must fail. Reason: Mint cost not set.
+  // 3. accounts[0] to mint brand1Currency1 for brand 1 must succeed.
+  // 4. sampleMintingPlugin to mint sysCurrency1 must succeed.
+  // 5. accounts[0] to mint BEAT must succeed.
 });
