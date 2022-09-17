@@ -336,7 +336,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
-  it("must now allow account 7 to grant SUPERUSER on itself", async function() {
+  it("must not allow account 7 to grant SUPERUSER on itself", async function() {
     await expectRevert(
       metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[7] }),
       revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
@@ -497,11 +497,54 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
+  it("must not allow account 7 to mint brandCurrency1 to account 1, due to lack of permissions", async function() {
+    await expectRevert(
+      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 2, {from: accounts[7]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 7 to grant METAVERSE_GIVE_BRAND_CURRENCIES on itself", async function() {
+    await expectRevert(
+      metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[7], true, { from: accounts[7] }),
+      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must allow account 0 to grant METAVERSE_GIVE_BRAND_CURRENCIES to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[7], true, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_GIVE_BRAND_CURRENCIES, "user": accounts[7], "set": true, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must allow account 7 to mint brandCurrency1 to account 1", async function() {
+    await mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 2, {from: accounts[0]});
+    let balance1 = await economy.balanceOf(accounts[1], brand1Currency1);
+    assert.isTrue(
+      balance1.cmp(new BN("40000000000000000000")) === 0,
+      "The amount of brand 1 currency 1 tokens in the account 1 must be 40 full tokens"
+    );
+  });
+
+  it("must allow account 0 to revoke METAVERSE_GIVE_BRAND_CURRENCIES to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[7], false, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_GIVE_BRAND_CURRENCIES, "user": accounts[7], "set": false, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must not allow account 7 to mint brandCurrency1 to account 1, due to lack of permissions", async function() {
+    await expectRevert(
+      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 2, {from: accounts[7]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
   // TODO:
-  // 1. Do not allow account 7 to mint brandCurrency1 to account 1, due to permissions.
-  // 2. Do now allot account 7 to grant METAVERSE_GIVE_BRAND_CURRENCIES to itself.
-  // 3. Allow account 0 to grant METAVERSE_GIVE_BRAND_CURRENCIES to account 7.
-  // 4. Allow account 7 to mint brandCurrency1 to account 1.
-  // 5. Allow account 0 to revoke METAVERSE_GIVE_BRAND_CURRENCIES to account 7.
   // 6. Do not allow account 7 to mint brandCurrency1 to account 1, due to permissions.
 });
