@@ -545,6 +545,71 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
-  // TODO:
-  // 6. Do not allow account 7 to mint brandCurrency1 to account 1, due to permissions.
+  it("must have the mint cost starting with 0", async function() {
+    let mintCost = await mintingPlugin.currencyMintCost();
+    assert.isTrue(
+      mintCost.cmp(new BN(0)) === 0,
+      "The mint cost must be initially 0"
+    );
+  });
+
+  it("must allow account 0 to set the minting cost to 5 matic", async function() {
+    await expectEvent(
+      await mintingPlugin.setCurrencyMintCost(new BN("5000000000000000000"), {from: accounts[0]}),
+      "CurrencyMintCostUpdated", {"newCost": new BN("5000000000000000000")}
+    );
+  });
+
+  it("must not allow account 7 to set the minting cost to 6 matic, since it lacks of permission", async function(){
+    await expectRevert(
+      mintingPlugin.setCurrencyMintCost(new BN("6000000000000000000"), {from: accounts[7]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must not allow account 7 to grant METAVERSE_MANAGE_CURRENCIES_SETTINGS on itself", async function() {
+    await expectRevert(
+      metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[7] }),
+      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must allow account 0 to grant METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[0] }),
+        "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": true, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must allow account 7 to set the minting amount to 6 matic", async function() {
+    await expectEvent(
+      await mintingPlugin.setCurrencyMintCost(new BN("6000000000000000000"), {from: accounts[7]}),
+      "CurrencyMintCostUpdated", {"newCost": new BN("6000000000000000000")}
+    );
+  });
+
+  it("must allow account 7 to set the minting amount to 5 matic", async function() {
+    await expectEvent(
+      await mintingPlugin.setCurrencyMintCost(new BN("5000000000000000000"), {from: accounts[7]}),
+      "CurrencyMintCostUpdated", {"newCost": new BN("5000000000000000000")}
+    );
+  });
+
+  it("must allow account 0 to revoke METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], false, { from: accounts[0] }),
+        "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": false, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must not allow account 7 to set the minting cost to 6 matic, since it lacks of permission", async function(){
+    await expectRevert(
+      mintingPlugin.setCurrencyMintCost(new BN("6000000000000000000"), {from: accounts[7]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
 });
