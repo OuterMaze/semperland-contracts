@@ -450,12 +450,58 @@ contract("CurrencyMintingPlugin", function (accounts) {
     assert.isTrue(
       balance.cmp(new BN("40000000000000000000")) === 0,
       "The amount of BEAT tokens in the account 4 must be 40 full tokens"
+    );
+  });
+
+  it("must not allow account 1/2 to mint currency 1 of brand 1/2, since the mint cost is not set", async function() {
+    await expectRevert(
+      mintingPlugin.mintBrandCurrency(accounts[1], brand1Currency1, 1, {from: accounts[1]}),
+      revertReason("CurrencyMintingPlugin: minting (for authorized brand) is currently disabled (no price is set)")
+    )
+    await expectRevert(
+      mintingPlugin.mintBrandCurrency(accounts[2], brand2Currency1, 1, {from: accounts[2]}),
+      revertReason("CurrencyMintingPlugin: minting (for authorized brand) is currently disabled (no price is set)")
     )
   });
 
-  // 1. accounts[1] to mint brand1Currency1 must fail. Reason: Mint cost not set.
-  // 2. accounts[2] to mint brand2Currency1 must fail. Reason: Mint cost not set.
-  // 3. accounts[0] to mint brand1Currency1 for brand 1 must succeed.
-  // 4. sampleMintingPlugin to mint sysCurrency1 must succeed.
-  // 5. accounts[0] to mint BEAT must succeed.
+  it("must allow the sample minting plug-in to mint sys. currency 1 to account 3", async function() {
+    await sampleMintingPlugin.mintSystemCurrency(accounts[3], sysCurrency1, 1, {from: accounts[0]});
+    let balance = await economy.balanceOf(accounts[3], sysCurrency1);
+    assert.isTrue(
+      balance.cmp(new BN("10000000000000000000")) === 0,
+      "The amount of system currency 1 in the account 3 must be 10 full tokens"
+    );
+  });
+
+  it("must not allow account 0 to mint 1 bulks to account 2", async function() {
+    await mintingPlugin.mintBEAT(accounts[3], 1, {from: accounts[0]});
+    let balance = await economy.balanceOf(accounts[3], BEAT);
+    assert.isTrue(
+      balance.cmp(new BN("10000000000000000000")) === 0,
+      "The amount of BEAT in the account 3 must be 10 full tokens"
+    );
+  });
+
+  it("must allow brand 0 to mint brand1Currency1 to account 1, and brand2Currency1 to account 2", async function() {
+    await mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 2, {from: accounts[0]});
+    await mintingPlugin.mintBrandCurrencyFor(accounts[2], brand2Currency1, 2, {from: accounts[0]});
+    let balance1 = await economy.balanceOf(accounts[1], brand1Currency1);
+    assert.isTrue(
+      balance1.cmp(new BN("20000000000000000000")) === 0,
+      "The amount of brand 1 currency 1 tokens in the account 1 must be 20 full tokens"
+    );
+    let balance2 = await economy.balanceOf(accounts[2], brand2Currency1);
+    assert.isTrue(
+      balance2.cmp(new BN("20000000000000000000")) === 0,
+      "The amount of brand 2 currency 1 tokens in the account 2 must be 20 full tokens"
+    );
+  });
+
+  // TODO:
+  // 1. Do not allow account 7 to mint brandCurrency1 to account 1, due to permissions.
+  // 2. Do now allot account 7 to grant METAVERSE_GIVE_BRAND_CURRENCIES to itself.
+  // 3. Allow account 0 to grant METAVERSE_GIVE_BRAND_CURRENCIES to account 7.
+  // 4. Allow account 7 to mint brandCurrency1 to account 1.
+  // 5. Allow account 0 to revoke METAVERSE_GIVE_BRAND_CURRENCIES to account 7.
+  // 6. Do not allow account 7 to mint brandCurrency1 to account 1, due to permissions.
 });
