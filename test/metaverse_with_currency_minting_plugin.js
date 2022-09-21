@@ -612,4 +612,35 @@ contract("CurrencyMintingPlugin", function (accounts) {
       revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
     );
   });
+
+  it("must fail minting brand currency for a brand using non-existing currency token id", async function() {
+    await expectRevert(
+      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1.add(new BN(3)), 1, {from: accounts[0]}),
+      revertReason("CurrencyMintingPlugin: the specified token id is not of a registered currency type")
+    );
+  })
+
+  it("must fail minting brand currency for a brand using empty bulks", async function() {
+    await expectRevert(
+      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 0, {from: accounts[0]}),
+      revertReason("CurrencyMintingPlugin: minting (brand scope) issued with no units")
+    );
+  });
+
+  // mintBrandCurrencyFor:
+  // - fail for permissions (using token id: brand 1 curr 1, bulks: 1).
+  // - fail for overflow (using token id: brand 1 curr 1, bulks: 1e60).
+  // - succeed for good cases.
+
+  // mintBrandCurrency:
+  // - fail for non-existing currency token id.
+  // - fail for empty bulks.
+  // - fail for value not paid.
+  // - succeed for brand owner.
+  // - fail for another user, without permissions.
+  // - fail when trying to gain per-brand permission.
+  // - succeed for owner granting permission.
+  // - succeed for another user, with permissions.
+  // - succeed for owner revoking permission.
+  // - fail for another user, without permissions.
 });
