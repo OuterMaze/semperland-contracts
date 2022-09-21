@@ -207,7 +207,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireBrandScope(scope, 0x0);
-        require(bulks != 0, "CurrencyMintingPlugin: minting (system scope) issued with no units");
+        require(bulks != 0, "CurrencyMintingPlugin: minting (brand scope) issued with no units");
         _mintFTFor(_to, _id, bulks * currencyMintAmount, "gifted brand mint");
     }
 
