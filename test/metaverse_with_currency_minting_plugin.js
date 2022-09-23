@@ -721,11 +721,66 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
-  // mintBrandCurrency:
-  // - fail for another user, without permissions.
-  // - fail when trying to gain per-brand permission.
-  // - succeed for owner granting permission.
-  // - succeed for another user, with permissions.
-  // - succeed for owner revoking permission.
-  // - fail for another user, without permissions.
+  it("must fail minting a brand currency with 5th account in brand 1, due to lack of permissions", async function() {
+    let value = new BN("5000000000000000000");
+    await expectRevert(
+      mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, 1, {from: accounts[5], value: value}),
+      "FTTypeCheckingPlugin: caller is not brand owner nor approved, " +
+      "and does not have the required permission"
+    );
+  });
+
+  it("must fail granting the BRAND_MANAGE_CURRENCIES on brand 1 with 5th account on itself", async function() {
+    await expectRevert(
+      brandRegistry.brandSetPermission(
+        brand1, BRAND_MANAGE_CURRENCIES, accounts[5], true, { from: accounts[5] }
+      ),
+      revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
+    );
+  });
+
+  it("must allow 1st account to grant BRAND_MANAGE_CURRENCIES on brand 1 to 5th account", async function() {
+    await expectEvent(
+      await brandRegistry.brandSetPermission(
+        brand1, BRAND_MANAGE_CURRENCIES, accounts[5], true, { from: accounts[1] }
+      ),
+      "BrandPermissionChanged", {
+        "brandId": brand1, "permission": BRAND_MANAGE_CURRENCIES, "user": accounts[5],
+        "set": true, "sender": accounts[1]
+      }
+    );
+  });
+
+  it("must allow minting a brand currency with 5th account in brand 1", async function() {
+    let value = new BN("5000000000000000000");
+    let balance = await economy.balanceOf(accounts[5], brand1Currency1);
+    await mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, 1, {from: accounts[5], value: value});
+    let expectedNewBalance = balance.add(new BN("10000000000000000000"));
+    let actualNewBalance = await economy.balanceOf(accounts[5], brand1Currency1);
+    assert.isTrue(
+      expectedNewBalance.cmp(actualNewBalance) === 0,
+      "The new balance should be " + expectedNewBalance.toString() + ", but it is " + actualNewBalance.toString()
+    );
+  });
+
+  it("must allow 1st account to revoke BRAND_MANAGE_CURRENCIES on brand 1 to 5th account", async function() {
+    await expectEvent(
+      await brandRegistry.brandSetPermission(
+        brand1, BRAND_MANAGE_CURRENCIES, accounts[5], false, { from: accounts[1] }
+      ),
+      "BrandPermissionChanged", {
+        "brandId": brand1, "permission": BRAND_MANAGE_CURRENCIES, "user": accounts[5],
+        "set": false, "sender": accounts[1]
+      }
+    );
+  });
+
+  it("must fail minting a brand currency with 5th account in brand 1, due to lack of permissions", async function() {
+    let value = new BN("5000000000000000000");
+    await expectRevert(
+      mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, 1, {from: accounts[5], value: value}),
+      "FTTypeCheckingPlugin: caller is not brand owner nor approved, and does not " +
+      "have the required permission"
+    );
+  });
 });
