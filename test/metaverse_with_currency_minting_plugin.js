@@ -627,10 +627,62 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
-  // mintBrandCurrencyFor:
-  // - fail for permissions (using token id: brand 1 curr 1, bulks: 1).
-  // - fail for overflow (using token id: brand 1 curr 1, bulks: 1e60).
-  // - succeed for good cases.
+  it("must fail minting brand currency for a brand using 5th account, due to lack of permissions", async function() {
+    await expectRevert(
+      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 1, {from: accounts[5]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must not allow 5th account to grant the mint-brand-for permission to itself", async function() {
+    await expectRevert(
+      metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[5], true, { from: accounts[5] }),
+      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must allow 0th account to grant the mint-brand-for permission to 5th account", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[5], true, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_GIVE_BRAND_CURRENCIES, "user": accounts[5], "set": true, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must allow minting brand currency for a brand using 5th account", async function() {
+    await mintingPlugin.mintBrandCurrencyFor(accounts[5], brand1Currency1, 2, {from: accounts[5]});
+    let balance = await economy.balanceOf(accounts[5], brand1Currency1);
+    let expected = new BN("20000000000000000000");
+    assert.isTrue(
+      balance.cmp(expected) === 0,
+      "The minted amount of currency 1 of brand 1 must be 20 full tokens"
+    );
+  });
+
+  it("must fail minting brand currency for a brand using an overflowing amount of bulks bulks", async function() {
+    let bulks = new BN("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    await expectRevert(
+      mintingPlugin.mintBrandCurrencyFor(accounts[5], brand1Currency1, bulks, {from: accounts[5]}),
+      "revert"
+    );
+  });
+
+  it("must allow 1st account to revoke the mint-brand-for permission to 5th account", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[5], false, { from: accounts[0] }),
+      "PermissionChanged", {
+        "permission": METAVERSE_GIVE_BRAND_CURRENCIES, "user": accounts[5], "set": false, "sender": accounts[0]
+      }
+    );
+  });
+
+  it("must fail minting brand currency for a brand using 5th account, due to lack of permissions", async function() {
+    await expectRevert(
+      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 1, {from: accounts[5]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
 
   // mintBrandCurrency:
   // - fail for non-existing currency token id.
