@@ -684,11 +684,44 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
+  it("must fail minting a brand currency using a non-existing currency id", async function() {
+    await expectRevert(
+      mintingPlugin.mintBrandCurrency(accounts[1], brand1Currency1.add(new BN(2)), 1, {from: accounts[1]}),
+      revertReason("CurrencyMintingPlugin: the specified token id is not of a registered currency type")
+    );
+  });
+
+  it("must fail minting a brand currency using empty bulks", async function() {
+    await expectRevert(
+      mintingPlugin.mintBrandCurrency(accounts[1], brand1Currency1, 0, {from: accounts[1]}),
+      revertReason("CurrencyMintingPlugin: minting (for authorized brand) issued with no units to purchase")
+    );
+  });
+
+  it("must fail minting a brand currency while not affording", async function() {
+    let payment = new BN('5000000000000000000');
+    await expectRevert(
+      mintingPlugin.mintBrandCurrency(accounts[1], brand1Currency1, 1, {from: accounts[1]}),
+      revertReason(
+        "CurrencyMintingPlugin: minting (for authorized brand) requires an exact " +
+        "payment of " + payment.toString() + " but 0 was given"
+      )
+    );
+  });
+
+  it("must succeed minting a brand currency with appropriate parameters and affording the amouunt", async function() {
+    let balance = await economy.balanceOf(accounts[5], brand1Currency1);
+    let value = new BN("5000000000000000000");
+    await mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, 1, {from: accounts[1], value: value});
+    let expectedNewBalance = balance.add(new BN("10000000000000000000"));
+    let actualNewBalance = await economy.balanceOf(accounts[5], brand1Currency1);
+    assert.isTrue(
+      expectedNewBalance.cmp(actualNewBalance) === 0,
+      "The new balance should be " + expectedNewBalance.toString() + ", but it is " + actualNewBalance.toString()
+    );
+  });
+
   // mintBrandCurrency:
-  // - fail for non-existing currency token id.
-  // - fail for empty bulks.
-  // - fail for value not paid.
-  // - succeed for brand owner.
   // - fail for another user, without permissions.
   // - fail when trying to gain per-brand permission.
   // - succeed for owner granting permission.
