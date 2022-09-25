@@ -11,6 +11,12 @@ const {
     expectRevert, // Assertions for transactions that should fail
 } = require('@openzeppelin/test-helpers');
 
+const {
+  atob,
+  revertReason,
+  jsonUrl,
+} = require("./test_utils");
+
 /*
  * uncomment accounts to access the test accounts made available by the
  * Ethereum client
@@ -29,23 +35,6 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
   const METAVERSE_MANAGE_CURRENCIES_SETTINGS = web3.utils.soliditySha3("Plugins::Currency::Settings::Manage");
   const METAVERSE_GIVE_BRAND_CURRENCIES = web3.utils.soliditySha3("Plugins::Currency::Currencies::Brands::Give");
   const BRAND_MANAGE_CURRENCIES = web3.utils.soliditySha3("Plugins::Currency::Brand::Currencies::Manage");
-
-  function revertReason(message) {
-    return message + " -- Reason given: " + message;
-  }
-
-  function btoa(raw) {
-    return new Buffer(raw).toString("base64");
-  }
-
-  function atob(encoded) {
-    return new Buffer(encoded, 'base64').toString("ascii");
-  }
-
-  function jsonUrl(payload) {
-    new Buffer("pija");
-    return "data:application/json;base64," + btoa(JSON.stringify(payload));
-  }
 
   before(async function () {
     // Set up the metaverse and two plug-ins.

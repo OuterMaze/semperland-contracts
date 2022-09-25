@@ -9,6 +9,10 @@ const {
   expectRevert, // Assertions for transactions that should fail
 } = require('@openzeppelin/test-helpers');
 
+const {
+  revertReason,
+} = require("./test_utils");
+
 /*
  * uncomment accounts to access the test accounts made available by the
  * Ethereum client
@@ -26,10 +30,6 @@ contract("Metaverse", function (accounts) {
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(contract.address, { from: accounts[0] });
   });
-
-  function revertReason(message) {
-    return message + " -- Reason given: " + message;
-  }
 
   it("must fail when calling Metaverse::onBrandOwnerChanged for common accounts", async function() {
     let brandId1 = "0x" + web3.utils.soliditySha3(

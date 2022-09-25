@@ -13,6 +13,12 @@ const {
     expectRevert, // Assertions for transactions that should fail
 } = require('@openzeppelin/test-helpers');
 
+const {
+  btoa,
+  revertReason,
+  txTotalGas
+} = require("./test_utils");
+
 /*
  * uncomment accounts to access the test accounts made available by the
  * Ethereum client
@@ -48,15 +54,6 @@ contract("CurrencyMintingPlugin", function (accounts) {
 
   function btoa(raw) {
     return new Buffer(raw).toString("base64");
-  }
-
-  function atob(encoded) {
-    return new Buffer(encoded, 'base64').toString("ascii");
-  }
-
-  function jsonUrl(payload) {
-    new Buffer("pija");
-    return "data:application/json;base64," + btoa(JSON.stringify(payload));
   }
 
   before(async function () {
@@ -823,10 +820,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
       accounts[4], mintingPlugin.address, WMATIC, new BN("5000000000000000000"), web3.utils.asciiToHex("hello"),
       {from: accounts[4]}
     );
-    let gasUsed = new BN(tx.receipt.gasUsed);
-    let nativeTx = await web3.eth.getTransaction(tx.tx);
-    let gasPrice = new BN(nativeTx.gasPrice);
-    let totalGas = gasUsed.mul(gasPrice);
+    let totalGas = await txTotalGas(web3, tx);
     let finalBalance = new BN(await web3.eth.getBalance(accounts[4]));
     let expectedFinalBalance = initialBalance.sub(totalGas).add(new BN("5000000000000000000"));
     assert.isTrue(
@@ -838,13 +832,10 @@ contract("CurrencyMintingPlugin", function (accounts) {
   it("must succeed in sending 5 WMATIC (they'll be unwrapped) again", async function() {
     let initialBalance = new BN(await web3.eth.getBalance(accounts[4]));
     let tx = await economy.safeTransferFrom(
-        accounts[4], mintingPlugin.address, WMATIC, new BN("5000000000000000000"), web3.utils.asciiToHex("hello"),
-        {from: accounts[4]}
+      accounts[4], mintingPlugin.address, WMATIC, new BN("5000000000000000000"), web3.utils.asciiToHex("hello"),
+      {from: accounts[4]}
     );
-    let gasUsed = new BN(tx.receipt.gasUsed);
-    let nativeTx = await web3.eth.getTransaction(tx.tx);
-    let gasPrice = new BN(nativeTx.gasPrice);
-    let totalGas = gasUsed.mul(gasPrice);
+    let totalGas = await txTotalGas(web3, tx);
     let finalBalance = new BN(await web3.eth.getBalance(accounts[4]));
     let expectedFinalBalance = initialBalance.sub(totalGas).add(new BN("5000000000000000000"));
     assert.isTrue(

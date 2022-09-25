@@ -9,6 +9,13 @@ const {
   expectRevert, // Assertions for transactions that should fail
 } = require('@openzeppelin/test-helpers');
 
+const {
+  btoa,
+  atob,
+  revertReason,
+  jsonUrl,
+} = require("./test_utils");
+
 /*
  * uncomment accounts to access the test accounts made available by the
  * Ethereum client
@@ -42,23 +49,6 @@ contract("Metaverse", function (accounts) {
       "BrandRegistrationCostUpdated", {"newCost": new BN("10000000000000000000")}
     );
   });
-
-  function revertReason(message) {
-    return message + " -- Reason given: " + message;
-  }
-
-  function btoa(raw) {
-    return new Buffer(raw).toString("base64");
-  }
-
-  function atob(encoded) {
-    return new Buffer(encoded, 'base64').toString("ascii");
-  }
-
-  function jsonUrl(payload) {
-    new Buffer("pija");
-    return "data:application/json;base64," + btoa(JSON.stringify(payload));
-  }
 
   // 2. Test the price to be 10 ether.
   it("must have a price of 10 ether", async function() {
