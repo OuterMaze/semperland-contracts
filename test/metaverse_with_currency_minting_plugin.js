@@ -873,8 +873,21 @@ contract("CurrencyMintingPlugin", function (accounts) {
       wmaticBalance.cmp(new BN(0)) === 0,
       "The WMATIC balance in the minting plug-in must be 0"
     );
-  })
+  });
 
-  // TODO test sending an invalid currency (fail).
-  // TODO test sending both WMATIC, BEAT and an invalid currency (fail).
+  it("must not allow transferring another asset type (e.g. a brand)", async function() {
+    let one = new BN(1);
+    let amount = new BN("1000000000000000000");
+    await economy.safeBatchTransferFrom(
+      accounts[4], accounts[1], [BEAT, WMATIC], [amount, amount], web3.utils.asciiToHex("hello"),
+      {from: accounts[4], gas: new BN("5000000")}
+    );
+    await expectRevert(
+      economy.safeBatchTransferFrom(
+        accounts[1], mintingPlugin.address, [BEAT, WMATIC, new BN(brand1)], [amount, amount, one],
+        web3.utils.asciiToHex("hello"), {from: accounts[1], gas: new BN("5000000")}
+      ),
+      revertReason("CurrencyMintingPlugin: cannot receive, from users, non-currency tokens")
+    );
+  });
 });
