@@ -842,9 +842,39 @@ contract("CurrencyMintingPlugin", function (accounts) {
       expectedFinalBalance.cmp(finalBalance) === 0,
       "The final balance is " + finalBalance + " but must be " + expectedFinalBalance + " instead"
     );
+    let wmaticBalance = await economy.balanceOf(mintingPlugin.address, WMATIC);
+    assert.isTrue(
+      wmaticBalance.cmp(new BN(0)) === 0,
+      "The WMATIC balance in the minting plug-in must be 0"
+    );
   });
 
+  it("must succeed in sending 6 WMATIC (they will be unwrapped) and 6 BEAT, in batch", async function() {
+    let amount = new BN("6000000000000000000");
+    let initialBalance = new BN(await web3.eth.getBalance(accounts[4]));
+    let tx = await economy.safeBatchTransferFrom(
+      accounts[4], mintingPlugin.address, [BEAT, WMATIC], [amount, amount], web3.utils.asciiToHex("hello"),
+      {from: accounts[4]}
+    );
+    let totalGas = await txTotalGas(web3, tx);
+    let finalBalance = new BN(await web3.eth.getBalance(accounts[4]));
+    let expectedFinalBalance = initialBalance.sub(totalGas).add(new BN("6000000000000000000"));
+    assert.isTrue(
+      expectedFinalBalance.cmp(finalBalance) === 0,
+      "The final balance is " + finalBalance + " but must be " + expectedFinalBalance + " instead"
+    );
+    let beatBalance = await economy.balanceOf(mintingPlugin.address, BEAT);
+    assert.isTrue(
+      beatBalance.cmp(new BN(0)) === 0,
+      "The BEAT balance in the minting plug-in must be 0"
+    );
+    let wmaticBalance = await economy.balanceOf(mintingPlugin.address, WMATIC);
+    assert.isTrue(
+      wmaticBalance.cmp(new BN(0)) === 0,
+      "The WMATIC balance in the minting plug-in must be 0"
+    );
+  })
+
   // TODO test sending an invalid currency (fail).
-  // TODO test sending both MATIC and BEAT.
-  // TODO test sending both MATIC, BEAT and an invalid currency (fail).
+  // TODO test sending both WMATIC, BEAT and an invalid currency (fail).
 });
