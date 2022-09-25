@@ -293,7 +293,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
-  it("must not allow the sample plugin to mint sys. currency 1, since the mint amount is not set", async function() {
+  it("must not allow the sample plug-in to mint sys. currency 1, since the mint amount is not set", async function() {
     await expectRevert(
       sampleMintingPlugin.mintSystemCurrency(accounts[0], sysCurrency1, 1, {from: accounts[0]}),
       revertReason("CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0")
@@ -783,4 +783,77 @@ contract("CurrencyMintingPlugin", function (accounts) {
       "have the required permission"
     );
   });
+
+  it("must succeed in wrapping 16 MATIC", async function() {
+    let amount = new BN("16000000000000000000");
+    await web3.eth.sendTransaction({ from: accounts[4], to: mintingPlugin.address, value: amount });
+    let balance = await economy.balanceOf(accounts[4], WMATIC);
+    assert.isTrue(
+      balance.cmp(amount) === 0,
+      "The expected amount of WMATIC must be 16 full coins, since that amount was wrapped"
+    )
+  });
+
+  it("must succeed in wrapping 3 more MATIC", async function() {
+    let amount = new BN("3000000000000000000");
+    let expectedBalance = new BN("19000000000000000000");
+    await web3.eth.sendTransaction({ from: accounts[4], to: mintingPlugin.address, value: amount });
+    let balance = await economy.balanceOf(accounts[4], WMATIC);
+    assert.isTrue(
+      balance.cmp(expectedBalance) === 0,
+      "The expected amount of WMATIC must be 19 full coins, since that amount was wrapped in total"
+    )
+  });
+
+  it("must succeed in sending 2 BEAT (they'll be burned)", async function() {
+    await economy.safeTransferFrom(
+      accounts[4], mintingPlugin.address, BEAT, new BN("2000000000000000000"), web3.utils.asciiToHex("hello"),
+      {from: accounts[4]}
+    );
+    let balance = await economy.balanceOf(mintingPlugin.address, BEAT);
+    assert.isTrue(
+      balance.cmp(new BN(0)) === 0,
+      "The expected BEAT amount in the minting plug-in must be 0"
+    );
+  });
+
+  it("must succeed in sending 5 WMATIC (they'll be unwrapped)", async function() {
+    let initialBalance = new BN(await web3.eth.getBalance(accounts[4]));
+    let tx = await economy.safeTransferFrom(
+      accounts[4], mintingPlugin.address, WMATIC, new BN("5000000000000000000"), web3.utils.asciiToHex("hello"),
+      {from: accounts[4]}
+    );
+    let gasUsed = new BN(tx.receipt.gasUsed);
+    let nativeTx = await web3.eth.getTransaction(tx.tx);
+    let gasPrice = new BN(nativeTx.gasPrice);
+    let totalGas = gasUsed.mul(gasPrice);
+    let finalBalance = new BN(await web3.eth.getBalance(accounts[4]));
+    let expectedFinalBalance = initialBalance.sub(totalGas).add(new BN("5000000000000000000"));
+    assert.isTrue(
+      expectedFinalBalance.cmp(finalBalance) === 0,
+      "The final balance is " + finalBalance + " but must be " + expectedFinalBalance + " instead"
+    );
+  });
+
+  it("must succeed in sending 5 WMATIC (they'll be unwrapped) again", async function() {
+    let initialBalance = new BN(await web3.eth.getBalance(accounts[4]));
+    let tx = await economy.safeTransferFrom(
+        accounts[4], mintingPlugin.address, WMATIC, new BN("5000000000000000000"), web3.utils.asciiToHex("hello"),
+        {from: accounts[4]}
+    );
+    let gasUsed = new BN(tx.receipt.gasUsed);
+    let nativeTx = await web3.eth.getTransaction(tx.tx);
+    let gasPrice = new BN(nativeTx.gasPrice);
+    let totalGas = gasUsed.mul(gasPrice);
+    let finalBalance = new BN(await web3.eth.getBalance(accounts[4]));
+    let expectedFinalBalance = initialBalance.sub(totalGas).add(new BN("5000000000000000000"));
+    assert.isTrue(
+      expectedFinalBalance.cmp(finalBalance) === 0,
+      "The final balance is " + finalBalance + " but must be " + expectedFinalBalance + " instead"
+    );
+  });
+
+  // TODO test sending an invalid currency (fail).
+  // TODO test sending both MATIC and BEAT.
+  // TODO test sending both MATIC, BEAT and an invalid currency (fail).
 });

@@ -237,15 +237,18 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
                 operator == from,
                 "CurrencyMintingPlugin: for safety, only the owner is able to unwrap these tokens"
             );
+            if (value == 0) return;
             _burnFT(WMATICType, value);
             payable(from).transfer(value);
         } else if (id == BEATType) {
+            if (value == 0) return;
             _burnFT(BEATType, value);
         } else {
             // Only plug-ins can burn currencies (and only currencies)
             // by safe-transferring them to this contract.
             if (IMetaverse(metaverse).plugins(_msgSender()) &&
                 CurrencyDefinitionPlugin(definitionPlugin).currencyExists(id)) {
+                if (value == 0) return;
                 _burnFT(id, value);
             } else {
                 revert("CurrencyMintingPlugin: cannot receive, from users, non-currency tokens");
