@@ -43,6 +43,9 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      */
     uint256 public currencyMintAmount;
 
+    // Reentrancy lock.
+    bool private wmaticUnwrappingLocked = false;
+
     /**
      * This permission allows users to mint currencies for a cost for
      * a brand.
@@ -238,8 +241,11 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
                 "CurrencyMintingPlugin: for safety, only the owner is able to unwrap these tokens"
             );
             if (value == 0) return;
+            require(!wmaticUnwrappingLocked, "CurrencyMintingPlugin: WMATIC-unwrapping reentrancy is forbidden");
+            wmaticUnwrappingLocked = true;
             _burnFT(WMATICType, value);
             payable(from).transfer(value);
+            wmaticUnwrappingLocked = false;
         } else if (id == BEATType) {
             if (value == 0) return;
             _burnFT(BEATType, value);
@@ -286,13 +292,8 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * Receiving MATIC involves automatically wrapping it into WMATIC tokens
      * for the exact address sender.
      */
-    receive() external payable {
+    receive() external payable onlyWhenInitialized {
         uint256 WMATICType = CurrencyDefinitionPlugin(definitionPlugin).WMATICType();
-        require(WMATICType != 0, "CurrencyMintingPlugin: definition plug-in is not initialized");
-        require(
-            initialized,
-            "CurrencyMintingPlugin: cannot receive MATIC because the plug-in is not yet initialized"
-        );
         _mintFTFor(_msgSender(), WMATICType, msg.value, "Currency wrapping");
     }
 }
