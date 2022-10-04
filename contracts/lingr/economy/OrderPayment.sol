@@ -52,12 +52,13 @@ abstract contract OrderPayment is Context {
     function _addPaymentOrder(
         address _receiver, uint256[] memory _tokenIds, uint256[] memory _tokenAmounts
     ) internal returns (uint256) {
+        require(_receiver != address(0), "OrderPayment: the receiver must not be 0");
         require(
             _tokenIds.length == _tokenAmounts.length && _tokenIds.length != 0,
             "OrderPayment: empty token data or mismatching lengths"
         );
         for(uint256 idx = 0; idx < _tokenIds.length; idx++) {
-            require(_tokenAmounts[idx] != 0, "OrderPayment: zero amounts were not allowed");
+            require(_tokenAmounts[idx] != 0, "OrderPayment: zero amounts are not allowed");
         }
         uint256 orderId = uint256(keccak256(abi.encodePacked(address(this), _receiver, nextOrderIndex)));
         orders[orderId] = PaymentOrder({
