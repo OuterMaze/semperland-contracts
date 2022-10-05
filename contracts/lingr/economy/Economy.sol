@@ -139,7 +139,9 @@ contract Economy is ERC1155, IEconomy, SafeExchange, OrderPayment {
     function _pay(
         uint256 _orderId, address _from, address _to, uint256[] storage _tokenIds, uint256[] storage _tokenAmounts
     ) internal override {
-        _safeBatchTransferFrom(_from, _to, _tokenIds, _tokenAmounts, abi.encode("order-pay", _orderId));
+        _safeBatchTransferFrom(_from, _to, _tokenIds, _tokenAmounts, abi.encodePacked(
+            "Economy: paying order ", Strings.toString(_orderId)
+        ));
     }
 
     /**
