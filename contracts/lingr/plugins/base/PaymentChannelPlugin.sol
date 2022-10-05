@@ -154,7 +154,6 @@ abstract contract PaymentChannelPlugin is MetaversePlugin, IERC1155Receiver {
         address operator, address from, uint256[] calldata ids, uint256[] calldata values,
         bytes calldata data
     ) external onlyEconomy returns (bytes4) {
-        uint256 length = ids.length;
         _tokensArrival(operator, from, ids, values, data);
         return 0xbc197c81;
     }
