@@ -7,14 +7,13 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IEconomy.sol";
 import "../IMetaverse.sol";
 import "./SafeExchange.sol";
-import "./OrderPayment.sol";
 
 /**
  * An economy system is a regular ERC1155, but the url will
  * not be stated, and also this contract will belong to a
  * particular metaverse.
  */
-contract Economy is ERC1155, IEconomy, SafeExchange, OrderPayment {
+contract Economy is ERC1155, IEconomy, SafeExchange {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -111,37 +110,6 @@ contract Economy is ERC1155, IEconomy, SafeExchange, OrderPayment {
      */
     function burnBatch(address _from, uint256[] memory _tokenIds, uint256[] memory _amounts) external onlyMetaverse {
         _burnBatch(_from, _tokenIds, _amounts);
-    }
-
-    /**
-     * Adds a payment order.
-     */
-    function addPaymentOrder(
-        address _receiver, uint256[] memory _ids, uint256[] memory _amounts
-    ) external onlyMetaverse returns (uint256) {
-        return _addPaymentOrder(_receiver, _ids, _amounts);
-    }
-
-    /**
-     * Removes a payment order.
-     */
-    function removePaymentOrder(uint256 _orderId) external onlyMetaverse {
-        _removePaymentOrder(_orderId);
-    }
-
-    /**
-     * Enables or disables an order.
-     */
-    function togglePaymentOrder(uint256 _orderId, bool _enabled) external onlyMetaverse {
-        _togglePaymentOrder(_orderId, _enabled);
-    }
-
-    function _pay(
-        uint256 _orderId, address _from, address _to, uint256[] storage _tokenIds, uint256[] storage _tokenAmounts
-    ) internal override {
-        _safeBatchTransferFrom(_from, _to, _tokenIds, _tokenAmounts, abi.encodePacked(
-            "Economy: paying order ", Strings.toString(_orderId)
-        ));
     }
 
     /**
