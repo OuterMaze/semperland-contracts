@@ -5,6 +5,9 @@ import "../../IMetaverse.sol";
 import "../../economy/IEconomy.sol";
 import "../base/PaymentChannelPlugin.sol";
 import "../base/NFTDefiningPlugin.sol";
+import "../../../NativePayable.sol";
+import "../base/NFTTransferWatcherPlugin.sol";
+import "../base/NFTMintingPlugin.sol";
 
 /**
  * A real-world marketplace allows brands or regular
@@ -12,7 +15,8 @@ import "../base/NFTDefiningPlugin.sol";
  * market (essentially, a market is just a group of
  * PoS entries / enabled users) and operate with it.
  */
-contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
+contract RealWorldMarketplacePlugin is NativePayable, PaymentChannelPlugin, NFTDefiningPlugin,
+                                       NFTTransferWatcherPlugin {
     /**
      * This is the definition of a real-world market.
      * Markets are described and have their data kept
@@ -23,9 +27,9 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
      */
     struct Market {
         /**
-         * This flag will always be true.
+         * Having an owner also serves to marks the market as existing.
          */
-        bool exists;
+        address owner;
 
         /**
          * The market title (e.g. a regional market instance).
@@ -176,6 +180,16 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
     }
 
     /**
+     * Resolves interface checking with whatever is implemented in the
+     * inheritance resolution scheme: NFTTransferWatcherPlugin.
+     */
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(NFTTransferWatcherPlugin, MetaversePlugin) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    /**
      * The title of the current plug-in is "Real-World Marketplace".
      */
     function title() public view override returns (string memory) {
@@ -194,7 +208,7 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
      */
     function _tokenMetadata(uint256 _marketId) internal view override returns (bytes memory) {
         Market storage market = markets[_marketId];
-        if (!market.exists) {
+        if (market.owner == address(0)) {
             return abi.encodePacked("");
         } else {
             return abi.encodePacked(
@@ -239,7 +253,7 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
     /**
      * What to do when a payment is received.
      */
-    function _paid(address operator, address from, uint256 channelId, uint256 units) internal override {
+    function _paid(address, address from, uint256 channelId, uint256 units) internal override {
         require(units == 1, "RealWorldMarketplacePlugin: Only one unit is allowed per external invoice");
         Invoice storage invoice = invoices[channelId];
 
@@ -250,11 +264,19 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
             );
         }
         // 2. Trigger the event of the paid invoice (tracking data only).
-        // 3. Destroy the payment channel and the invoice.
         emit InvoicePaid(
             invoice.marketId, invoice.externalId, invoice.description,
             invoice.operator, invoice.customer
         );
+        // 3. For MATIC payments, discount roundDown(MATIC * FEE), which goes
+        //    to this plugin's earnings receiver. Whatever remains (still the
+        //    major part) goes to the market owner.
+        //    For ERC1155 payments, discount roundDown(Token[i] * FEE) from
+        //    each token[i]. Whatever remains (still the major part for each
+        //    token) goes to the market owner.
+        //    The fee is 0 if the owner is a brand marked as committed.
+        // TODO
+        // 4. Destroy the payment channel and the invoice.
         _removePaymentChannel(channelId);
         delete invoices[channelId];
         //    The invoice (event) is anyway indexed by: customer, market,
@@ -262,8 +284,19 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
         //    gas will be refunded to the payer.
     }
 
-    // TODO methods to mint marketplaces:
+    /**
+     * The owner of a market is updated appropriately. This is a notification
+     * coming from the metaverse.
+     */
+    function onNFTOwnerChanged(uint256 _nftId, address _newOwner) external override(NFTTransferWatcherPlugin) onlyMetaverse {
+        markets[_nftId].owner = _newOwner;
+    }
 
+    function mintMarketplace(
+        // TODO
+    ) public payable onlyWhenInitialized hasNativeTokenPrice("RealWorldMarketplacePlugin: marketplace minting", marketMintingCost, 1) {
+        // TODO
+    }
     // TODO onlyInitialized operations:
     // TODO   mint directly, for the sender (it costs)
     // TODO   brandPermission(brand, BRAND_MARKETS_OVERSEER)
@@ -284,4 +317,7 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
     // TODO     cancelInvoice
     // TODO   onlyTheDirectedCustomer(invoice):
     // TODO     rejectInvoice
+    // TODO   onlyMarketOwner:
+    // TODO     retrieveMatic(amount)
+    // TODO     retrieveTokens(ids, amounts) # Funds go to whoever is market OWNER.
 }
