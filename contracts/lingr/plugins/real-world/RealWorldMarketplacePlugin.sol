@@ -146,6 +146,28 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
     bytes32 constant METAVERSE_MANAGE_REAL_WORLD_MARKETPLACE_SETTINGS =
         keccak256("Plugins::RealWorldMarketplace::Settings::Manage");
 
+    /**
+     * This permission allows users to mint (for free)
+     * a market for certain account (or brand). When
+     * doing this, only the title will be set, but then
+     * it is up to the account, an ERC1155 operator of
+     * it (including the owner, in the case of a brand),
+     * or an account having BRAND_MARKETS_OVERSEER in
+     * the brand, the responsibility to set the market
+     * up (manager, emitter(s), operator(s), title).
+     */
+    bytes32 constant METAVERSE_GIVE_MARKETPLACES = keccak256("Plugins::RealWorldMarketplace::Markets::Give");
+
+    /**
+     * This is a permission that may be granted by brands
+     * to users to grant them owner-like permissions when
+     * interacting with the markets associated to it. This
+     * permission allows everything that owners do, save
+     * for the ability to ERC1155-transfer the market as
+     * a standard ERC1155 asset is allowed to.
+     */
+    bytes32 constant BRAND_MARKETS_OVERSEER = keccak256("Plugins::RealWorldMarketplace::Brand::Markets::Overseer");
+
     constructor(
         address _metaverse, string memory _marketImage, uint256 _marketMintingPrice
     ) MetaversePlugin(_metaverse) {
@@ -241,12 +263,14 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
     }
 
     // TODO methods to mint marketplaces:
-    // TODO   directly, for the sender (it costs)
-    // TODO   indirectly, for a brand (it costs)
-    // TODO   admin-funded: directly, for a user (it does not cost)
-    // TODO   admin-funded: indirectly, for a brand (it does not cost; the user is only tracked)
 
     // TODO onlyInitialized operations:
+    // TODO   mint directly, for the sender (it costs)
+    // TODO   brandPermission(brand, BRAND_MARKETS_OVERSEER)
+    // TODO     mint indirectly, for a brand (it costs)
+    // TODO   metaversePermission(METAVERSE_GIVE_MARKETPLACES)
+    // TODO     directly, for a user (it does not cost)
+    // TODO     indirectly, for a brand (it does not cost; the user is only tracked)
     // TODO   onlyMarketOwner:
     // TODO     change manager (trigger event)
     // TODO     change description (trigger event)
