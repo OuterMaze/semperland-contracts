@@ -124,9 +124,16 @@ interface IMetaverse is IERC165 {
     function tokenURI(uint256 _tokenId) external view returns (string memory);
 
     /**
-     * Hook to be invoked as part of a transfer from ERC1155.
+     * Hook to be invoked as part of a transfer from ERC1155 when a brand NFT
+     * is transferred.
      */
     function onBrandOwnerChanged(address _brandId, address _newOwner) external;
+
+    /**
+     * Hook to be invoked as part of a transfer from ERC1155 when another type
+     * of NFT is transferred.
+     */
+    function onNFTOwnerChanged(uint256 _nftId, address _newOwner) external;
 
     /**
      * Tells whether a user has a specific permission on the metaverse, or

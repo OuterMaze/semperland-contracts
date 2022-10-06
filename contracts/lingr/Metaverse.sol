@@ -4,6 +4,7 @@ pragma solidity >=0.8 <0.9.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "./plugins/base/IMetaversePlugin.sol";
+import "./plugins/base/INFTTransferWatcherPlugin.sol";
 import "./IMetaverse.sol";
 import "./economy/IEconomy.sol";
 import "./brands/IBrandRegistry.sol";
@@ -396,11 +397,24 @@ contract Metaverse is Ownable, IMetaverse {
     }
 
     /**
-     * Hook to be invoked as part of a transfer from ERC1155.
+     * Hook to be invoked as part of a transfer from ERC1155 when a brand NFT
+     * is transferred.
      */
     function onBrandOwnerChanged(address _brandId, address _newOwner) external onlyEconomy {
         IBrandRegistry(brandRegistry).onBrandOwnerChanged(_brandId, _newOwner);
     }
+
+    /**
+     * Hook to be invoked as part of a transfer from ERC1155 when another type
+     * of NFT is transferred.
+     */
+    function onNFTOwnerChanged(uint256 _nftId, address _newOwner) external onlyEconomy {
+        address resolver = tokenTypeResolvers[nftTypes[_nftId]];
+        if (resolver.supportsInterface(type(INFTTransferWatcherPlugin).interfaceId)) {
+            INFTTransferWatcherPlugin(resolver).onNFTOwnerChanged(_nftId, _newOwner);
+        }
+    }
+
 
     // ********** Plugin management goes here **********
 
