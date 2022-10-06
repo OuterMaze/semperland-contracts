@@ -119,14 +119,26 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
      */
     mapping(uint256 => Market) public markets;
 
-    // TODO set the market minting settings:
-    // TODO - variable (with initial cost in the constructor)
-    // TODO - permission to change it
-    // TODO - event of it being changed
-    // TODO - function to change it (requiring permission and triggering the event)
+    /**
+     * The market minting price. 0 means the market
+     * minting is disabled by this public mean, until
+     * the administration sets a price.
+     */
+    uint256 public marketMintingCost;
 
-    constructor(address _metaverse, string memory _marketImage) MetaversePlugin(_metaverse) {
+    /**
+     * This permission allows users to set the market
+     * minting costs for brands or accounts to define
+     * new real-world markets.
+     */
+    bytes32 constant METAVERSE_MANAGE_REAL_WORLD_MARKETPLACE_SETTINGS =
+        keccak256("Plugins::RealWorldMarketplace::Settings::Manage");
+
+    constructor(
+        address _metaverse, string memory _marketImage, uint256 _marketMintingPrice
+    ) MetaversePlugin(_metaverse) {
         marketImage = _marketImage;
+        marketMintingCost = _marketMintingPrice;
     }
 
     /**
@@ -156,6 +168,23 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
                 '","decimals":0,"properties":{}}'
             );
         }
+    }
+
+    /**
+     * An event for when the market minting cost
+     * is updated. Updating it to 0 disables it
+     * completely.
+     */
+    event MarketMintingCostUpdated(uint256 newCost);
+
+    /**
+     * Sets the currency definition cost.
+     */
+    function setMarketMintingCost(uint256 newCost) public
+        onlyMetaverseAllowed(METAVERSE_MANAGE_REAL_WORLD_MARKETPLACE_SETTINGS)
+    {
+        marketMintingCost = newCost;
+        emit MarketMintingCostUpdated(newCost);
     }
 
     /**
