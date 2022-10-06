@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
+import "../../IMetaverse.sol";
+import "../../economy/IEconomy.sol";
 import "../base/PaymentChannelPlugin.sol";
 import "../base/NFTDefiningPlugin.sol";
 
@@ -85,6 +87,11 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
         uint256[] rewardTokenAmounts;
 
         /**
+         * The market this invoice belongs to.
+         */
+        uint256 marketId;
+
+        /**
          * The invoice emitter. This is typically an automated software
          * which emitted the invoice and determined its costs and rewards
          * via regulated, per-business, means.
@@ -118,6 +125,11 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
      * The currently minted (and not burned) markets.
      */
     mapping(uint256 => Market) public markets;
+
+    /**
+     * The (yet unpaid) invoices.
+     */
+    mapping(uint256 => Invoice) public invoices;
 
     /**
      * The market minting price. 0 means the market
@@ -188,10 +200,44 @@ contract RealWorldMarketplacePlugin is PaymentChannelPlugin, NFTDefiningPlugin {
     }
 
     /**
+     * Invoices being paid trigger these events, which only reference:
+     * - (market id, operator address) : To allow the operator tracking
+     *   their managed invoices.
+     * - customer address : To allow the customer tracking their purchases.
+     * - concept & external id : Details of the invoice, just for human
+     *   readability and matching.
+     * The payment and reward will NOT be specified here, because this
+     * system is meant to track well-known costs for recurring services
+     * or back the operation against a real-world document referenced
+     * by its external id.
+     */
+    event InvoicePaid(uint256 indexed marketId, string externalId, string concept,
+                      address indexed operator, address indexed customer);
+
+    /**
      * What to do when a payment is received.
      */
     function _paid(address operator, address from, uint256 channelId, uint256 units) internal override {
-        // TODO
+        require(units == 1, "RealWorldMarketplacePlugin: Only one unit is allowed per external invoice");
+        Invoice storage invoice = invoices[channelId];
+
+        // 1. If there is a reward, batch-transfer it to the from address.
+        if (invoice.rewardTokenIds.length > 0) {
+            IEconomy(IMetaverse(metaverse).economy()).safeBatchTransferFrom(
+                address(this), from, invoice.rewardTokenIds, invoice.rewardTokenAmounts, ""
+            );
+        }
+        // 2. Trigger the event of the paid invoice (tracking data only).
+        // 3. Destroy the payment channel and the invoice.
+        emit InvoicePaid(
+            invoice.marketId, invoice.externalId, invoice.description,
+            invoice.operator, invoice.customer
+        );
+        _removePaymentChannel(channelId);
+        delete invoices[channelId];
+        //    The invoice (event) is anyway indexed by: customer, market,
+        //    or operator, but the record will not exist anymore and the
+        //    gas will be refunded to the payer.
     }
 
     // TODO methods to mint marketplaces:
