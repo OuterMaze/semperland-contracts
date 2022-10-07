@@ -42,7 +42,7 @@ contract SignatureVerifierHub is SignatureVerifier {
     /**
      * Verifies a signature by iteration among all the verifiers.
      */
-    function verifySignature(bytes32 _message, bytes memory _signature) external override view returns (address) {
+    function verifySignature(bytes32 _message, bytes memory _signature) public override view returns (address) {
         for(uint256 index = 0; index < verifiers.length; index++) {
             address verifier = verifiers[index];
 

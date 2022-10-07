@@ -23,5 +23,5 @@ abstract contract SignatureVerifier is ISignatureVerifier {
      * returned. Otherwise, unless there is an error, the zero
      * address is returned.
      */
-    function verifySignature(bytes32 _message, bytes memory _signature) external virtual view returns (address);
+    function verifySignature(bytes32 _message, bytes memory _signature) public virtual view returns (address);
 }

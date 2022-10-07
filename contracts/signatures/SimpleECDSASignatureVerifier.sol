@@ -15,7 +15,7 @@ contract SimpleECDSASignatureVerifier is SignatureVerifier {
      * provided (v, r, s) pair and returns the signing account's
      * address. On failure, returns the zero address.
      */
-    function verifySignature(bytes32 _message, bytes memory _signature) external override view returns (address) {
+    function verifySignature(bytes32 _message, bytes memory _signature) public override view returns (address) {
         if (_signature.length != 65) return address(0);
 
         _message = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", _message));
@@ -25,9 +25,9 @@ contract SimpleECDSASignatureVerifier is SignatureVerifier {
         bytes32 s;
         assembly {
             // Remember: The first 32 bytes are the length of the array.
-            r := mload(add(signature, 32))
-            s := mload(add(signature, 64))
-            v := byte(0, mload(add(signature, 96)))
+            r := mload(add(_signature, 32))
+            s := mload(add(_signature, 64))
+            v := byte(0, mload(add(_signature, 96)))
         }
         if (v < 2) v += 27;
         return ecrecover(_message, v, r, s);
