@@ -16,18 +16,20 @@ contract SimpleECDSASignatureVerifier is SignatureVerifier {
      * address. On failure, returns the zero address.
      */
     function verifySignature(bytes32 message, bytes memory signature) external override view returns (address) {
-        require(
-            signature.length == 65,
-            "SimpleECDSASignatureVerifier: Invalid signature length"
-        );
+        if (signature.length != 65) return address(0);
 
-        uint8 v = uint8(signature[0]);
+        message = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", message));
+
+        uint8 v;
         bytes32 r;
         bytes32 s;
         assembly {
-            r := mload(add(signature, 1))
-            s := mload(add(signature, 33))
+            // Remember: The first 32 bytes are the length of the array.
+            r := mload(add(signature, 32))
+            s := mload(add(signature, 64))
+            v := byte(0, mload(add(signature, 96)))
         }
+        if (v < 2) v += 27;
         return ecrecover(message, v, r, s);
     }
 }

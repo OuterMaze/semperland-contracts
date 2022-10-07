@@ -58,7 +58,8 @@ contract SignatureVerifierHub {
 
             address returnedValue;
             assembly {
-                returnedValue := mload(add(signature, 20))
+                // Remember: the first 32 bytes are the length
+                returnedValue := mload(add(returnData, 32))
             }
             if (returnedValue != address(0)) return returnedValue;
         }
