@@ -38,7 +38,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
      * - data = web3.utils.soliditySha3(paymentId, tokenId, tokenAmount, rewardTokenIds, rewardTokenAmounts);
      * - sig = await web3.eth.sign(data, address);
      */
-    function _getTokenInvoiceSigningAddress(
+    function _getTokenPaymentSigningAddress(
         // This comes from the onERC1155Received token args.
         uint256 _tokenId, uint256 _tokenAmount,
         // This comes from the onERC1155Received data arg (after abi.decode).
@@ -65,7 +65,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
      * - data = web3.utils.soliditySha3(paymentId, tokenIds, tokenAmounts, rewardTokenIds, rewardTokenAmounts);
      * - sig = await web3.eth.sign(data, address);
      */
-    function _getBatchTokenInvoiceSigningAddress(
+    function _getBatchTokenPaymentSigningAddress(
         // This comes from the onERC1155BatchReceived token args.
         uint256[] calldata _tokenIds, uint256[] calldata _tokenAmounts,
         // This comes from the onERC1155Received data arg (after abi.decode).
@@ -91,7 +91,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
      * - data = web3.utils.soliditySha3(paymentId, amount, rewardTokenIds, rewardTokenAmounts);
      * - sig = await web3.eth.sign(data, address);
      */
-    function _getNativeInvoiceSigningAddress(
+    function _getNativePaymentSigningAddress(
         // This comes from the pay() amount argument.
         uint256 _amount,
         // This comes from the pay() extra arguments (directly).
