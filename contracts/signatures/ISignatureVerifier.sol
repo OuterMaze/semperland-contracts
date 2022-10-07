@@ -16,5 +16,5 @@ interface ISignatureVerifier is IERC165 {
      * when verifying, this function returns the address of
      * the signing account.
      */
-    function verifySignature(bytes32 message, bytes memory signature) external view returns (address);
+    function verifySignature(bytes32 _message, bytes memory _signature) external view returns (address);
 }

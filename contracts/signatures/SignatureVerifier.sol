@@ -13,8 +13,8 @@ abstract contract SignatureVerifier is ISignatureVerifier {
     /**
      * A signature verifier contract satisfies the ISignatureVerifier and IERC165.
      */
-    function supportsInterface(bytes4 interfaceId) public view returns (bool) {
-        return interfaceId == type(IERC165).interfaceId || interfaceId == type(ISignatureVerifier).interfaceId;
+    function supportsInterface(bytes4 _interfaceId) public view returns (bool) {
+        return _interfaceId == type(IERC165).interfaceId || interfaceId == type(ISignatureVerifier).interfaceId;
     }
 
     /**
@@ -23,5 +23,5 @@ abstract contract SignatureVerifier is ISignatureVerifier {
      * returned. Otherwise, unless there is an error, the zero
      * address is returned.
      */
-    function verifySignature(bytes32 message, bytes memory signature) external virtual view returns (address);
+    function verifySignature(bytes32 _message, bytes memory _signature) external virtual view returns (address);
 }

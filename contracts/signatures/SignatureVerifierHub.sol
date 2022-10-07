@@ -42,13 +42,13 @@ contract SignatureVerifierHub is SignatureVerifier {
     /**
      * Verifies a signature by iteration among all the verifiers.
      */
-    function verifySignature(bytes32 message, bytes memory signature) external override view returns (address) {
+    function verifySignature(bytes32 _message, bytes memory _signature) external override view returns (address) {
         for(uint256 index = 0; index < verifiers.length; index++) {
             address verifier = verifiers[index];
 
             bytes memory callData = abi.encodeWithSelector(
                 ISignatureVerifier.verifySignature.selector,
-                message, signature
+                _message, _signature
             );
 
             (bool didSucceed, bytes memory returnData) = verifier.staticcall(callData);
