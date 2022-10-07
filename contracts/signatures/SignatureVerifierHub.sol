@@ -3,6 +3,7 @@ pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "./ISignatureVerifier.sol";
+import "./SignatureVerifier.sol";
 
 /**
  * This contract maintains a list of signature verifier contracts
@@ -10,7 +11,7 @@ import "./ISignatureVerifier.sol";
  * check returns the appropriate address. This contract can be
  * extended to add means to add or remove verifiers.
  */
-contract SignatureVerifierHub {
+contract SignatureVerifierHub is SignatureVerifier {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -41,7 +42,7 @@ contract SignatureVerifierHub {
     /**
      * Verifies a signature by iteration among all the verifiers.
      */
-    function verifySignature(bytes32 message, bytes memory signature) external view returns (address) {
+    function verifySignature(bytes32 message, bytes memory signature) external override view returns (address) {
         for(uint256 index = 0; index < verifiers.length; index++) {
             address verifier = verifiers[index];
 
