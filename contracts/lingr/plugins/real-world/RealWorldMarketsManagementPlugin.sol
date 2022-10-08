@@ -70,7 +70,7 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
      * per-market signers (market managers can only manage
      * the signers in this contract).
      */
-    bytes32 constant BRAND_MANAGE_CURRENCIES = keccak256("Plugins::RealWorldMarkets::Brand::Markets::Manage");
+    bytes32 constant BRAND_MANAGE_MARKETS = keccak256("Plugins::RealWorldMarkets::Brand::Markets::Manage");
 
     /**
      * The hash of the 0 address.
@@ -207,7 +207,7 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
         if (IEconomy(_metaverse.economy()).isApprovedForAll(_to, _from)) return true;
 
         IBrandRegistry _brandRegistry = IBrandRegistry(IMetaverse(metaverse).brandRegistry());
-        return _brandRegistry.brandExists(_to) && _brandRegistry.isBrandAllowed(_to, BRAND_MANAGE_CURRENCIES, _from);
+        return _brandRegistry.brandExists(_to) && _brandRegistry.isBrandAllowed(_to, BRAND_MANAGE_MARKETS, _from);
     }
 
     /**
