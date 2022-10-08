@@ -48,14 +48,6 @@ contract("CurrencyMintingPlugin", function (accounts) {
   const BRAND_MANAGE_CURRENCIES = web3.utils.soliditySha3("Plugins::Currency::Brand::Currencies::Manage");
   const METAVERSE_MINT_BEAT = web3.utils.soliditySha3("Plugins::Currency::BEAT::Mint");
 
-  function revertReason(message) {
-    return message + " -- Reason given: " + message;
-  }
-
-  function btoa(raw) {
-    return new Buffer(raw).toString("base64");
-  }
-
   before(async function () {
     // Set up the metaverse and two plug-ins.
     metaverse = await Metaverse.new({ from: accounts[0] });
@@ -157,7 +149,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
     let mintingTitle = await mintingPlugin.title();
     assert.isTrue(
       mintingTitle === "Currency (Minting)",
-      "The title of the definition plug-in must be: Currency (Minting), not: " + mintingTitle
+      "The title of the minting plug-in must be: Currency (Minting), not: " + mintingTitle
     );
   });
 
