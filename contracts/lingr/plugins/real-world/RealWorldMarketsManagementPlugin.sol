@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "../../economy/IEconomy.sol";
-import "../base/NFTMintingPlugin.sol";
 import "../base/NFTDefiningPlugin.sol";
+import "../base/NFTMintingPlugin.sol";
+import "../base/NFTBurningPlugin.sol";
 import "../base/NFTTransferWatcherPlugin.sol";
 
 /**
@@ -15,7 +17,8 @@ import "../base/NFTTransferWatcherPlugin.sol";
  * users to remember which actual addresses are used,
  * since they'll not be recoverable from this contract.
  */
-contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin, NFTTransferWatcherPlugin {
+contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin, NFTBurningPlugin,
+                                             NFTTransferWatcherPlugin {
     /**
      * A market is defined by this structure (this
      * one is subject to changes and improvements).
@@ -33,7 +36,7 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
          * The manager of this market. It can perform management
          * operations on the market.
          */
-        uint256 manager;
+        bytes32 manager;
 
         /**
          * The signers allowed by this market. Typically, each signer
@@ -42,7 +45,7 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
          * operations to set / remove the signer of the operation to
          * signature-verify and retrieve that address.
          */
-        mapping(uint256 => bool) signers;
+        mapping(bytes32 => bool) signers;
 
         /**
          * A description for the market.
@@ -70,6 +73,11 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
     bytes32 constant BRAND_MANAGE_CURRENCIES = keccak256("Plugins::RealWorldMarkets::Brand::Markets::Manage");
 
     /**
+     * The hash of the 0 address.
+     */
+    bytes32 constant ZERO_ADDRESS_HASH = keccak256(abi.encodePacked(address(0)));
+
+    /**
      * The image used for colliding markets' metadata.
      */
     string public collidingMarketImage;
@@ -85,7 +93,7 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
      * but the market management should be more
      * difficult to track).
      */
-    mapping(uint256 => Market) markets;
+    mapping(bytes32 => Market) markets;
 
     /**
      * A colliding market is a market with different
@@ -112,17 +120,17 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
      * Merging interfaces support from both ancestors.
      */
     function supportsInterface(
-        bytes4 interfaceId
+        bytes4 _interfaceId
     ) public view virtual override(MetaversePlugin, NFTTransferWatcherPlugin) returns (bool) {
-        return MetaversePlugin.supportsInterface(interfaceId) ||
-               NFTTransferWatcherPlugin.supportsInterface(interfaceId);
+        return MetaversePlugin.supportsInterface(_interfaceId) ||
+               NFTTransferWatcherPlugin.supportsInterface(_interfaceId);
     }
 
     /**
      * The title of the current plug-in is "Real-World Marketplace".
      */
     function title() public view override returns (string memory) {
-        return "Real-World Payments";
+        return "Real-World Markets";
     }
 
     /**
@@ -138,7 +146,7 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
             );
         }
 
-        Market storage market = markets[_marketId];
+        Market storage market = markets[keccak256(abi.encodePacked(_marketId))];
         if (market.owner == address(0)) {
             return abi.encodePacked("");
         } else {
@@ -168,15 +176,20 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
         uint256 _nftId, address _newOwner
     ) external override(NFTTransferWatcherPlugin) onlyMetaverse {
         if (collidingMarkets[_nftId]) {
-            require(_newOwner == address(0), "RealWorldPaymentsPlugin: colliding markets can only be burned");
+            require(_newOwner == address(0), "RealWorldMarketsPlugin: colliding markets can only be burned");
             delete collidingMarkets[_nftId];
         } else {
             // The market will have a metadata.
-            require(
-                canGiveMarketsTo(markets[_nftId].owner, _newOwner),
-                "RealWorldPaymentsPlugin: the market owner is not allowed to transfer it to the new owner"
-            );
-            markets[_nftId].owner = _newOwner;
+            if (_newOwner != address(0)) {
+                Market storage market = markets[keccak256(abi.encodePacked(_nftId))];
+                require(
+                    canGiveMarketsTo(market.owner, _newOwner),
+                    "RealWorldMarketsPlugin: the market owner is not allowed to transfer it to the new owner"
+                );
+                market.owner = _newOwner;
+            } else {
+                delete markets[keccak256(abi.encodePacked(_nftId))];
+            }
         }
     }
 
@@ -187,26 +200,146 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
      * user when the target is the brand they're allowed into
      * (this involves a special permission).
      */
-    function canGiveMarketsTo(address from, address to) public view returns (bool) {
-        if (from == to) return true;
+    function canGiveMarketsTo(address _from, address _to) public view returns (bool) {
+        if (_from == _to) return true;
 
         IMetaverse _metaverse = IMetaverse(metaverse);
-        if (IEconomy(_metaverse.economy()).isApprovedForAll(to, from)) return true;
+        if (IEconomy(_metaverse.economy()).isApprovedForAll(_to, _from)) return true;
 
         IBrandRegistry _brandRegistry = IBrandRegistry(IMetaverse(metaverse).brandRegistry());
-        return _brandRegistry.brandExists(to) && _brandRegistry.isBrandAllowed(to, BRAND_MANAGE_CURRENCIES, from);
+        return _brandRegistry.brandExists(_to) && _brandRegistry.isBrandAllowed(_to, BRAND_MANAGE_CURRENCIES, _from);
     }
 
-    // TODO (all of them public methods - the callbacks have to restrict by onlyEconomy):
-    // - changeManager(marketIdHash, managerAddressHash) onlyMarketOwner(marketIdHash) {}
-    // - setMarketTitle(marketIdHash, title) onlyMarketOwnerOrManager(marketIdHash) {}
-    // - setMarketSigner(marketIdHash, marketSignerHash, bool permitted) onlyMarketOwnerOrManager(marketIdHash) {}
-    // - onERC1155Received and onERC1155BatchReceived:
-    //   - Burn any market received this way. Complain by any other asset type received this way.
-    // - mintMarket(marketTitle) {}:
-    //   - Mints a new market. The owner will be the sender.
-    //   - The notification will be done through a standard trackable Transfer(to=sender) event.
-    // - mintMarketFor(owner, marketTitle) {}:
-    //   - Mints a new market for another user. canGiveMarketsTo(msg.sender, owner) must be satisfied.
-    //   - The notification will be done through a standard trackable Transfer(to=sender) event.
+    /**
+     * Tells whether the owner ERC1155-approves the sender.
+     */
+    function _isOwnerOrApproved(address _owner, address _sender) internal view returns (bool) {
+        return _owner == _sender || IEconomy(IMetaverse(metaverse).economy()).isApprovedForAll(_owner, _sender);
+    }
+
+    /**
+     * Sets the title for one market. Only the market owner
+     * (or one of its ERC-1155 approved operators) can do this.
+     */
+    function setMarketTitle(uint256 _marketId, string memory _title) external {
+        Market storage market = markets[keccak256(abi.encodePacked(_marketId))];
+        require(
+            _isOwnerOrApproved(market.owner, _msgSender()),
+            "RealWorldMarketsPlugin: only the market owner or an ERC-1155 approved operator can invoke this operation"
+        );
+        market.title = _title;
+    }
+
+    /**
+     * Sets a manager for this market. Only the market owner
+     * (or one of its ERC-1155 approved operators) can do this.
+     * The market is specified by its hash in this method.
+     */
+    function setMarketManager(bytes32 _marketIdHash, bytes32 _managerAddressHash) external {
+        Market storage market = markets[_marketIdHash];
+        require(
+            _isOwnerOrApproved(market.owner, _msgSender()),
+            "RealWorldMarketsPlugin: only the market owner or an ERC-1155 approved operator can invoke this operation"
+        );
+        market.manager = _managerAddressHash;
+    }
+
+    /**
+     * Sets or unsets a signer for this market. Only the market
+     * owner (or one of its ERC-1155 approved operators) or the
+     * market manager can do this. Both the market and address
+     * are specified as hashes.
+     */
+    function setMarketSigner(bytes32 _marketIdHash, bytes32 _signerAddressHash, bool _set) external {
+        Market storage market = markets[_marketIdHash];
+        require(
+            _isOwnerOrApproved(market.owner, _msgSender()) ||
+                market.manager == keccak256(abi.encodePacked(_msgSender())),
+            "RealWorldMarketsPlugin: only the market owner, an ERC-1155 approved operator, or the market manager can invoke this operation"
+        );
+        market.signers[_signerAddressHash] = _set;
+    }
+
+    /**
+     * Mints a market for a specific owner. The new market
+     * is instantiated appropriately and, with extremely low
+     * probability, it has a collision conflict with another
+     * minted market. The user account that mints it will be
+     * able to get notified by checking the appropriate
+     * ERC1155 event.
+     */
+    function _mintMarket(address _owner, string memory _title) private {
+        uint256 marketId = _mintNFTFor(_owner, marketType, "");
+        bytes32 marketHash = keccak256(abi.encodePacked(marketId));
+        if (markets[marketHash].owner != address(0)) {
+            collidingMarkets[marketId] = true;
+        } else {
+            markets[marketHash].owner = _owner;
+            markets[marketHash].title = _title;
+        }
+    }
+
+    /**
+     * Mints a market for the sender. The market is instantiated
+     * appropriately and, with extremely low probability, it has
+     * a collision conflict with another minted market. The user
+     * account that mints it will be able to get notified by
+     * checking the appropriate ERC1155 event.
+     */
+    function mintMarket(string memory _title) external {
+        _mintMarket(_msgSender(), _title);
+    }
+
+    /**
+     * Mints a market for a specific owner. The market is instantiated
+     * appropriately and, with extremely low probability, it has a
+     * collision conflict with another minted market. The user account
+     * that mints it will be able to get notified by checking the
+     * appropriate ERC1155 event.
+     */
+    function mintMarketFor(address _owner, string memory _title) external {
+        require(
+            canGiveMarketsTo(_msgSender(), _owner),
+            "RealWorldMarketsPlugin: the sender is not allowed to create a market for the new owner"
+        );
+        _mintMarket(_owner, _title);
+    }
+
+    /**
+     * Receives tokens. The token markets are burned. Other tokens are rejected
+     * and the transaction is reverted.
+     */
+    function onERC1155Received(
+        address, address, uint256 _id, uint256 _values, bytes calldata
+    ) external onlyEconomy returns (bytes4) {
+        if (_values > 0) {
+            require(
+                IMetaverse(metaverse).nftTypes(_id) != marketType,
+                "RealWorldMarketsPlugin: only markets can be sent to the plug-in (and will be burned)"
+            );
+            _burnNFT(_id);
+        }
+        return 0xf23a6e61;
+    }
+
+    /**
+     * Receives many tokens. The token markets are burned. Other tokens are rejected
+     * and the transaction is reverted.
+     */
+    function onERC1155BatchReceived(
+        address, address, uint256[] calldata _ids, uint256[] calldata _values,
+        bytes calldata
+    ) external onlyEconomy returns (bytes4) {
+        for(uint256 index = 0; index < _ids.length; index++) {
+            if (_values[index] > 0) {
+                uint256 _id = _ids[index];
+                require(
+                    IMetaverse(metaverse).nftTypes(_id) != marketType,
+                    "RealWorldMarketsPlugin: only markets can be sent to the plug-in (and will be burned)"
+                );
+                _burnNFT(_id);
+            }
+        }
+        return 0xbc197c81;
+    }
 }
