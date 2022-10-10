@@ -73,10 +73,10 @@ contract RealWorldPaymentsPlugin is
     }
 
     /**
-     * Checks whether, for a given box id (by its hash), a sender can be
-     * confirmed to be a valid signer-allowed for it.
+     * Checks whether, for a given box id (by its hash), a sender is allowed to
+     * add / remove signers for a given box.
      */
-    function _canAllowWithdraw(address _sender, bytes32 _boxIdHash) internal virtual override view returns (bool) {
+    function _canAllowAccounts(address _sender, bytes32 _boxIdHash) internal virtual override view returns (bool) {
         // TODO implement.
         return false;
     }
@@ -88,6 +88,17 @@ contract RealWorldPaymentsPlugin is
         bytes32 _paymentIdHash, uint256 _nativeAmount, uint256[] memory _ids, uint256[] memory _amounts,
         uint256[] memory _rewardIds, uint256[] memory _rewardAmounts, address _signer
     ) internal override {
-        // TODO implement.
+        Payment storage payment = payments[_paymentIdHash];
+        require(payment.creator != address(0), "RealWorldPaymentsPlugin: payment does not exist");
+        BoxFunds storage box = boxes[payment.boxIdHash3];
+        require(box.exists, "RealWorldPaymentsPlugin: the box associated to this payment does not exist anymore");
+        BoxPermissions storage perms = boxPermissions[payment.boxIdHash3];
+        require(
+            perms.paymentMakeAllowed[_signer],
+            "RealWorldPaymentsPlugin: the payment signer is not allowed anymore to operate in the associated box"
+        );
+        // TODO: _fund the box: (100%/0%) for committed box owners, and (97%/3%) for non-committed box owners.
+        // TODO: pay rewards from the box' s funds according to the specification.
+        delete payments[_paymentIdHash];
     }
 }
