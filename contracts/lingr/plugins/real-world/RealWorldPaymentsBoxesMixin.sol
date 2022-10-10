@@ -65,11 +65,12 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
     }
 
     /**
-     * Makes a box. The box id must be specified a priori, and
-     * appropriately kept (as secret as possible).
+     * Makes a box. The box id's second hash must be specified
+     * a priori, having the original box id appropriately kept
+     * (as secret as possible).
      */
-    function _makeBox(bytes32 _boxId) internal {
-        bytes32 _boxIdHash3 = _hash(_hash(_hash(_boxId)));
+    function _makeBox(bytes32 _boxIdHash2) internal {
+        bytes32 _boxIdHash3 = _hash(_boxIdHash2);
         require(!boxes[_boxIdHash3].exists, "RealWorldPaymentsPlugin: Colliding or already existing box");
         // Marks true to create a new box.
         boxes[_boxIdHash3].exists = true;
@@ -100,16 +101,16 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
      * Returns the native balance of a box. If the box does not
      * exist, it returns 0.
      */
-    function balance(bytes32 _boxIdHash2) external view returns (uint256) {
-        return boxes[_hash(_boxIdHash2)].native;
+    function balance(bytes32 _boxId) external view returns (uint256) {
+        return boxes[_hash(_hash(_hash(_boxId)))].native;
     }
 
     /**
      * Returns the balance of a box for a given token. If the box
      * does not exist, it returns 0.
      */
-    function balanceOf(bytes32 _boxIdHash2, uint256 _id) external view returns (uint256) {
-        return boxes[_hash(_boxIdHash2)].tokens[_id];
+    function balanceOf(bytes32 _boxId, uint256 _id) external view returns (uint256) {
+        return boxes[_hash(_hash(_hash(_boxId)))].tokens[_id];
     }
 
     /**
@@ -117,8 +118,8 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
      * does not exist, it returns an array of zeros of the same
      * length of the input array.
      */
-    function balanceOfBatch(bytes32 _boxIdHash2, uint256[] calldata _ids) external view returns (uint256[] memory) {
-        BoxFunds storage box = boxes[_hash(_boxIdHash2)];
+    function balanceOfBatch(bytes32 _boxId, uint256[] calldata _ids) external view returns (uint256[] memory) {
+        BoxFunds storage box = boxes[_hash(_hash(_hash(_boxId)))];
         uint256 length = _ids.length;
         uint256[] memory values = new uint256[](length);
         for(uint256 index = 0; index < length; index++) {
