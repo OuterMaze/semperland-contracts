@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
+import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "./RealWorldPaymentsSignaturesMixin.sol";
 
@@ -9,7 +10,7 @@ import "./RealWorldPaymentsSignaturesMixin.sol";
  * Once the payment is paid (and the payment is valid), this is
  * reported, and subclasses must implement its behaviour.
  */
-abstract contract RealWorldPaymentsReceptionMixin is IERC1155Receiver, RealWorldPaymentsSignaturesMixin {
+abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsSignaturesMixin, IERC1155Receiver {
     /**
      * Receives payments consisting of one single ERC1155
      * (non-native) token.
@@ -17,12 +18,12 @@ abstract contract RealWorldPaymentsReceptionMixin is IERC1155Receiver, RealWorld
     function onERC1155Received(
         address _operator, address _from, uint256 _id, uint256 _value, bytes calldata _data
     ) external returns (bytes4) {
-        _requireEconomy();
+        _requireEconomy(_msgSender());
         (uint256 p, uint256[] memory rIds, uint256[] memory rAmounts, bytes memory sig) = abi.decode(
             _data, (uint256, uint256[], uint256[], bytes)
         );
         address signer = _getTokenPaymentSigningAddress(_id, _value, p, rIds, rAmounts, sig);
-        require(signer != address(0), "RealWorldPaymentsPlugin: Token payment signature verification failed");
+        require(signer != address(0), "RealWorldPaymentsPlugin: token payment signature verification failed");
         uint256[] memory _ids = new uint256[](1);
         uint256[] memory _amounts = new uint256[](1);
         _ids[0] = _id;
@@ -39,12 +40,12 @@ abstract contract RealWorldPaymentsReceptionMixin is IERC1155Receiver, RealWorld
         address _operator, address _from, uint256[] calldata _ids, uint256[] calldata _values,
         bytes calldata _data
     ) external returns (bytes4) {
-        _requireEconomy();
+        _requireEconomy(_msgSender());
         (uint256 p, uint256[] memory rIds, uint256[] memory rAmounts, bytes memory sig) = abi.decode(
             _data, (uint256, uint256[], uint256[], bytes)
         );
         address signer = _getBatchTokenPaymentSigningAddress(_ids, _values, p, rIds, rAmounts, sig);
-        require(signer != address(0), "RealWorldPaymentsPlugin: Batch token payment signature verification failed");
+        require(signer != address(0), "RealWorldPaymentsPlugin: batch token payment signature verification failed");
         _paid(p, 0, _ids, _values, rIds, rAmounts);
         return 0xbc197c81;
     }
@@ -59,7 +60,7 @@ abstract contract RealWorldPaymentsReceptionMixin is IERC1155Receiver, RealWorld
         address signer = _getNativePaymentSigningAddress(
             msg.value, _paymentId, _rewardTokenIds, _rewardTokenAmounts, _signature
         );
-        require(signer != address(0), "RealWorldPaymentsPlugin: Native payment signature verification failed");
+        require(signer != address(0), "RealWorldPaymentsPlugin: native payment signature verification failed");
         _paid(_paymentId, msg.value, new uint256[](0), new uint256[](0), _rewardTokenIds, _rewardTokenAmounts);
     }
 
@@ -67,7 +68,14 @@ abstract contract RealWorldPaymentsReceptionMixin is IERC1155Receiver, RealWorld
      * This method must be overridden to restrict the execution
      * to the economy system.
      */
-    function _requireEconomy() internal virtual;
+    function _requireEconomy(address _sender) private {
+        require(_economy() == _sender, "RealWorldPaymentsPlugin: the only allowed sender is the economy system");
+    }
+
+    /**
+     * Returns the contract being used as ERC1155 source of truth.
+     */
+    function _economy() internal virtual view returns (address);
 
     /**
      * This method must be overridden to tell what happens
