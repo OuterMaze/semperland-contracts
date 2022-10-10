@@ -41,6 +41,23 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
     mapping(bytes32 => BoxFunds) private boxes;
 
     /**
+     * Account permissions associated to this box
+     * (General management is not included here).
+     */
+    struct BoxPermissions {
+        /**
+         * Users that are allowed to withdraw from this box.
+         */
+        mapping(bytes32 => bool) withdrawAllowed;
+    }
+
+    /**
+     * Tracks the withdraw allowed accounts for a given box. The
+     * accounts are specified by their hash.
+     */
+    mapping(bytes32 => BoxPermissions) private boxPermissions;
+
+    /**
      * Computes a hash of a previous bytes32 value (hash o id).
      */
     function _hash(bytes32 _value) internal pure returns (bytes32) {
@@ -111,15 +128,45 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
     }
 
     /**
-     * Returns whether a given sender can retrieve funds from
-     * a given box.
+     * Returns whether a given sender can [un]set accounts to
+     * withdraw funds from a given box. The box id is given
+     * as a hash instead of directly.
      */
-    function _canWithdraw(address _sender, bytes32 _boxIdHash3) internal virtual view returns (bool);
+    function _canAllowWithdraw(address _sender, bytes32 _boxIdHash) internal virtual view returns (bool);
 
     /**
      * Returns the contract being used as ERC1155 source of truth.
      */
     function _economy() internal virtual view returns (address);
+
+    /**
+     * Sets or clears a permission to withdraw funds from a box for
+     * a given account. The account is specified by its hash.
+     */
+    function setWithdrawAllowance(bytes32 _boxIdHash, bytes32 _accountHash, bool _allow) external {
+        bytes32 _boxIdHash3 = _hash(_hash(_boxIdHash));
+        BoxFunds storage box = boxes[_boxIdHash3];
+        require(!box.exists, "RealWorldPaymentsPlugin: The box does not exist");
+        require(
+            _canAllowWithdraw(_msgSender(), _boxIdHash),
+            "RealWorldPaymentsPlugin: the sender is not allowed to set/clear withdrawal permission in the specified box"
+        );
+        boxPermissions[_boxIdHash3].withdrawAllowed[_accountHash] = _allow;
+    }
+
+    /**
+     * Clears withdrawal permissions from a box for all the accounts.
+     */
+    function resetBoxPermissions(bytes32 _boxIdHash) external {
+        bytes32 _boxIdHash3 = _hash(_hash(_boxIdHash));
+        BoxFunds storage box = boxes[_boxIdHash3];
+        require(!box.exists, "RealWorldPaymentsPlugin: The box does not exist");
+        require(
+            _canAllowWithdraw(_msgSender(), _boxIdHash),
+            "RealWorldPaymentsPlugin: the sender is not allowed to reset withdrawal permissions in the specified box"
+        );
+        delete boxPermissions[_boxIdHash3];
+    }
 
     /**
      * Withdraw funds from an existing box, if the sender is
@@ -131,7 +178,7 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
         bytes32 boxIdHash3 = _hash(_boxIdHash2);
         address sender = _msgSender();
         require(
-            _canWithdraw(sender, boxIdHash3),
+            boxPermissions[boxIdHash3].withdrawAllowed[keccak256(abi.encodePacked(sender))],
             "RealWorldPaymentsPlugin: the sender is not allowed to withdraw from this box"
         );
         require(
