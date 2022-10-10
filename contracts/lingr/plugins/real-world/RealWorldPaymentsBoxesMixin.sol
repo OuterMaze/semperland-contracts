@@ -272,7 +272,7 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
     function killPayment(bytes32 _boxIdHash, bytes32 _paymentIdHash) internal {
         bytes32 boxIdHash3 = _hash(_hash(_boxIdHash));
         Payment storage payment = payments[_paymentIdHash];
-        require(payment.creator == address(0), "RealWorldPaymentsPlugin: payment already exists");
+        require(payment.creator != address(0), "RealWorldPaymentsPlugin: payment does not exist");
         require(
             boxIdHash3 == payment.boxIdHash3,
             "RealWorldPaymentsPlugin: payment is not related to the given box"
