@@ -29,7 +29,7 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         uint256[] memory _amounts = new uint256[](1);
         _ids[0] = _id;
         _amounts[0] = _value;
-        _paid(p, 0, _ids, _amounts, rIds, rAmounts);
+        _paid(p, 0, _ids, _amounts, rIds, rAmounts, signer);
         return 0xf23a6e61;
     }
 
@@ -48,7 +48,7 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         );
         address signer = _getBatchTokenPaymentSigningAddress(_ids, _values, p, rIds, rAmounts, sig);
         require(signer != address(0), "RealWorldPaymentsPlugin: batch token payment signature verification failed");
-        _paid(p, 0, _ids, _values, rIds, rAmounts);
+        _paid(p, 0, _ids, _values, rIds, rAmounts, signer);
         return 0xbc197c81;
     }
 
@@ -63,7 +63,10 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
             msg.value, _paymentIdHash, _rewardTokenIds, _rewardTokenAmounts, _signature
         );
         require(signer != address(0), "RealWorldPaymentsPlugin: native payment signature verification failed");
-        _paid(_paymentIdHash, msg.value, new uint256[](0), new uint256[](0), _rewardTokenIds, _rewardTokenAmounts);
+        _paid(
+            _paymentIdHash, msg.value, new uint256[](0), new uint256[](0),
+            _rewardTokenIds, _rewardTokenAmounts, signer
+        );
     }
 
     /**
@@ -82,10 +85,10 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
     /**
      * This method must be overridden to tell what happens
      * when a payment is paid. The payment is specified as
-     * a hash instead.
+     * a hash instead, and the signer is also given.
      */
     function _paid(
         bytes32 _paymentIdHash, uint256 _nativeAmount, uint256[] memory _ids, uint256[] memory _amounts,
-        uint256[] memory _rewardIds, uint256[] memory _rewardAmounts
+        uint256[] memory _rewardIds, uint256[] memory _rewardAmounts, address _signer
     ) internal virtual;
 }
