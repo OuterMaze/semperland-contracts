@@ -13,7 +13,7 @@ abstract contract SignatureVerifier is ISignatureVerifier {
     /**
      * A signature verifier contract satisfies the ISignatureVerifier and IERC165.
      */
-    function supportsInterface(bytes4 _interfaceId) public view returns (bool) {
+    function supportsInterface(bytes4 _interfaceId) public virtual view returns (bool) {
         return _interfaceId == type(IERC165).interfaceId || _interfaceId == type(ISignatureVerifier).interfaceId;
     }
 
