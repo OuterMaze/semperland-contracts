@@ -13,14 +13,15 @@ import "./RealWorldPaymentsSignaturesMixin.sol";
 abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsSignaturesMixin, IERC1155Receiver {
     /**
      * Receives payments consisting of one single ERC1155
-     * (non-native) token.
+     * (non-native) token. The payment id is specified as
+     * its hash instead.
      */
     function onERC1155Received(
         address _operator, address _from, uint256 _id, uint256 _value, bytes calldata _data
     ) external returns (bytes4) {
         _requireEconomy(_msgSender());
-        (uint256 p, uint256[] memory rIds, uint256[] memory rAmounts, bytes memory sig) = abi.decode(
-            _data, (uint256, uint256[], uint256[], bytes)
+        (bytes32 p, uint256[] memory rIds, uint256[] memory rAmounts, bytes memory sig) = abi.decode(
+            _data, (bytes32, uint256[], uint256[], bytes)
         );
         address signer = _getTokenPaymentSigningAddress(_id, _value, p, rIds, rAmounts, sig);
         require(signer != address(0), "RealWorldPaymentsPlugin: token payment signature verification failed");
@@ -34,15 +35,16 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
 
     /**
      * Receives payments consisting of multiple ERC1155
-     * (non-native) tokens.
+     * (non-native) tokens. The payment id is specified
+     * as its hash instead.
      */
     function onERC1155BatchReceived(
         address _operator, address _from, uint256[] calldata _ids, uint256[] calldata _values,
         bytes calldata _data
     ) external returns (bytes4) {
         _requireEconomy(_msgSender());
-        (uint256 p, uint256[] memory rIds, uint256[] memory rAmounts, bytes memory sig) = abi.decode(
-            _data, (uint256, uint256[], uint256[], bytes)
+        (bytes32 p, uint256[] memory rIds, uint256[] memory rAmounts, bytes memory sig) = abi.decode(
+            _data, (bytes32, uint256[], uint256[], bytes)
         );
         address signer = _getBatchTokenPaymentSigningAddress(_ids, _values, p, rIds, rAmounts, sig);
         require(signer != address(0), "RealWorldPaymentsPlugin: batch token payment signature verification failed");
@@ -54,14 +56,14 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
      * Receives payments consisting of native tokens.
      */
     function pay(
-        uint256 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
+        bytes32 _paymentIdHash, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
         bytes memory _signature
     ) external payable {
         address signer = _getNativePaymentSigningAddress(
-            msg.value, _paymentId, _rewardTokenIds, _rewardTokenAmounts, _signature
+            msg.value, _paymentIdHash, _rewardTokenIds, _rewardTokenAmounts, _signature
         );
         require(signer != address(0), "RealWorldPaymentsPlugin: native payment signature verification failed");
-        _paid(_paymentId, msg.value, new uint256[](0), new uint256[](0), _rewardTokenIds, _rewardTokenAmounts);
+        _paid(_paymentIdHash, msg.value, new uint256[](0), new uint256[](0), _rewardTokenIds, _rewardTokenAmounts);
     }
 
     /**
@@ -79,10 +81,11 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
 
     /**
      * This method must be overridden to tell what happens
-     * when a payment is paid.
+     * when a payment is paid. The payment is specified as
+     * a hash instead.
      */
     function _paid(
-        uint256 _paymentId, uint256 _nativeAmount, uint256[] memory _ids, uint256[] memory _amounts,
+        bytes32 _paymentIdHash, uint256 _nativeAmount, uint256[] memory _ids, uint256[] memory _amounts,
         uint256[] memory _rewardIds, uint256[] memory _rewardAmounts
     ) internal virtual;
 }

@@ -27,7 +27,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
 
     /**
      * Gets the signer of a real-world payment order, given its signature and:
-     * - The payment id.
+     * - The payment id hash.
      * - The ids of the tokens given as reward.
      * - The amounts of the tokens given as reward. Same length of the ids.
      * - The id of the token expected as payment.
@@ -42,7 +42,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
         // This comes from the onERC1155Received token args.
         uint256 _tokenId, uint256 _tokenAmount,
         // This comes from the onERC1155Received data arg (after abi.decode).
-        uint256 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
+        bytes32 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
         bytes memory _signature
     ) internal returns (address) {
         // The hash involves a single token only (not an array) expected from the user.
@@ -54,7 +54,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
 
     /**
      * Gets the signer of a real-world payment order, given its signature and:
-     * - The payment id.
+     * - The payment id hash.
      * - The ids of the tokens given as reward.
      * - The amounts of the tokens given as reward. Same length of the ids.
      * - The ids of the tokens expected as payment.
@@ -69,7 +69,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
         // This comes from the onERC1155BatchReceived token args.
         uint256[] calldata _tokenIds, uint256[] calldata _tokenAmounts,
         // This comes from the onERC1155Received data arg (after abi.decode).
-        uint256 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
+        bytes32 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
         bytes memory _signature
     ) internal returns (address) {
         // The hash involves multiple tokens (an array) expected from the user.
@@ -81,7 +81,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
 
     /**
      * Gets the signer of a real-world payment order, given its signature and:
-     * - The payment id.
+     * - The payment id hash.
      * - The ids of the tokens given as reward.
      * - The amounts of the tokens given as reward. Same length of the ids.
      * - The amount of native tokens expected as payment.
@@ -95,7 +95,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
         // This comes from the pay() amount argument.
         uint256 _amount,
         // This comes from the pay() extra arguments (directly).
-        uint256 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
+        bytes32 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
         bytes memory _signature
     ) internal returns (address) {
         // The hash involves only the native token expected from the user.
