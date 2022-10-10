@@ -41,10 +41,39 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
     mapping(bytes32 => BoxFunds) private boxes;
 
     /**
+     * An existing, pending, payment.
+     */
+    struct Payment {
+        /**
+         * The payment maker this payment was created by.
+         */
+        address creator;
+
+        /**
+         * The box (3rd hash) this payment is created against.
+         */
+        bytes32 boxIdHash3;
+    }
+
+    /**
+     * Tracks the existing payments, but by the 1st hash instead of
+     * the box payment ids directly, and the 3rd hash instead of the
+     * box ids directly.
+     */
+    mapping(bytes32 => Payment) private payments;
+
+    /**
      * Account permissions associated to this box
      * (General management is not included here).
      */
     struct BoxPermissions {
+        /**
+         * Users that are allowed to create payment channels
+         * for this box. Accounts who make payments also are
+         * the valid signers for them.
+         */
+        mapping(bytes32 => bool) paymentMakeAllowed;
+
         /**
          * Users that are allowed to withdraw from this box.
          */
@@ -70,10 +99,10 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
      * (as secret as possible).
      */
     function _makeBox(bytes32 _boxIdHash2) internal {
-        bytes32 _boxIdHash3 = _hash(_boxIdHash2);
-        require(!boxes[_boxIdHash3].exists, "RealWorldPaymentsPlugin: Colliding or already existing box");
+        bytes32 boxIdHash3 = _hash(_boxIdHash2);
+        require(!boxes[boxIdHash3].exists, "RealWorldPaymentsPlugin: Colliding or already existing box");
         // Marks true to create a new box.
-        boxes[_boxIdHash3].exists = true;
+        boxes[boxIdHash3].exists = true;
     }
 
     /**
@@ -89,7 +118,7 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
         bytes32 _boxIdHash3, uint256 _native, uint256[] memory _ids, uint256[] memory _values
     ) internal {
         BoxFunds storage box = boxes[_boxIdHash3];
-        require(!box.exists, "RealWorldPaymentsPlugin: The box does not exist");
+        require(box.exists, "RealWorldPaymentsPlugin: The box does not exist");
         box.native += _native;
         uint256 length = _ids.length;
         for(uint256 index = 0; index < length; index++) {
@@ -133,7 +162,7 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
      * withdraw funds from a given box. The box id is given
      * as a hash instead of directly.
      */
-    function _canAllowWithdraw(address _sender, bytes32 _boxIdHash) internal virtual view returns (bool);
+    function _canAllowAccounts(address _sender, bytes32 _boxIdHash) internal virtual view returns (bool);
 
     /**
      * Returns the contract being used as ERC1155 source of truth.
@@ -145,28 +174,43 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
      * a given account. The account is specified by its hash.
      */
     function setWithdrawAllowance(bytes32 _boxIdHash, bytes32 _accountHash, bool _allow) external {
-        bytes32 _boxIdHash3 = _hash(_hash(_boxIdHash));
-        BoxFunds storage box = boxes[_boxIdHash3];
+        bytes32 boxIdHash3 = _hash(_hash(_boxIdHash));
+        BoxFunds storage box = boxes[boxIdHash3];
         require(!box.exists, "RealWorldPaymentsPlugin: The box does not exist");
         require(
-            _canAllowWithdraw(_msgSender(), _boxIdHash),
+            _canAllowAccounts(_msgSender(), _boxIdHash),
             "RealWorldPaymentsPlugin: the sender is not allowed to set/clear withdrawal permission in the specified box"
         );
-        boxPermissions[_boxIdHash3].withdrawAllowed[_accountHash] = _allow;
+        boxPermissions[boxIdHash3].withdrawAllowed[_accountHash] = _allow;
     }
 
     /**
-     * Clears withdrawal permissions from a box for all the accounts.
+     * Sets or clears a permission to make payments for a box for
+     * a given account. The account is specified by its hash.
      */
-    function resetBoxPermissions(bytes32 _boxIdHash) external {
-        bytes32 _boxIdHash3 = _hash(_hash(_boxIdHash));
-        BoxFunds storage box = boxes[_boxIdHash3];
+    function setPaymentMakeAllowance(bytes32 _boxIdHash, bytes32 _accountHash, bool _allow) external {
+        bytes32 boxIdHash3 = _hash(_hash(_boxIdHash));
+        BoxFunds storage box = boxes[boxIdHash3];
         require(!box.exists, "RealWorldPaymentsPlugin: The box does not exist");
         require(
-            _canAllowWithdraw(_msgSender(), _boxIdHash),
+            _canAllowAccounts(_msgSender(), _boxIdHash),
+            "RealWorldPaymentsPlugin: the sender is not allowed to set/clear payment making permission in the specified box"
+        );
+        boxPermissions[boxIdHash3].paymentMakeAllowed[_accountHash] = _allow;
+    }
+
+    /**
+     * Clears withdrawal / payment making permissions from a box for all the accounts.
+     */
+    function resetBoxPermissions(bytes32 _boxIdHash) external {
+        bytes32 boxIdHash3 = _hash(_hash(_boxIdHash));
+        BoxFunds storage box = boxes[boxIdHash3];
+        require(!box.exists, "RealWorldPaymentsPlugin: The box does not exist");
+        require(
+            _canAllowAccounts(_msgSender(), _boxIdHash),
             "RealWorldPaymentsPlugin: the sender is not allowed to reset withdrawal permissions in the specified box"
         );
-        delete boxPermissions[_boxIdHash3];
+        delete boxPermissions[boxIdHash3];
     }
 
     /**
@@ -201,5 +245,43 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
             (bool success,) = sender.call{value: _native}("");
             require(success, "RealWorldPaymentsPlugin: error while withdrawing native tokens");
         }
+    }
+
+    /**
+     * Makes a payment, but using the payment id hash and the
+     * box id's 3rd hash.
+     */
+    function makePayment(bytes32 _paymentIdHash, bytes32 _boxIdHash3) external {
+        Payment storage payment = payments[_paymentIdHash];
+        require(payment.creator == address(0), "RealWorldPaymentsPlugin: payment already exists");
+        BoxFunds storage box = boxes[_boxIdHash3];
+        require(box.exists, "RealWorldPaymentsPlugin: The box does not exist");
+        BoxPermissions storage boxPerms = boxPermissions[_boxIdHash3];
+        address sender = _msgSender();
+        require(
+            boxPerms.paymentMakeAllowed[keccak256(abi.encode(sender))],
+            "RealWorldPaymentsPlugin: The sender is not allowed to make payments"
+        );
+        payment.creator = sender;
+        payment.boxIdHash3 = _boxIdHash3;
+    }
+
+    /**
+     * Kills a payment, also determined by the box id hash.
+     */
+    function killPayment(bytes32 _boxIdHash, bytes32 _paymentIdHash) internal {
+        bytes32 boxIdHash3 = _hash(_hash(_boxIdHash));
+        Payment storage payment = payments[_paymentIdHash];
+        require(payment.creator == address(0), "RealWorldPaymentsPlugin: payment already exists");
+        require(
+            boxIdHash3 == payment.boxIdHash3,
+            "RealWorldPaymentsPlugin: payment is not related to the given box"
+        );
+        address sender = _msgSender();
+        require(
+            payment.creator == sender || _canAllowAccounts(sender, _boxIdHash),
+            "RealWorldPaymentsPlugin: the sender is not allowed to kill this payment"
+        );
+        delete payments[_paymentIdHash];
     }
 }
