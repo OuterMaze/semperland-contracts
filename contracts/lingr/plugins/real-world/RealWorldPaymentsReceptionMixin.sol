@@ -12,6 +12,51 @@ import "./RealWorldPaymentsSignaturesMixin.sol";
  */
 abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsSignaturesMixin, IERC1155Receiver {
     /**
+     * This structure holds data of a payment notification
+     * (after having a valid signature check).
+     */
+    struct PaidData {
+        /**
+         * The hash of the payment id.
+         */
+        bytes32 paymentIdHash;
+
+        /**
+         * The amount of matic.
+         */
+        uint256 matic;
+
+        /**
+         * Ids of the ERC1155 tokens used.
+         */
+        uint256[] ids;
+
+        /**
+         * Amounts of the ERC1155 tokens used.
+         */
+        uint256[] values;
+
+        /**
+         * Ids of the ERC1155 reward tokens awarded.
+         */
+        uint256[] rewardIds;
+
+        /**
+         * Amounts of the ERC1155 reward tokens awarded.
+         */
+        uint256[] rewardValues;
+
+        /**
+         * The payer (who owns the tokens).
+         */
+        address payer;
+
+        /**
+         * The payment order signer.
+         */
+        address signer;
+    }
+    /**
      * Receives payments consisting of one single ERC1155
      * (non-native) token. The payment id is specified as
      * its hash instead.
@@ -29,7 +74,11 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         uint256[] memory _amounts = new uint256[](1);
         _ids[0] = _id;
         _amounts[0] = _value;
-        _paid(p, 0, _ids, _amounts, rIds, rAmounts, signer);
+        PaidData memory paidData = PaidData({
+            paymentIdHash: p, matic: 0, ids: _ids, values: _amounts,
+            rewardIds: rIds, rewardValues: rAmounts, payer: _from, signer: signer
+        });
+        _paid(paidData);
         return 0xf23a6e61;
     }
 
@@ -48,7 +97,11 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         );
         address signer = _getBatchTokenPaymentSigningAddress(_ids, _values, p, rIds, rAmounts, sig);
         require(signer != address(0), "RealWorldPaymentsPlugin: batch token payment signature verification failed");
-        _paid(p, 0, _ids, _values, rIds, rAmounts, signer);
+        PaidData memory paidData = PaidData({
+            paymentIdHash: p, matic: 0, ids: _ids, values: _values, rewardIds: rIds,
+            rewardValues: rAmounts, payer: _from, signer: signer
+        });
+        _paid(paidData);
         return 0xbc197c81;
     }
 
@@ -63,10 +116,11 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
             msg.value, _paymentIdHash, _rewardTokenIds, _rewardTokenAmounts, _signature
         );
         require(signer != address(0), "RealWorldPaymentsPlugin: native payment signature verification failed");
-        _paid(
-            _paymentIdHash, msg.value, new uint256[](0), new uint256[](0),
-            _rewardTokenIds, _rewardTokenAmounts, signer
-        );
+        PaidData memory paidData = PaidData({
+            paymentIdHash: _paymentIdHash, matic: msg.value, ids: new uint256[](0), values: new uint256[](0),
+            rewardIds: _rewardTokenIds, rewardValues: _rewardTokenAmounts, payer: _msgSender(), signer: signer
+        });
+        _paid(paidData);
     }
 
     /**
@@ -87,8 +141,5 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
      * when a payment is paid. The payment is specified as
      * a hash instead, and the signer is also given.
      */
-    function _paid(
-        bytes32 _paymentIdHash, uint256 _nativeAmount, uint256[] memory _ids, uint256[] memory _amounts,
-        uint256[] memory _rewardIds, uint256[] memory _rewardAmounts, address _signer
-    ) internal virtual;
+    function _paid(PaidData memory paidData) internal virtual;
 }

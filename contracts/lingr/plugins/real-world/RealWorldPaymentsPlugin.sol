@@ -84,21 +84,21 @@ contract RealWorldPaymentsPlugin is
     /**
      * Attends an incoming payment (it may be either native or token, but not both).
      */
-    function _paid(
-        bytes32 _paymentIdHash, uint256 _nativeAmount, uint256[] memory _ids, uint256[] memory _amounts,
-        uint256[] memory _rewardIds, uint256[] memory _rewardAmounts, address _signer
-    ) internal override {
-        Payment storage payment = payments[_paymentIdHash];
+    function _paid(PaidData memory paidData) internal override {
+        Payment storage payment = payments[paidData.paymentIdHash];
         require(payment.creator != address(0), "RealWorldPaymentsPlugin: payment does not exist");
         BoxFunds storage box = boxes[payment.boxIdHash3];
         require(box.exists, "RealWorldPaymentsPlugin: the box associated to this payment does not exist anymore");
         BoxPermissions storage perms = boxPermissions[payment.boxIdHash3];
         require(
-            perms.paymentMakeAllowed[_signer],
+            perms.paymentMakeAllowed[keccak256(abi.encode(paidData.signer))],
             "RealWorldPaymentsPlugin: the payment signer is not allowed anymore to operate in the associated box"
         );
+        // TODO: find the owner of the box `box` / (payment.boxIdHash3). It will be a market.
+        // TODO: find the owner of that market. See whether it is a committed brand, or not.
         // TODO: _fund the box: (100%/0%) for committed box owners, and (97%/3%) for non-committed box owners.
+        // TODO: take a decision on what happens to that 3% if it is the case.
         // TODO: pay rewards from the box' s funds according to the specification.
-        delete payments[_paymentIdHash];
+        delete payments[paidData.paymentIdHash];
     }
 }
