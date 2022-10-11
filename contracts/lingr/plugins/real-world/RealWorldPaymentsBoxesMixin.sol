@@ -38,7 +38,7 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
      * Tracks the existing boxes, but by the 3rd hash instead of the
      * box id directly.
      */
-    mapping(bytes32 => BoxFunds) private boxes;
+    mapping(bytes32 => BoxFunds) internal boxes;
 
     /**
      * An existing, pending, payment.
@@ -60,7 +60,7 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
      * the box payment ids directly, and the 3rd hash instead of the
      * box ids directly.
      */
-    mapping(bytes32 => Payment) private payments;
+    mapping(bytes32 => Payment) internal payments;
 
     /**
      * Account permissions associated to this box
@@ -84,7 +84,7 @@ abstract contract RealWorldPaymentsBoxesMixin is Context {
      * Tracks the withdraw allowed accounts for a given box. The
      * accounts are specified by their hash.
      */
-    mapping(bytes32 => BoxPermissions) private boxPermissions;
+    mapping(bytes32 => BoxPermissions) internal boxPermissions;
 
     /**
      * Computes a hash of a previous bytes32 value (hash o id).
