@@ -39,15 +39,6 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
         bytes32 manager;
 
         /**
-         * The signers allowed by this market. Typically, each signer
-         * is a cashier operator. Only the hash of the cashier is kept
-         * here, in order to give the appearance of decoupling the
-         * operations to set / remove the signer of the operation to
-         * signature-verify and retrieve that address.
-         */
-        mapping(bytes32 => bool) signers;
-
-        /**
          * A description for the market.
          */
         string title;
@@ -245,19 +236,12 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
     }
 
     /**
-     * Sets or unsets a signer for this market. Only the market
-     * owner (or one of its ERC-1155 approved operators) or the
-     * market manager can do this. Both the market and address
-     * are specified as hashes.
+     * Tells whether a market has an owner being a committed brand.
+     * The market is given by its hash instead of its id.
      */
-    function setMarketSigner(bytes32 _marketIdHash, bytes32 _signerAddressHash, bool _set) external {
+    function isMarketOwnedByCommittedBrand(bytes32 _marketIdHash) external view returns (bool) {
         Market storage market = markets[_marketIdHash];
-        require(
-            _isOwnerOrApproved(market.owner, _msgSender()) ||
-                market.manager == keccak256(abi.encodePacked(_msgSender())),
-            "RealWorldMarketsPlugin: only the market owner, an ERC-1155 approved operator, or the market manager can invoke this operation"
-        );
-        market.signers[_signerAddressHash] = _set;
+        return IBrandRegistry(IMetaverse(metaverse).brandRegistry()).isCommitted(market.owner);
     }
 
     /**
