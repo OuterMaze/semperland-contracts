@@ -236,6 +236,13 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
     }
 
     /**
+     * Tells whether a market allows an address as its manager.
+     */
+    function isMarketManager(bytes32 _marketIdHash, bytes32 _managerAddressHash) external view returns (bool) {
+        return markets[_marketIdHash].manager == _managerAddressHash;
+    }
+
+    /**
      * Tells whether a market has an owner being a committed brand.
      * The market is given by its hash instead of its id.
      */
