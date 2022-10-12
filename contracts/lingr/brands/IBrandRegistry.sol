@@ -37,4 +37,10 @@ interface IBrandRegistry is IERC165 {
      * or it is allowed by the brand's ownership.
      */
     function isBrandAllowed(address _brandId, bytes32 _permission, address _sender) external view returns (bool);
+
+    /**
+     * Tells whether the address is a committed brand, or not
+     * (this may also be caused by the address not being a brand).
+     */
+    function isCommitted(address _brandId) external view returns (bool);
 }

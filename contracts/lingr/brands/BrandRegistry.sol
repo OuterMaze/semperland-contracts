@@ -509,6 +509,14 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
     }
 
     /**
+     * Tells whether the address is a committed brand, or not
+     * (this may also be caused by the address not being a brand).
+     */
+    function isCommitted(address _brandId) external view returns (bool) {
+        return brands[_brandId].committed;
+    }
+
+    /**
      * This event is triggered when a brand permission is set or revoked
      * for a given user in a given brand.
      */
