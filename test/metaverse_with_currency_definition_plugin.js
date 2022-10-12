@@ -292,7 +292,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
         "http://example.org/images/brand1-1-icon64x64.png", "#001122", { from: accounts[1] }
       ),
-      revertReason("CurrencyPlugin: brand currency definition is currently disabled (no price is set)")
+      revertReason("CurrencyDefinitionPlugin: brand currency definition is currently disabled (no price is set)")
     );
   });
 
@@ -440,7 +440,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         "http://example.org/images/brand1-1-icon64x64.png", "#001122",
         { from: accounts[1], value: new BN("11000000000000000000"), gas: new BN("5000000") }
       ),
-      revertReason("CurrencyPlugin: brand currency definition requires an exact payment of 10000000000000000000 " +
+      revertReason("CurrencyDefinitionPlugin: brand currency definition requires an exact payment of 10000000000000000000 " +
                    "but 11000000000000000000 was given")
     );
   });
