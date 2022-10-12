@@ -69,7 +69,7 @@ contract RealWorldPaymentsPlugin is
     /**
      * This plug-in has no token metadata (since it has no token type definition).
      */
-    function _tokenMetadata(uint256 _tokenId) internal view override returns (bytes memory) { return ""; }
+    function _tokenMetadata(uint256) internal view override returns (bytes memory) { return ""; }
 
     /**
      * The title of the current plug-in is "Real-World Payments".
@@ -107,9 +107,8 @@ contract RealWorldPaymentsPlugin is
      */
     function _canManageMarket(address _sender, bytes32 _marketIdHash) private view returns (bool) {
         return RealWorldMarketsManagementPlugin(marketsManagementPlugin).isMarketManager(
-            _marketIdHash, keccak256(abi.encodePacked(_managerAddressHash))
+            _marketIdHash, keccak256(abi.encodePacked(_sender))
         );
-        return false;
     }
 
     /**
@@ -130,10 +129,11 @@ contract RealWorldPaymentsPlugin is
     function makeBox(bytes32 _boxIdHash2, bytes32 _marketIdHash) external {
         bytes32 _boxIdHash3 = _hash(_boxIdHash2);
         require(
-            _canManageMarket(boxMarkets[_boxIdHash3]),
+            _canManageMarket(_msgSender(), _marketIdHash),
             "RealWorldPaymentsPlugin: the sender is not allowed to create a box for this market"
         );
         _makeBox(_boxIdHash3);
+        boxMarkets[_boxIdHash3] = _marketIdHash;
     }
 
     /**

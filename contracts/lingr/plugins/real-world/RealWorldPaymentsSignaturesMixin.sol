@@ -21,7 +21,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
     /**
      * Gets the signer of a real-world payment order hash, given its signature.
      */
-    function _getSigningAddress(bytes32 _computedHash, bytes memory _signature) internal returns (address) {
+    function _getSigningAddress(bytes32 _computedHash, bytes memory _signature) internal view returns (address) {
         return verifySignature(_computedHash, _signature);
     }
 
@@ -44,7 +44,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
         // This comes from the onERC1155Received data arg (after abi.decode).
         bytes32 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
         bytes memory _signature
-    ) internal returns (address) {
+    ) internal view returns (address) {
         // The hash involves a single token only (not an array) expected from the user.
         bytes32 messageHash = keccak256(abi.encodePacked(
             _paymentId, _tokenId, _tokenAmount, _rewardTokenIds, _rewardTokenAmounts
@@ -71,7 +71,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
         // This comes from the onERC1155Received data arg (after abi.decode).
         bytes32 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
         bytes memory _signature
-    ) internal returns (address) {
+    ) internal view returns (address) {
         // The hash involves multiple tokens (an array) expected from the user.
         bytes32 messageHash = keccak256(abi.encodePacked(
             _paymentId, _tokenIds, _tokenAmounts, _rewardTokenIds, _rewardTokenAmounts
@@ -97,7 +97,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
         // This comes from the pay() extra arguments (directly).
         bytes32 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
         bytes memory _signature
-    ) internal returns (address) {
+    ) internal view returns (address) {
         // The hash involves only the native token expected from the user.
         bytes32 messageHash = keccak256(abi.encodePacked(
             _paymentId, _amount, _rewardTokenIds, _rewardTokenAmounts

@@ -62,7 +62,7 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
      * its hash instead.
      */
     function onERC1155Received(
-        address _operator, address _from, uint256 _id, uint256 _value, bytes calldata _data
+        address, address _from, uint256 _id, uint256 _value, bytes calldata _data
     ) external returns (bytes4) {
         _requireEconomy(_msgSender());
         (bytes32 p, uint256[] memory rIds, uint256[] memory rAmounts, bytes memory sig) = abi.decode(
@@ -88,7 +88,7 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
      * as its hash instead.
      */
     function onERC1155BatchReceived(
-        address _operator, address _from, uint256[] calldata _ids, uint256[] calldata _values,
+        address, address _from, uint256[] calldata _ids, uint256[] calldata _values,
         bytes calldata _data
     ) external returns (bytes4) {
         _requireEconomy(_msgSender());
