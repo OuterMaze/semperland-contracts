@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "../../IMetaverse.sol";
 import "../../economy/IEconomy.sol";
 import "../base/MetaversePlugin.sol";
+import "./RealWorldMarketsManagementPlugin.sol";
 import "./RealWorldPaymentsBoxesMixin.sol";
 import "./RealWorldPaymentsReceptionMixin.sol";
 
@@ -33,6 +34,11 @@ contract RealWorldPaymentsPlugin is
     bytes32 private feeBoxIdHash3;
 
     /**
+     * A reference to the markets management plug-in.
+     */
+    address marketsManagementPlugin;
+
+    /**
      * Markets (1st hash) by their boxes (3rd hash).
      */
     mapping(bytes32 => bytes32) boxMarkets;
@@ -47,11 +53,12 @@ contract RealWorldPaymentsPlugin is
      */
     constructor(
         address _metaverse, uint256 _paymentFee, address[] memory _verifiers,
-        bytes32 _feeBoxIdHash2
+        bytes32 _feeBoxIdHash2, address _marketsManagementPlugin
     ) MetaversePlugin(_metaverse) RealWorldPaymentsSignaturesMixin(_verifiers) {
         feeBoxIdHash3 = _hash(_feeBoxIdHash2);
         _makeBox(feeBoxIdHash3);
         paymentFee = _paymentFee;
+        marketsManagementPlugin = _marketsManagementPlugin;
     }
 
     /**
@@ -99,7 +106,9 @@ contract RealWorldPaymentsPlugin is
      * Tells whether a sender is manager of the market by its hash.
      */
     function _canManageMarket(address _sender, bytes32 _marketIdHash) private view returns (bool) {
-        // TODO ask the markets plug-in whether _sender is a manager of it.
+        return RealWorldMarketsManagementPlugin(marketsManagementPlugin).isMarketManager(
+            _marketIdHash, keccak256(abi.encodePacked(_managerAddressHash))
+        );
         return false;
     }
 
@@ -108,11 +117,9 @@ contract RealWorldPaymentsPlugin is
      * as a socially committed one.
      */
     function _boxHasCommittedOwner(bytes32 _boxIdHash3) private view returns (bool) {
-        // TODO Implement:
-        // TODO - Get Market.
-        // TODO - Get Owner.
-        // TODO - If it is a brand, get their commitment.
-        return false;
+        return RealWorldMarketsManagementPlugin(marketsManagementPlugin).isMarketOwnedByCommittedBrand(
+            boxMarkets[_boxIdHash3]
+        );
     }
 
     /**
