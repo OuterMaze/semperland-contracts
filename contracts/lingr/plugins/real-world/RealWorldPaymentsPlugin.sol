@@ -22,7 +22,15 @@ contract RealWorldPaymentsPlugin is
      * as units per 10000 and will not, typically, exceed
      * 300 (3%) in this global setting.
      */
-    uint256 paymentFee;
+    uint256 public paymentFee;
+
+    /**
+     * The 3rd hash of the box that will be used to receive
+     * the fees that are earned on payments. The original
+     * value should be kept in secret, although it is not
+     * needed at all.
+     */
+    bytes32 private feeBoxIdHash3;
 
     /**
      * Instantiating this plug-in requires the metaverse,
@@ -33,9 +41,11 @@ contract RealWorldPaymentsPlugin is
      * instead of per market).
      */
     constructor(
-        address _metaverse, uint256 _paymentFee, address[] memory _verifiers
+        address _metaverse, uint256 _paymentFee, address[] memory _verifiers,
+        bytes32 _feeBoxIdHash2
     ) MetaversePlugin(_metaverse) RealWorldPaymentsSignaturesMixin(_verifiers) {
-        // marketImage = _marketImage;
+        feeBoxIdHash3 = _hash(_feeBoxIdHash2);
+        _makeBox(feeBoxIdHash3);
         paymentFee = _paymentFee;
     }
 
@@ -82,23 +92,49 @@ contract RealWorldPaymentsPlugin is
     }
 
     /**
+     * Checks whether a given box belongs to an owner that is a brand regarded
+     * as a socially committed one.
+     */
+    function _boxHasCommittedOwner(bytes32 _boxIdHash3) private view returns (bool) {
+        // TODO implement.
+        return false;
+    }
+
+    /**
      * Attends an incoming payment (it may be either native or token, but not both).
      */
     function _paid(PaidData memory paidData) internal override {
         Payment storage payment = payments[paidData.paymentIdHash];
         require(payment.creator != address(0), "RealWorldPaymentsPlugin: payment does not exist");
-        BoxFunds storage box = boxes[payment.boxIdHash3];
+        bytes32 boxIdHash3 = payment.boxIdHash3;
+        BoxFunds storage box = boxes[boxIdHash3];
         require(box.exists, "RealWorldPaymentsPlugin: the box associated to this payment does not exist anymore");
-        BoxPermissions storage perms = boxPermissions[payment.boxIdHash3];
+        BoxPermissions storage perms = boxPermissions[boxIdHash3];
         require(
             perms.paymentMakeAllowed[keccak256(abi.encode(paidData.signer))],
             "RealWorldPaymentsPlugin: the payment signer is not allowed anymore to operate in the associated box"
         );
-        // TODO: find the owner of the box `box` / (payment.boxIdHash3). It will be a market.
-        // TODO: find the owner of that market. See whether it is a committed brand, or not.
-        // TODO: _fund the box: (100%/0%) for committed box owners, and (97%/3%) for non-committed box owners.
-        // TODO: take a decision on what happens to that 3% if it is the case.
-        // TODO: pay rewards from the box' s funds according to the specification.
+        if (_boxHasCommittedOwner(boxIdHash3)) {
+            // Move 100% to the owner's box.
+            _fund(boxIdHash3, paidData.matic, paidData.ids, paidData.values);
+        } else {
+            // Move (1 - fee) to the owner's box.
+            // Move (fee)) to our box.
+            uint256 length = paidData.values.length;
+            uint256[] memory feeValues = new uint256[](length);
+            uint256[] memory remainingValues = new uint256[](length);
+            for(uint256 index = 0; index < length; index++) {
+                feeValues[index] = paidData.values[index] * paymentFee / 1000;
+                remainingValues[index] = paidData.values[index] - feeValues[index];
+            }
+            uint256 feeMatic = paidData.matic * paymentFee / 1000;
+            uint256 remainingMatic = paidData.matic - feeMatic;
+            _fund(feeBoxIdHash3, feeMatic, paidData.ids, feeValues);
+            _fund(boxIdHash3, remainingMatic, paidData.ids, remainingValues);
+        }
+        IEconomy(_economy()).safeBatchTransferFrom(
+            address(this), paidData.payer, paidData.rewardIds, paidData.rewardValues, ""
+        );
         delete payments[paidData.paymentIdHash];
     }
 }
