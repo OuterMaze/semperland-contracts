@@ -33,6 +33,11 @@ contract RealWorldPaymentsPlugin is
     bytes32 private feeBoxIdHash3;
 
     /**
+     * Markets (1st hash) by their boxes (3rd hash).
+     */
+    mapping(bytes32 => bytes32) boxMarkets;
+
+    /**
      * Instantiating this plug-in requires the metaverse,
      * a set of allowed payment order signers and a global
      * fee (which will nevertheless be overridable by a
@@ -87,7 +92,14 @@ contract RealWorldPaymentsPlugin is
      * add / remove signers for a given box.
      */
     function _canAllowAccounts(address _sender, bytes32 _boxIdHash) internal virtual override view returns (bool) {
-        // TODO implement.
+        return _canManageMarket(_sender, boxMarkets[_hash(_hash(_boxIdHash))]);
+    }
+
+    /**
+     * Tells whether a sender is manager of the market by its hash.
+     */
+    function _canManageMarket(address _sender, bytes32 _marketIdHash) private view returns (bool) {
+        // TODO ask the markets plug-in whether _sender is a manager of it.
         return false;
     }
 
@@ -96,8 +108,25 @@ contract RealWorldPaymentsPlugin is
      * as a socially committed one.
      */
     function _boxHasCommittedOwner(bytes32 _boxIdHash3) private view returns (bool) {
-        // TODO implement.
+        // TODO Implement:
+        // TODO - Get Market.
+        // TODO - Get Owner.
+        // TODO - If it is a brand, get their commitment.
         return false;
+    }
+
+    /**
+     * Creates a box for a market (Given the 2nd hash of the box).
+     * This is only allowed when the sender is allowed to manage
+     * the said market (also fails if the market does not exist).
+     */
+    function makeBox(bytes32 _boxIdHash2, bytes32 _marketIdHash) external {
+        bytes32 _boxIdHash3 = _hash(_boxIdHash2);
+        require(
+            _canManageMarket(boxMarkets[_boxIdHash3]),
+            "RealWorldPaymentsPlugin: the sender is not allowed to create a box for this market"
+        );
+        _makeBox(_boxIdHash3);
     }
 
     /**
