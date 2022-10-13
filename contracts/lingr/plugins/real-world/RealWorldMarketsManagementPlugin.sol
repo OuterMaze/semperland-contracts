@@ -174,7 +174,7 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
             if (_newOwner != address(0)) {
                 Market storage market = markets[keccak256(abi.encodePacked(_nftId))];
                 require(
-                    canGiveMarketsTo(market.owner, _newOwner),
+                    canManageMarketsFor(market.owner, _newOwner),
                     "RealWorldMarketsPlugin: the market owner is not allowed to transfer it to the new owner"
                 );
                 market.owner = _newOwner;
@@ -191,7 +191,7 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
      * user when the target is the brand they're allowed into
      * (this involves a special permission).
      */
-    function canGiveMarketsTo(address _from, address _to) public view returns (bool) {
+    function canManageMarketsFor(address _from, address _to) public view returns (bool) {
         if (_from == _to) return true;
 
         IMetaverse _metaverse = IMetaverse(metaverse);
@@ -209,16 +209,22 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
     }
 
     /**
+     * An event for when the market data is updated.
+     */
+    event MarketUpdated(uint256 indexed marketId);
+
+    /**
      * Sets the title for one market. Only the market owner
      * (or one of its ERC-1155 approved operators) can do this.
      */
     function setMarketTitle(uint256 _marketId, string memory _title) external {
         Market storage market = markets[keccak256(abi.encodePacked(_marketId))];
         require(
-            _isOwnerOrApproved(market.owner, _msgSender()),
-            "RealWorldMarketsPlugin: only the market owner or an ERC-1155 approved operator can invoke this operation"
+            canManageMarketsFor(_msgSender(), market.owner),
+            "RealWorldMarketsPlugin: the sender is not allowed to change the market's title"
         );
         market.title = _title;
+        emit MarketUpdated(_marketId);
     }
 
     /**
@@ -290,7 +296,7 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
      */
     function mintMarketFor(address _owner, string memory _title) external {
         require(
-            canGiveMarketsTo(_msgSender(), _owner),
+            canManageMarketsFor(_msgSender(), _owner),
             "RealWorldMarketsPlugin: the sender is not allowed to create a market for the new owner"
         );
         _mintMarket(_owner, _title);
