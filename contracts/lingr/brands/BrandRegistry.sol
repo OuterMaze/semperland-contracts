@@ -451,7 +451,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
             '{"name":"', brand.name, '","description":"', brand.description, '","image":"', brand.image,
             '","properties":{"challengeUrl":"',brand.challengeUrl,'","icon16x16":"', brand.icon16x16,
             '","icon32x32":"', brand.icon32x32, '","icon64x64":"', brand.icon64x64, '","committed":',
-            brand.committed ? 'true' : 'false','}}'
+            brand.committed ? 'true' : 'false',',"type":"brand"}}'
         ))));
     }
 

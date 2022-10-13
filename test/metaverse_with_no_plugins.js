@@ -282,7 +282,8 @@ contract("Metaverse", function (accounts) {
         "icon16x16":"http://example.com/ico16x16.png",
         "icon32x32":"http://example.com/ico32x32.png",
         "icon64x64":"http://example.com/ico64x64.png",
-        "committed":false
+        "committed":false,
+        "type":"brand"
       }
     });
   })
@@ -322,7 +323,8 @@ contract("Metaverse", function (accounts) {
         "icon16x16":"http://example.com/ico16x16.png",
         "icon32x32":"http://example.com/ico32x32.png",
         "icon64x64":"http://example.com/ico64x64.png",
-        "committed":false
+        "committed":false,
+        "type":"brand"
       }
     });
   });
@@ -347,7 +349,8 @@ contract("Metaverse", function (accounts) {
         "icon16x16":"http://example.com/ico16x16.png",
         "icon32x32":"http://example.com/ico32x32.png",
         "icon64x64":"http://example.com/ico64x64.png",
-        "committed":false
+        "committed":false,
+        "type":"brand"
       }
     });
   });
@@ -372,7 +375,8 @@ contract("Metaverse", function (accounts) {
         "icon16x16":"http://example.com/ico16x16-bazinga.png",
         "icon32x32":"http://example.com/ico32x32.png",
         "icon64x64":"http://example.com/ico64x64.png",
-        "committed":false
+        "committed":false,
+        "type":"brand"
       }
     });
   });
@@ -397,7 +401,8 @@ contract("Metaverse", function (accounts) {
         "icon16x16":"http://example.com/ico16x16-bazinga.png",
         "icon32x32":"http://example.com/ico32x32-bazinga.png",
         "icon64x64":"http://example.com/ico64x64.png",
-        "committed":false
+        "committed":false,
+        "type":"brand"
       }
     });
   });
@@ -422,7 +427,8 @@ contract("Metaverse", function (accounts) {
         "icon16x16":"http://example.com/ico16x16-bazinga.png",
         "icon32x32":"http://example.com/ico32x32-bazinga.png",
         "icon64x64":"http://example.com/ico64x64-bazinga.png",
-        "committed":false
+        "committed":false,
+        "type":"brand"
       }
     });
   });
@@ -510,7 +516,8 @@ contract("Metaverse", function (accounts) {
         "icon16x16":"http://example.com/ico16x16-bazinga.png",
         "icon32x32":"http://example.com/ico32x32-bazinga.png",
         "icon64x64":"http://example.com/ico64x64-bazinga.png",
-        "committed":true
+        "committed":true,
+        "type":"brand"
       }
     });
   });
@@ -530,7 +537,8 @@ contract("Metaverse", function (accounts) {
         "icon16x16":"http://example.com/ico16x16-bazinga.png",
         "icon32x32":"http://example.com/ico32x32-bazinga.png",
         "icon64x64":"http://example.com/ico64x64-bazinga.png",
-        "committed":false
+        "committed":false,
+        "type":"brand"
       }
     });
   });
@@ -577,7 +585,8 @@ contract("Metaverse", function (accounts) {
         "icon16x16":"http://example.com/ico16x16-bazinga.png",
         "icon32x32":"http://example.com/ico32x32-bazinga.png",
         "icon64x64":"http://example.com/ico64x64-bazinga.png",
-        "committed":true
+        "committed":true,
+        "type":"brand"
       }
     });
   });
