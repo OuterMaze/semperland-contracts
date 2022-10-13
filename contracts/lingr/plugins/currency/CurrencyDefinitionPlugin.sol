@@ -229,7 +229,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
                 '{"name":"',currency.name,'","description":"', currency.description,
                 '","image":"', currency.image, '","decimals":18,"properties":{"icon16x16":"',
                 currency.icon16x16, '","icon32x32":"', currency.icon32x32, '","icon64x64":"',
-                currency.icon64x64, '","color":"', currency.color, '"}}'
+                currency.icon64x64, '","color":"', currency.color, '","type":"currency"}}'
             );
         }
     }
@@ -370,7 +370,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         string memory _image, string memory _icon16x16, string memory _icon32x32,
         string memory _icon64x64, string memory _color
     ) public payable onlyWhenInitialized onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
-      hasNativeTokenPrice("CurrencyPlugin: brand currency definition", currencyDefinitionCost, 1) {
+      hasNativeTokenPrice("CurrencyDefinitionPlugin: brand currency definition", currencyDefinitionCost, 1) {
         CurrencyMetadata memory metadata = CurrencyMetadata({
             registered: true, name: _name, description: _description, color: _color,
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
