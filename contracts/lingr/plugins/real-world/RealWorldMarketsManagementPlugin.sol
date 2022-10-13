@@ -133,7 +133,7 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
         if (collidingMarkets[_marketId]) {
             return abi.encodePacked(
                 '{"name":"', "~Invalid Market~", '","description":"","image":"', collidingMarketImage,
-                '","decimals":0,"properties":{}}'
+                '","decimals":0,"properties":{"type": "market"}}'
             );
         }
 
@@ -143,7 +143,7 @@ contract RealWorldMarketsManagementPlugin is NFTDefiningPlugin, NFTMintingPlugin
         } else {
             return abi.encodePacked(
                 '{"name":"',market.title, '","description":"","image":"', marketImage,
-                '","decimals":0,"properties":{}}'
+                '","decimals":0,"properties":{"type": "market"}}'
             );
         }
     }
