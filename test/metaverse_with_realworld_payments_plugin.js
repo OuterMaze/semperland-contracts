@@ -1,7 +1,7 @@
 const BrandRegistry = artifacts.require("BrandRegistry");
 const Economy = artifacts.require("Economy");
 const Metaverse = artifacts.require("Metaverse");
-const RealWorldMarketsManagementPlugin = artifacts.require("RealWorldMarketsManagementPlugin");
+const RealWorldPaymentsPlugin = artifacts.require("RealWorldPaymentsPlugin");
 
 const {
     BN,           // Big Number support
@@ -21,11 +21,11 @@ const {
  * Ethereum client
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
-contract("CurrencyMintingPlugin", function (accounts) {
+contract("RealWorldPaymentsPlugin", function (accounts) {
   var economy = null;
   var metaverse = null;
   var brandRegistry = null;
-  var realWorldMarketsManagementPlugin = null;
+  var realWorldPaymentsPlugin = null;
   var brand1 = null;
   var brand2 = null;
 
@@ -36,12 +36,12 @@ contract("CurrencyMintingPlugin", function (accounts) {
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
     brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
-    realWorldMarketsManagementPlugin = await RealWorldMarketsManagementPlugin.new(
-        metaverse.address, { from: accounts[0] }
+    realWorldPaymentsPlugin = await RealWorldPaymentsPlugin.new(
+        metaverse.address, 30, accounts[9], [], { from: accounts[0] }
     );
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
-    await metaverse.addPlugin(realWorldMarketsManagementPlugin.address, { from: accounts[0] });
+    await metaverse.addPlugin(realWorldPaymentsPlugin.address, { from: accounts[0] });
 
     // Mint some brands (define cost, and mint 2 brands).
     await brandRegistry.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[0] });
@@ -66,10 +66,10 @@ contract("CurrencyMintingPlugin", function (accounts) {
   });
 
   it("must have the expected title", async function() {
-    let realWorldMarketsManagementTitle = await realWorldMarketsManagementPlugin.title();
+    let realWorldPaymentsTitle = await realWorldPaymentsPlugin.title();
     assert.isTrue(
-      realWorldMarketsManagementTitle === "Real-World Markets",
-      "The title of the real-world markets plug-in must be: Real-World Markets, not: " + realWorldMarketsManagementTitle
+      realWorldPaymentsTitle === "Real-World Payments",
+      "The title of the real-world markets plug-in must be: Real-World Payments, not: " + realWorldPaymentsTitle
     );
   });
 });
