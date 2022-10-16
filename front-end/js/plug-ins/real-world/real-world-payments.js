@@ -1,5 +1,16 @@
 const dates = require("../../utils/dates");
 
+const PAY = '0xa81ec8df';
+const PAY_BATCH = '0x119e6f29';
+const FUND_CALL = '0x0af6ce8500000000000000000000000000000000000000000000000000000000' +
+                    '0000000000000000000000000000000000000000000000000000000000000040' +
+                    '0000000000000000000000000000000000000000000000000000000000000001' +
+                    '0000000000000000000000000000000000000000000000000000000000000000';
+const FUND_BATCH_CALL = '0xce3ee61200000000000000000000000000000000000000000000000000000000' +
+                          '0000000000000000000000000000000000000000000000000000000000000040' +
+                          '0000000000000000000000000000000000000000000000000000000000000001' +
+                          '0000000000000000000000000000000000000000000000000000000000000000';
+
 /**
  * Creates a payment order URI, useful to be QR-encoded and passed to the customer so
  * they pay it.
@@ -113,11 +124,11 @@ async function makePaymentOrderURI(
                 args: {
                     id: paymentMethod.id,
                     value: paymentMethod.value,
-                    data: web3.eth.abi.encodeParameters(
+                    data: web3.eth.abi.encodeParameters(['bytes', 'bytes'], [PAY, web3.eth.abi.encodeParameters(
                         ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
                         [toAddress, paymentId, dueDate, brandAddress, rewardIds, rewardValues, rewardSignature,
                             paymentSignature]
-                    )
+                    )])
                 }
             }
             break;
@@ -125,13 +136,13 @@ async function makePaymentOrderURI(
             fullObj = {
                 type: 'tokens',
                 args: {
-                    id: paymentMethod.id,
-                    value: paymentMethod.value,
-                    data: web3.eth.abi.encodeParameters(
+                    ids: paymentMethod.ids,
+                    values: paymentMethod.values,
+                    data: web3.eth.abi.encodeParameters(['bytes', 'bytes'], [PAY_BATCH, web3.eth.abi.encodeParameters(
                         ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
                         [toAddress, paymentId, dueDate, brandAddress, rewardIds, rewardValues, rewardSignature,
                             paymentSignature]
-                    )
+                    )])
                 }
             }
             break;
@@ -167,5 +178,7 @@ function parsePaymentOrderURI(url, domain) {
 
 
 module.exports = {
-    makePaymentOrderURI: makePaymentOrderURI
+    makePaymentOrderURI: makePaymentOrderURI,
+    FUND_CALL: FUND_CALL,
+    FUND_BATCH_CALL: FUND_BATCH_CALL
 }
