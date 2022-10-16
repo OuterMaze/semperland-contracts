@@ -16,11 +16,11 @@ const {
   txTotalGas
 } = require("./test_utils");
 
-function encodeParameters(
-
-) {
-
-}
+const {
+  makePaymentOrderURI,
+  FUND_CALL,
+  FUND_BATCH_CALL
+} = require("../front-end/js/plug-ins/real-world/real-world-payments");
 
 /*
  * uncomment accounts to access the test accounts made available by the
@@ -36,11 +36,6 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
   var brand2 = null;
 
   const BRAND_SIGN_PAYMENTS = web3.utils.soliditySha3("Plugins::RealWorldPayments::Brand::Payments::Sign");
-
-  const FUND_SIGNATURE = web3.eth.abi.encodeFunctionSignature("fund(address,uint256,uint256)");
-  const FUND_BATCH_SIGNATURE = web3.eth.abi.encodeFunctionSignature("fundBatch(address,uint256[],uint256[])");
-  const PAY_SIGNATURE = web3.eth.abi.encodeFunctionSignature("pay(address,uint256,uint256,bytes)");
-  const PAY_BATCH_SIGNATURE = web3.eth.abi.encodeFunctionSignature("payBatch(address,uint256[],uint256[],bytes)");
 
   before(async function () {
     // Set up the metaverse and two plug-ins.
