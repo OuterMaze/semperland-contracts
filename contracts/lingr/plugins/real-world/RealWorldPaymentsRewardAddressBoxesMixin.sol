@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
  * place for operators / approved users) to add or remove
  * funds (both or native) from this contract.
  */
-abstract contract RealWorldPaymentsAddressBoxesMixin is Context {
+abstract contract RealWorldPaymentsRewardAddressBoxesMixin is Context {
     /**
      * Native and ERC1155 balances for a given address.
      */

@@ -59,7 +59,8 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         return PaymentData({
             to: to, paymentId: paymentId, dueDate: dueDate, brandId: brandId,
             rewardIds: rewardIds, rewardValues: rewardValues,
-            rewardSignature: rewardSignature, paymentSignature: paymentSignature
+            rewardSignature: rewardSignature, rewardAddress: address(0),
+            paymentSignature: paymentSignature
         });
     }
 
@@ -133,7 +134,8 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         PaymentData memory paymentData = PaymentData({
             to: _to, paymentId: _paymentId, dueDate: _dueDate, brandId: _brandId,
             rewardIds: _rewardTokenIds, rewardValues: _rewardTokenAmounts,
-            rewardSignature: _rewardSignature, paymentSignature: _paymentSignature
+            rewardSignature: _rewardSignature, rewardAddress: address(0),
+            paymentSignature: _paymentSignature
         });
         address signer = _getNativePaymentSigningAddress(msg.value, paymentData);
         require(signer != address(0), "RealWorldPaymentsPlugin: native payment signature verification failed");

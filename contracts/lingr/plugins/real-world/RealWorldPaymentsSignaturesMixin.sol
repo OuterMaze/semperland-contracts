@@ -81,6 +81,11 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
         address brandId;
 
         /**
+         * The account who pays the rewards, if any, for this payment.
+         */
+        address rewardAddress;
+
+        /**
          * A list of offered rewards (ids here) on payment completion. It
          * may be empty. Always matches in length: rewardValues. If this is
          * empty, then the rewardSignature will also be empty.
@@ -132,11 +137,12 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
         uint256 _tokenId, uint256 _tokenAmount,
         // This comes from the onERC1155Received data arg (after abi.decode).
         PaymentData memory _paymentData
-    ) internal view returns (address) {
+    ) internal returns (address) {
         // First, compute the reward address by checking its signature.
         // If the check fails.
         address rewardAddress = _getRewardSigningAddress(_paymentData);
         if (rewardAddress == address(0)) return address(0);
+        _paymentData.rewardAddress = rewardAddress;
         // The hash involves a single token only (not an array) expected
         // from the user.
         bytes32 messageHash = keccak256(abi.encodePacked(
@@ -155,11 +161,12 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
         uint256[] calldata _tokenIds, uint256[] calldata _tokenAmounts,
         // This comes from the onERC1155Received data arg (after abi.decode).
         PaymentData memory _paymentData
-    ) internal view returns (address) {
+    ) internal returns (address) {
         // First, compute the reward address by checking its signature.
         // If the check fails.
         address rewardAddress = _getRewardSigningAddress(_paymentData);
         if (rewardAddress == address(0)) return address(0);
+        _paymentData.rewardAddress = rewardAddress;
         // The hash involves a single token only (not an array) expected
         // from the user.
         bytes32 messageHash = keccak256(abi.encodePacked(
@@ -177,11 +184,12 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
         // This comes from the pay() amount argument.
         uint256 _amount,
         PaymentData memory _paymentData
-    ) internal view returns (address) {
+    ) internal returns (address) {
         // First, compute the reward address by checking its signature.
         // If the check fails.
         address rewardAddress = _getRewardSigningAddress(_paymentData);
         if (rewardAddress == address(0)) return address(0);
+        _paymentData.rewardAddress = rewardAddress;
         // The hash involves a single token only (not an array) expected
         // from the user.
         bytes32 messageHash = keccak256(abi.encodePacked(
