@@ -13,95 +13,181 @@ import "../../../signatures/SignatureVerifierHub.sol";
  */
 abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
     /**
+     * In each case, the signature will have to refer:
+     * - The address to pay this payment to.
+     * - The payment ID typically refers to an internal code of the payment,
+     *   like this: (address pos, invoice id, description, stamp).
+     *   - The pos address will match the signer. Used to avoid collisions.
+     *   - The invoice id is unique to the PoS (in face: unique to the
+     *     underlying company).
+     *   - The description of the invoice, which is plain text that humans
+     *     consider relevant.
+     *   - The stamp is in seconds (e.g. block.timestamp), and recommended
+     *     to be related to the due date by some fixed interval.
+     *   The payment ID comes from hashing these 4 values and will act
+     *   as a nonce so the signature is not used again. It is computed
+     *   entirely off-chain.
+     * - The due date (typically obtained from block.timestamp in a view,
+     *   and adding 600 seconds).
+     * - The brand this payment is made for. It must be satisfied that the
+     *   brand marks the current signer as a valid signer-on-behalf. This
+     *   should only be used (otherwise payments will be correlated) when
+     *   the brand is socially committed.
+     * - The signer address of the reward to deliver. This will be obtained
+     *   later in this comment.
+     * - The expected payment from the customer. This will involve one out
+     *   of 3 formats:
+     *   - MATIC (value).
+     *   - Token (id, value).
+     *   - Tokens (ids, values).
+     *
+     * The reward address is obtained by verifying the signature of:
+     * - The payment id (same as described above).
+     * - The promised reward (ids/values), if any, and the signature of
+     *   (payment ID, promised reward). The signer will be the address
+     *   that owns the reward tokens that will be delivered.
+     *
+     * This is all expressed in the following structure (save for the
+     * payment, which is given by other means).
+     */
+    struct PaymentData {
+        /**
+         * The address that is expecting the payment. This address will
+         * belong to the payment.
+         */
+        address to;
+
+        /**
+         * The id of the payment. This one should be a unique hash of the
+         * tuple: (PoS address, external ID, concept, stamp), but always
+         * computing this externally (off-chain).
+         */
+        bytes32 paymentId;
+
+        /**
+         * The due date of the payment. Past this due date, this payment
+         * cannot be attempted and will raise an error when trying. This
+         * timestamp is in the same format of `block.timestamp`.
+         */
+        uint256 dueDate;
+
+        /**
+         * This member should be used (otherwise, left address(0)) if the
+         * referenced brand is a "committed" one, and allows the signer of
+         * this payment as a signer (with special permissions) on it. If
+         * the related brand is not "committed", this field should not be
+         * used, in favor of anonymity.
+         */
+        address brandId;
+
+        /**
+         * A list of offered rewards (ids here) on payment completion. It
+         * may be empty. Always matches in length: rewardValues. If this is
+         * empty, then the rewardSignature will also be empty.
+         */
+        uint256[] rewardIds;
+
+        /**
+         * A list of offered rewards (values here) on payment completion.
+         */
+        uint256[] rewardValues;
+
+        /**
+         * The signature of keccak256(paymentId, rewardIds, rewardValues).
+         * On match, returns the rewardAddress.
+         */
+        bytes rewardSignature;
+
+        /**
+         * The signature of keccak256(to, paymentId, dueDate, brandId, rewardAddress, ...payment).
+         * On match, returns the signer PoS address.
+         */
+        bytes paymentSignature;
+    }
+
+    /**
      * The only needed thing for this trait to be instantiated
      * is the list of verifiers that will be used for validation.
      */
     constructor(address[] memory _verifiers) SignatureVerifierHub(_verifiers) {}
 
     /**
-     * Gets the signer of a real-world payment order hash, given its signature.
+     * Validates a reward signature and returns the reward address.
+     * On empty data or invalid match, returns the zero address.
      */
-    function _getSigningAddress(bytes32 _computedHash, bytes memory _signature) internal view returns (address) {
-        return verifySignature(_computedHash, _signature);
+    function _getRewardSigningAddress(PaymentData memory _paymentData) private view returns (address) {
+        uint256 length = _paymentData.rewardIds.length;
+        if (length == 0 || length != _paymentData.rewardValues.length) return address(0);
+        return verifySignature(keccak256(abi.encodePacked(
+            _paymentData.paymentId, _paymentData.rewardIds, _paymentData.rewardValues
+        )), _paymentData.rewardSignature);
     }
 
     /**
-     * Gets the signer of a real-world payment order, given its signature and:
-     * - The payment id hash.
-     * - The ids of the tokens given as reward.
-     * - The amounts of the tokens given as reward. Same length of the ids.
-     * - The id of the token expected as payment.
-     * - The amount of the token expected as payment.
-     * The off-chain side must build the signature like this:
-     * - paymentId = web3.utils.asciiToHex(urandom(32 bytes));
-     *   ...
-     * - data = web3.utils.soliditySha3(paymentId, tokenId, tokenAmount, rewardTokenIds, rewardTokenAmounts);
-     * - sig = await web3.eth.sign(data, address);
+     * Gets the signer of a real-world payment order, given its signature and
+     * all the enumerated data and a single-token payment.
      */
     function _getTokenPaymentSigningAddress(
         // This comes from the onERC1155Received token args.
         uint256 _tokenId, uint256 _tokenAmount,
         // This comes from the onERC1155Received data arg (after abi.decode).
-        bytes32 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
-        bytes memory _signature
+        PaymentData memory _paymentData
     ) internal view returns (address) {
-        // The hash involves a single token only (not an array) expected from the user.
+        // First, compute the reward address by checking its signature.
+        // If the check fails.
+        address rewardAddress = _getRewardSigningAddress(_paymentData);
+        if (rewardAddress == address(0)) return address(0);
+        // The hash involves a single token only (not an array) expected
+        // from the user.
         bytes32 messageHash = keccak256(abi.encodePacked(
-            _paymentId, _tokenId, _tokenAmount, _rewardTokenIds, _rewardTokenAmounts
+            _paymentData.to, _paymentData.paymentId, _paymentData.dueDate,
+            _paymentData.brandId, rewardAddress, _tokenId, _tokenAmount
         ));
-        return _getSigningAddress(messageHash, _signature);
+        return verifySignature(messageHash, _paymentData.paymentSignature);
     }
 
     /**
-     * Gets the signer of a real-world payment order, given its signature and:
-     * - The payment id hash.
-     * - The ids of the tokens given as reward.
-     * - The amounts of the tokens given as reward. Same length of the ids.
-     * - The ids of the tokens expected as payment.
-     * - The amounts of the tokens expected as payment. Same length of the ids.
-     * The off-chain side must build the signature like this:
-     * - paymentId = web3.utils.asciiToHex(urandom(32 bytes));
-     *   ...
-     * - data = web3.utils.soliditySha3(paymentId, tokenIds, tokenAmounts, rewardTokenIds, rewardTokenAmounts);
-     * - sig = await web3.eth.sign(data, address);
+     * Gets the signer of a real-world payment order, given its signature and
+     * all the enumerated data and a multiple-token payment.
      */
     function _getBatchTokenPaymentSigningAddress(
         // This comes from the onERC1155BatchReceived token args.
         uint256[] calldata _tokenIds, uint256[] calldata _tokenAmounts,
         // This comes from the onERC1155Received data arg (after abi.decode).
-        bytes32 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
-        bytes memory _signature
+        PaymentData memory _paymentData
     ) internal view returns (address) {
-        // The hash involves multiple tokens (an array) expected from the user.
+        // First, compute the reward address by checking its signature.
+        // If the check fails.
+        address rewardAddress = _getRewardSigningAddress(_paymentData);
+        if (rewardAddress == address(0)) return address(0);
+        // The hash involves a single token only (not an array) expected
+        // from the user.
         bytes32 messageHash = keccak256(abi.encodePacked(
-            _paymentId, _tokenIds, _tokenAmounts, _rewardTokenIds, _rewardTokenAmounts
+            _paymentData.to, _paymentData.paymentId, _paymentData.dueDate,
+            _paymentData.brandId, rewardAddress, _tokenIds, _tokenAmounts
         ));
-        return _getSigningAddress(messageHash, _signature);
+        return verifySignature(messageHash, _paymentData.paymentSignature);
     }
 
     /**
-     * Gets the signer of a real-world payment order, given its signature and:
-     * - The payment id hash.
-     * - The ids of the tokens given as reward.
-     * - The amounts of the tokens given as reward. Same length of the ids.
-     * - The amount of native tokens expected as payment.
-     * The off-chain side must build the signature like this:
-     * - paymentId = web3.utils.asciiToHex(urandom(32 bytes));
-     *   ...
-     * - data = web3.utils.soliditySha3(paymentId, amount, rewardTokenIds, rewardTokenAmounts);
-     * - sig = await web3.eth.sign(data, address);
+     * Gets the signer of a real-world payment order, given its signature and
+     * all the enumerated data and a native payment.
      */
     function _getNativePaymentSigningAddress(
         // This comes from the pay() amount argument.
         uint256 _amount,
-        // This comes from the pay() extra arguments (directly).
-        bytes32 _paymentId, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
-        bytes memory _signature
+        PaymentData memory _paymentData
     ) internal view returns (address) {
-        // The hash involves only the native token expected from the user.
+        // First, compute the reward address by checking its signature.
+        // If the check fails.
+        address rewardAddress = _getRewardSigningAddress(_paymentData);
+        if (rewardAddress == address(0)) return address(0);
+        // The hash involves a single token only (not an array) expected
+        // from the user.
         bytes32 messageHash = keccak256(abi.encodePacked(
-            _paymentId, _amount, _rewardTokenIds, _rewardTokenAmounts
+            _paymentData.to, _paymentData.paymentId, _paymentData.dueDate,
+            _paymentData.brandId, rewardAddress, _amount
         ));
-        return _getSigningAddress(messageHash, _signature);
+        return verifySignature(messageHash, _paymentData.paymentSignature);
     }
 }

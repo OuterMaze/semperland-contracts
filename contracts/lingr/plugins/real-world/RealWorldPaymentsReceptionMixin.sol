@@ -19,7 +19,7 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         /**
          * The hash of the payment id.
          */
-        bytes32 paymentIdHash;
+        PaymentData payment;
 
         /**
          * The amount of matic.
@@ -37,16 +37,6 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         uint256[] values;
 
         /**
-         * Ids of the ERC1155 reward tokens awarded.
-         */
-        uint256[] rewardIds;
-
-        /**
-         * Amounts of the ERC1155 reward tokens awarded.
-         */
-        uint256[] rewardValues;
-
-        /**
          * The payer (who owns the tokens).
          */
         address payer;
@@ -56,6 +46,23 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
          */
         address signer;
     }
+
+    /**
+     * Parses a data chunk into a payment data record.
+     */
+    function _parsePaymentData(bytes memory _data) private returns (PaymentData memory) {
+        (address to, bytes32 paymentId, uint256 dueDate, address brandId,
+         uint256[] memory rewardIds, uint256[] memory rewardValues,
+         bytes memory rewardSignature, bytes memory paymentSignature) = abi.decode(
+            _data, (address, bytes32, uint256, address, uint256[], uint256[], bytes, bytes)
+        );
+        return PaymentData({
+            to: to, paymentId: paymentId, dueDate: dueDate, brandId: brandId,
+            rewardIds: rewardIds, rewardValues: rewardValues,
+            rewardSignature: rewardSignature, paymentSignature: paymentSignature
+        });
+    }
+
     /**
      * Receives payments consisting of one single ERC1155
      * (non-native) token. The payment id is specified as
@@ -65,20 +72,25 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         address, address _from, uint256 _id, uint256 _value, bytes calldata _data
     ) external returns (bytes4) {
         _requireEconomy(_msgSender());
-        (bytes32 p, uint256[] memory rIds, uint256[] memory rAmounts, bytes memory sig) = abi.decode(
-            _data, (bytes32, uint256[], uint256[], bytes)
-        );
-        address signer = _getTokenPaymentSigningAddress(_id, _value, p, rIds, rAmounts, sig);
-        require(signer != address(0), "RealWorldPaymentsPlugin: token payment signature verification failed");
-        uint256[] memory _ids = new uint256[](1);
-        uint256[] memory _amounts = new uint256[](1);
-        _ids[0] = _id;
-        _amounts[0] = _value;
-        PaidData memory paidData = PaidData({
-            paymentIdHash: p, matic: 0, ids: _ids, values: _amounts,
-            rewardIds: rIds, rewardValues: rAmounts, payer: _from, signer: signer
-        });
-        _paid(paidData);
+        (bytes4 selector, bytes memory innerData) = abi.decode(_data, (bytes4, bytes));
+        if (selector == bytes4(keccak256("fund(address,uint256[],uint256[],bytes)"))) {
+            _funded(_from, _id, _value);
+        } else if (selector == bytes4(keccak256("pay(address,uint256[],uint256[],bytes)"))) {
+            PaymentData memory paymentData = _parsePaymentData(innerData);
+            address signer = _getTokenPaymentSigningAddress(_id, _value, paymentData);
+            require(signer != address(0), "RealWorldPaymentsPlugin: token payment signature verification failed");
+            uint256[] memory _ids = new uint256[](1);
+            uint256[] memory _amounts = new uint256[](1);
+            _ids[0] = _id;
+            _amounts[0] = _value;
+            PaidData memory paidData = PaidData({
+            payment: paymentData, matic: 0, ids: _ids, values: _amounts,
+            payer: _from, signer: signer
+            });
+            _paid(paidData);
+        } else {
+            revert("RealWorldPaymentsPlugin: Unexpected incoming batch-transfer data");
+        }
         return 0xf23a6e61;
     }
 
@@ -92,16 +104,21 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         bytes calldata _data
     ) external returns (bytes4) {
         _requireEconomy(_msgSender());
-        (bytes32 p, uint256[] memory rIds, uint256[] memory rAmounts, bytes memory sig) = abi.decode(
-            _data, (bytes32, uint256[], uint256[], bytes)
-        );
-        address signer = _getBatchTokenPaymentSigningAddress(_ids, _values, p, rIds, rAmounts, sig);
-        require(signer != address(0), "RealWorldPaymentsPlugin: batch token payment signature verification failed");
-        PaidData memory paidData = PaidData({
-            paymentIdHash: p, matic: 0, ids: _ids, values: _values, rewardIds: rIds,
-            rewardValues: rAmounts, payer: _from, signer: signer
-        });
-        _paid(paidData);
+        (bytes4 selector, bytes memory innerData) = abi.decode(_data, (bytes4, bytes));
+        if (selector == bytes4(keccak256("fund(address,uint256[],uint256[],bytes)"))) {
+            _batchFunded(_from, _ids, _values);
+        } else if (selector == bytes4(keccak256("pay(address,uint256[],uint256[],bytes)"))) {
+            PaymentData memory paymentData = _parsePaymentData(innerData);
+            address signer = _getBatchTokenPaymentSigningAddress(_ids, _values, paymentData);
+            require(signer != address(0), "RealWorldPaymentsPlugin: batch token payment signature verification failed");
+            PaidData memory paidData = PaidData({
+            payment: paymentData, matic: 0, ids: _ids, values: _values,
+            payer: _from, signer: signer
+            });
+            _paid(paidData);
+        } else {
+            revert("RealWorldPaymentsPlugin: Unexpected incoming batch-transfer data");
+        }
         return 0xbc197c81;
     }
 
@@ -109,16 +126,20 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
      * Receives payments consisting of native tokens.
      */
     function pay(
-        bytes32 _paymentIdHash, uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
-        bytes memory _signature
+        address _to, bytes32 _paymentId, uint256 _dueDate, address _brandId,
+        uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
+        bytes memory _rewardSignature, bytes memory _paymentSignature
     ) external payable {
-        address signer = _getNativePaymentSigningAddress(
-            msg.value, _paymentIdHash, _rewardTokenIds, _rewardTokenAmounts, _signature
-        );
+        PaymentData memory paymentData = PaymentData({
+            to: _to, paymentId: _paymentId, dueDate: _dueDate, brandId: _brandId,
+            rewardIds: _rewardTokenIds, rewardValues: _rewardTokenAmounts,
+            rewardSignature: _rewardSignature, paymentSignature: _paymentSignature
+        });
+        address signer = _getNativePaymentSigningAddress(msg.value, paymentData);
         require(signer != address(0), "RealWorldPaymentsPlugin: native payment signature verification failed");
         PaidData memory paidData = PaidData({
-            paymentIdHash: _paymentIdHash, matic: msg.value, ids: new uint256[](0), values: new uint256[](0),
-            rewardIds: _rewardTokenIds, rewardValues: _rewardTokenAmounts, payer: _msgSender(), signer: signer
+            payment: paymentData, matic: msg.value, ids: new uint256[](0), values: new uint256[](0),
+            payer: _msgSender(), signer: signer
         });
         _paid(paidData);
     }
@@ -142,4 +163,18 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
      * a hash instead, and the signer is also given.
      */
     function _paid(PaidData memory paidData) internal virtual;
+
+    /**
+     * This method must be overridden to tell what happens
+     * when an account manifests its wish to fund themselves
+     * by adding balance of a single token.
+     */
+    function _funded(address _from, uint256 _id, uint256 _value) internal virtual;
+
+    /**
+     * This method must be overridden to tell what happens
+     * when an account manifests its wish to fund themselves
+     * by adding balance of a single token.
+     */
+    function _batchFunded(address _from, uint256[] calldata _ids, uint256[] calldata _values) internal virtual;
 }
