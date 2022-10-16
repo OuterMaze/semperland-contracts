@@ -64,12 +64,24 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
         address, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory
     ) internal override {
         if (from != address(0)) {
+            uint256 length = amounts.length;
+            // Process transfer:
             if (to != address(0)) {
-                // A transfer. Brands will be transfer-processed.
-                for(uint256 index = 0; index < amounts.length; index++) {
+                // Brands will be transfer-processed.
+                for(uint256 index = 0; index < length; index++) {
                     if (ids[index] < (1 << 160) && amounts[index] != 0) {
                         IMetaverse(metaverse).onBrandOwnerChanged(address(uint160(ids[index])), to);
                     }
+                }
+            }
+            // Process transfer or a burn.
+            // NFTs will be transfer/burn processed.
+            for(uint256 index = 0; index < length; index++) {
+                // Other NFT types will have their own process
+                // to be notified - all of them through the
+                // metaverse instance they live into.
+                if (ids[index] < (1 << 255) && ids[index] >= (1 << 160)) {
+                    IMetaverse(metaverse).onNFTOwnerChanged(ids[index], to);
                 }
             }
         }
