@@ -29,7 +29,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
   var brand1 = null;
   var brand2 = null;
 
-  const BRAND_MANAGE_MARKETS = web3.utils.soliditySha3("Plugins::RealWorldMarkets::Brand::Markets::Manage");
+  const BRAND_SIGN_PAYMENTS = web3.utils.soliditySha3("Plugins::RealWorldPayments::Brand::Payments::Sign");
 
   before(async function () {
     // Set up the metaverse and two plug-ins.
