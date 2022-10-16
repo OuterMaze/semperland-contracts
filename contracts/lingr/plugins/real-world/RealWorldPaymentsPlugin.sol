@@ -94,6 +94,22 @@ contract RealWorldPaymentsPlugin is
     }
 
     /**
+     * An event registering who signed the payment, who paid it, who
+     * was the payment sent to, what's the payment's digest, and also
+     * the amount(s) paid and the received reward(s), if any.
+     */
+    event PaymentComplete(
+        // Indices:
+        // - signer (for when I'm a PoS watching my own events)
+        // - from (for when I'm a customer watching my own events)
+        // - paymentId (for both cases).
+        // It makes little sense to index the rewarder as well.
+        address indexed signer, address to, address indexed from, bytes32 indexed paymentId,
+        uint256 matic, uint256[] ids, uint256[] values,
+        address rewarder, uint256[] rewardIds, uint256[] rewardValues
+    );
+
+    /**
      * This method must be overridden to tell what happens
      * when a payment is paid. The payment is specified as
      * a hash instead, and the signer is also given.
@@ -153,7 +169,6 @@ contract RealWorldPaymentsPlugin is
                     "RealWorldPaymentsPlugin: error while transferring native to the earnings receiver address"
                 );
             } else if (length > 0) {
-
                 uint256[] memory feeValues = new uint256[](length);
                 uint256[] memory remainingValues = new uint256[](length);
                 for(uint256 index = 0; index < length; index++) {
@@ -174,6 +189,11 @@ contract RealWorldPaymentsPlugin is
                 address(this), paidData.payer, rewardIds, rewardValues, ""
             );
         }
+        // Add the event to track everything.
+        emit PaymentComplete(
+            paidData.signer, to, paidData.payer, paymentId, paidData.matic,
+            paidData.ids, paidData.values, rewardAddress, rewardIds, rewardValues
+        );
     }
 
     /**
