@@ -74,9 +74,9 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
     ) external returns (bytes4) {
         _requireEconomy(_msgSender());
         (bytes4 selector, bytes memory innerData) = abi.decode(_data, (bytes4, bytes));
-        if (selector == bytes4(keccak256("fund(address,uint256[],uint256[],bytes)"))) {
+        if (selector == bytes4(keccak256("fund(address,uint256,uint256,bytes)"))) {
             _funded(_from, _id, _value);
-        } else if (selector == bytes4(keccak256("pay(address,uint256[],uint256[],bytes)"))) {
+        } else if (selector == bytes4(keccak256("pay(address,uint256,uint256,bytes)"))) {
             PaymentData memory paymentData = _parsePaymentData(innerData);
             address signer = _getTokenPaymentSigningAddress(_id, _value, paymentData);
             require(signer != address(0), "RealWorldPaymentsPlugin: token payment signature verification failed");
@@ -106,9 +106,9 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
     ) external returns (bytes4) {
         _requireEconomy(_msgSender());
         (bytes4 selector, bytes memory innerData) = abi.decode(_data, (bytes4, bytes));
-        if (selector == bytes4(keccak256("fund(address,uint256[],uint256[],bytes)"))) {
+        if (selector == bytes4(keccak256("fundBatch(address,uint256[],uint256[],bytes)"))) {
             _batchFunded(_from, _ids, _values);
-        } else if (selector == bytes4(keccak256("pay(address,uint256[],uint256[],bytes)"))) {
+        } else if (selector == bytes4(keccak256("payBatch(address,uint256[],uint256[],bytes)"))) {
             PaymentData memory paymentData = _parsePaymentData(innerData);
             address signer = _getBatchTokenPaymentSigningAddress(_ids, _values, paymentData);
             require(signer != address(0), "RealWorldPaymentsPlugin: batch token payment signature verification failed");
