@@ -58,12 +58,18 @@ abstract contract RealWorldPaymentsAddressBoxesMixin is Context {
      */
     function _fundTokens(address _from, uint256[] calldata _ids, uint256[] calldata _values) internal {
         uint256 length = _ids.length;
-        require(
-            length == _values.length,
-            "token ids and amounts length mismatch or 0"
-        );
         for(uint256 index = 0; index < length; index++) {
             balances[_from].tokens[_ids[index]] += _values[index];
+        }
+    }
+
+    /**
+     * Removes tokens balances from the local balances of the source address.
+     */
+    function _defundTokens(address _from, uint256[] memory _ids, uint256[] memory _values) internal {
+        uint256 length = _ids.length;
+        for(uint256 index = 0; index < length; index++) {
+            balances[_from].tokens[_ids[index]] -= _values[index];
         }
     }
 
