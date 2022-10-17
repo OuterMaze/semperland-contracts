@@ -212,7 +212,7 @@ function parsePaymentOrderURI(url, domain) {
  *   transaction object, an integer will be returned: the estimated gas cost.
  * @returns Promise<object|number> The resulting transaction or gas amount (depends on dryRun).
  */
-async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, erc1155ABI, rwp, rwpABI, dryRun) {
+async function executePaymentOrderConfirmationCall(obj, web3, address, erc1155, erc1155ABI, rwp, rwpABI, dryRun) {
     let paymentId = web3.utils.soliditySha3(
         {type: 'address', value: obj.args.payment.posAddress},
         {type: 'string', value: obj.args.payment.reference},
