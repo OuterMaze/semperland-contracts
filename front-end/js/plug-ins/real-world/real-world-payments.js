@@ -1,5 +1,3 @@
-const dates = require("../../utils/dates");
-
 const PAY = '0xa81ec8df';
 const PAY_BATCH = '0x119e6f29';
 const FUND_CALL = '0x0af6ce8500000000000000000000000000000000000000000000000000000000' +
@@ -215,8 +213,6 @@ function parsePaymentOrderURI(url, domain) {
  * @returns Promise<object|number> The resulting transaction or gas amount (depends on dryRun).
  */
 async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, erc1155ABI, rwp, rwpABI, dryRun) {
-    let rwpContract = null;
-    let erc1155Contract = null;
     let paymentId = web3.utils.soliditySha3(
         {type: 'address', value: obj.args.payment.posAddress},
         {type: 'string', value: obj.args.payment.reference},
@@ -228,8 +224,7 @@ async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, 
 
     switch(obj.type) {
         case 'native':
-            rwpContract = new web3.eth.Contract(rwpABI, rwp);
-            method = rwpContract.methods.payNative(
+            method = new web3.eth.Contract(rwpABI, rwp).methods.payNative(
                 obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
                 obj.args.rewardIds, obj.args.rewardValues, obj.args.rewardSignature,
                 obj.args.paymentSignature
@@ -237,8 +232,7 @@ async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, 
             sendArgs = {from: address, value: obj.value};
             break;
         case 'token':
-            erc1155Contract = new web3.eth.Contract(erc1155ABI, erc1155);
-            method = erc1155Contract.methods.safeTransferFrom(
+            method = new web3.eth.Contract(erc1155ABI, erc1155).methods.safeTransferFrom(
                 address, rwp, obj.id, obj.value, web3.eth.abi.encodeParameters(
                     ['bytes', 'bytes'], [PAY, web3.eth.abi.encodeParameters(
                         ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
@@ -251,8 +245,7 @@ async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, 
             sendArgs = {from: address};
             break;
         case 'tokens':
-            erc1155Contract = new web3.eth.Contract(erc1155ABI, erc1155);
-            method = erc1155Contract.methods.safeBatchTransferFrom(
+            method = new web3.eth.Contract(erc1155ABI, erc1155).methods.safeBatchTransferFrom(
                 address, rwp, obj.ids, obj.values, web3.eth.abi.encodeParameters(
                     ['bytes', 'bytes'], [PAY_BATCH, web3.eth.abi.encodeParameters(
                         ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
