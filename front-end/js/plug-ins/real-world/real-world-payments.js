@@ -12,12 +12,54 @@ const FUND_BATCH_CALL = '0xce3ee612000000000000000000000000000000000000000000000
                           '0000000000000000000000000000000000000000000000000000000000000000';
 
 /**
+ * Creates a reward signature for the given payment data (pos address, reference,
+ * description and timestamp).
+ * @param web3 The web3 client to use several EVM utils from, and sign the reward.
+ * @param rewardingAddress The signer address for the reward for this payment. it must
+ *   be valid / imported in this web3 client.
+ * @param posAddress The signer address for this payment.
+ * @param reference An external reference. A string. Typically, this value will hold
+ *   the invoice id in the real world. But must be anything the user desires (typically
+ *   a value that will never repeat).
+ * @param description A description. A string. It will be used here as well, but it is
+ *   only relevant to the customer as a description of their purchase. In blockchain,
+ *   this value will not be present.
+ * @param now The timestamp this order is being created for. The same will be used when
+ *   signing the payment itself.
+ * @param rewardIds The list of token ids that will be used for the reward. Typically
+ *   only one or two tokens.
+ * @param rewardValues The list of token values that will be used for the reward. They
+ *   must match, in length, to the reward token ids.
+ * @returns {Promise<String>} The reward URL.
+ */
+async function rewardSign(
+    web3, rewardingAddress,
+    posAddress, reference, description, now,
+    rewardIds, rewardValues
+) {
+    let paymentId = web3.utils.soliditySha3(
+        {type: 'address', value: posAddress},
+        {type: 'string', value: reference},
+        {type: 'string', value: description},
+        {type: 'uint256', value: now}
+    );
+    let messageHash = web3.utils.soliditySha3(
+        {type: 'bytes32', value: paymentId},
+        {type: 'uint256[]', value: rewardIds},
+        {type: 'uint256[]', value: rewardValues},
+    );
+    return await web3.eth.sign(messageHash, rewardingAddress);
+}
+
+/**
  * Creates a payment order URI, useful to be QR-encoded and passed to the customer so
  * they pay it.
  * @param domain The domain used for the final URI.
- * @param web3 The web3 client to use several EVM utils from.
+ * @param web3 The web3 client to use several EVM utils from, and sign the payment.
  * @param posAddress The signer address for this payment. It must be valid / imported
  *   in this web3 client.
+ * @param now The timestamp this order is being created for. The same will be used when
+ *   signing the rewards.
  * @param dueTime The time, in seconds, this payment order will be valid until.
  * @param toAddress The target address to send the payment to. It must not be the zero
  *   address (payments cannot be sent to the zero address).
@@ -43,15 +85,14 @@ const FUND_BATCH_CALL = '0xce3ee612000000000000000000000000000000000000000000000
  *   this payment. It must be an empty bytes array when no rewards are used.
  * @param paymentMethod The method to use for payment. One out of 3 methods can be used
  *   in this payment orders mechanism: native, token, or tokens.
- * @returns string
+ * @returns {Promise<String>} The payment URL.
  */
 async function makePaymentOrderURI(
-    domain, web3, posAddress,
+    domain, web3, posAddress, now,
     dueTime, toAddress, reference, description, brandAddress,
     rewardIds, rewardValues, rewardingAddress, rewardSignature,
     paymentMethod
 ) {
-    let now = dates.timestamp();
     let dueDate = now + dueTime;
     let paymentId = web3.utils.soliditySha3(
         {type: 'address', value: posAddress},
@@ -169,7 +210,7 @@ function parsePaymentOrderURI(url, domain) {
  * @param erc1155ABI The ABI of the ERC1155 contract.
  * @param rwp The address of a Real-World Payments contract.
  * @param rwpABI The ABI of the Real-World Payments contract.
- * @returns object The resulting transaction.
+ * @returns Promise<object> The resulting transaction.
  */
 async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, erc1155ABI, rwp, rwpABI) {
     let rwpContract = null;
@@ -220,6 +261,7 @@ async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, 
 
 
 module.exports = {
+    rewardSign: rewardSign,
     makePaymentOrderURI: makePaymentOrderURI,
     parsePaymentOrderURI: parsePaymentOrderURI,
     executePaymentOrderConfirmationCall: executePaymentOrderConfirmationCall,
