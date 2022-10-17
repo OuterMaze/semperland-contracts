@@ -100,51 +100,35 @@ async function makePaymentOrderURI(
     }
     let paymentSignature = await web3.eth.sign(messageHash, posAddress);
 
-    let fullObj = null;
+    let fullObj = {
+        type: paymentMethod.type,
+        args: {
+            toAddress: toAddress,
+            payment: {
+                posAddress: posAddress,
+                reference: reference,
+                description: description,
+                now: now,
+            },
+            dueDate: dueDate,
+            brandAddress: brandAddress,
+            rewardIds: rewardIds,
+            rewardValues: rewardValues,
+            rewardSignature: rewardSignature,
+            paymentSignature: paymentSignature
+        }
+    };
     switch(paymentMethod.type) {
         case 'native':
-            fullObj = {
-                type: 'native',
-                args: {
-                    toAddress: toAddress,
-                    paymentId: paymentId,
-                    dueDate: dueDate,
-                    brandAddress: brandAddress,
-                    rewardIds: rewardIds,
-                    rewardValues: rewardValues,
-                    rewardSignature: rewardSignature,
-                    paymentSignature: paymentSignature
-                },
-                value: paymentMethod.value
-            }
+            fullObj.value = paymentMethod.value
             break;
         case 'token':
-            fullObj = {
-                type: 'token',
-                args: {
-                    id: paymentMethod.id,
-                    value: paymentMethod.value,
-                    data: web3.eth.abi.encodeParameters(['bytes', 'bytes'], [PAY, web3.eth.abi.encodeParameters(
-                        ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
-                        [toAddress, paymentId, dueDate, brandAddress, rewardIds, rewardValues, rewardSignature,
-                            paymentSignature]
-                    )])
-                }
-            }
+            fullObj.id = paymentMethod.id
+            fullObj.value = paymentMethod.value
             break;
         case 'tokens':
-            fullObj = {
-                type: 'tokens',
-                args: {
-                    ids: paymentMethod.ids,
-                    values: paymentMethod.values,
-                    data: web3.eth.abi.encodeParameters(['bytes', 'bytes'], [PAY_BATCH, web3.eth.abi.encodeParameters(
-                        ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
-                        [toAddress, paymentId, dueDate, brandAddress, rewardIds, rewardValues, rewardSignature,
-                            paymentSignature]
-                    )])
-                }
-            }
+            fullObj.ids = paymentMethod.ids
+            fullObj.values = paymentMethod.values
             break;
         // Nothing else will occur.
     }
@@ -158,7 +142,7 @@ async function makePaymentOrderURI(
  * The return value will be an object equal to the one generated when creating the url.
  * @param url The payment URI to parse.
  * @param domain The expected domain in the payment URI.
- * @returns object The object describing the call details to send the payment.
+ * @returns object The object describing the payment details.
  */
 function parsePaymentOrderURI(url, domain) {
     let prefix = "payto://" + domain + "/real-world-payments?data=";
@@ -176,9 +160,69 @@ function parsePaymentOrderURI(url, domain) {
     }
 }
 
+/**
+ * Executes a payment order.
+ * @param obj The object from which the transaction will be generated and executed.
+ * @param web3 The web3 client to confirm this transaction with.
+ * @param address The address (which the web3 object can sign for) to send the transaction.
+ * @param erc1155 The address of an ERC1155 contract.
+ * @param erc1155ABI The ABI of the ERC1155 contract.
+ * @param rwp The address of a Real-World Payments contract.
+ * @param rwpABI The ABI of the Real-World Payments contract.
+ * @returns object The resulting transaction.
+ */
+async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, erc1155ABI, rwp, rwpABI) {
+    let rwpContract = null;
+    let erc1155Contract = null;
+    let paymentId = web3.utils.soliditySha3(
+        {type: 'address', value: obj.args.payment.posAddress},
+        {type: 'string', value: obj.args.payment.reference},
+        {type: 'string', value: obj.args.payment.description},
+        {type: 'uint256', value: obj.args.payment.now}
+    );
+
+    switch(obj.type) {
+        case 'native':
+            rwpContract = new web3.eth.Contract(rwpABI, rwp);
+            return await rwpContract.methods.payNative(
+                obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
+                obj.args.rewardIds, obj.args.rewardValues, obj.args.rewardSignature,
+                obj.args.paymentSignature
+            ).send({from: address, value: obj.value});
+        case 'token':
+            erc1155Contract = new web3.eth.Contract(erc1155ABI, erc1155);
+            return await erc1155Contract.method.safeTransferFrom(
+                address, rwp, obj.id, obj.value, web3.eth.abi.encodeParameters(
+                    ['bytes', 'bytes'], [PAY_BATCH, web3.eth.abi.encodeParameters(
+                        ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
+                        [obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
+                         obj.args.rewardIds, obj.args.rewardValues, obj.args.rewardSignature,
+                         obj.args.paymentSignature]
+                    )]
+                )
+            ).send({from: address});
+        case 'tokens':
+            erc1155Contract = new web3.eth.Contract(erc1155ABI, erc1155);
+            return await erc1155Contract.method.safeBatchTransferFrom(
+                address, rwp, obj.ids, obj.values, web3.eth.abi.encodeParameters(
+                    ['bytes', 'bytes'], [PAY_BATCH, web3.eth.abi.encodeParameters(
+                        ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
+                        [obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
+                         obj.args.rewardIds, obj.args.rewardValues, obj.args.rewardSignature,
+                         obj.args.paymentSignature]
+                    )]
+                )
+            ).send({from: address});
+        default:
+            throw new Error("Invalid payment method type: " + obj.type);
+    }
+}
+
 
 module.exports = {
     makePaymentOrderURI: makePaymentOrderURI,
+    parsePaymentOrderURI: parsePaymentOrderURI,
+    executePaymentOrderConfirmationCall: executePaymentOrderConfirmationCall,
     FUND_CALL: FUND_CALL,
     FUND_BATCH_CALL: FUND_BATCH_CALL
 }
