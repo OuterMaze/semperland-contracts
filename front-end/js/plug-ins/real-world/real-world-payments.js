@@ -210,9 +210,11 @@ function parsePaymentOrderURI(url, domain) {
  * @param erc1155ABI The ABI of the ERC1155 contract.
  * @param rwp The address of a Real-World Payments contract.
  * @param rwpABI The ABI of the Real-World Payments contract.
- * @returns Promise<object> The resulting transaction.
+ * @param dryRun If true, then the transaction will not be executed and, instead of a
+ *   transaction object, an integer will be returned: the estimated gas cost.
+ * @returns Promise<object|number> The resulting transaction or gas amount (depends on dryRun).
  */
-async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, erc1155ABI, rwp, rwpABI) {
+async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, erc1155ABI, rwp, rwpABI, dryRun) {
     let rwpContract = null;
     let erc1155Contract = null;
     let paymentId = web3.utils.soliditySha3(
@@ -221,30 +223,36 @@ async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, 
         {type: 'string', value: obj.args.payment.description},
         {type: 'uint256', value: obj.args.payment.now}
     );
+    let method = null;
+    let sendArgs = null;
 
     switch(obj.type) {
         case 'native':
             rwpContract = new web3.eth.Contract(rwpABI, rwp);
-            return await rwpContract.methods.payNative(
+            method = rwpContract.methods.payNative(
                 obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
                 obj.args.rewardIds, obj.args.rewardValues, obj.args.rewardSignature,
                 obj.args.paymentSignature
-            ).send({from: address, value: obj.value});
+            );
+            sendArgs = {from: address, value: obj.value};
+            break;
         case 'token':
             erc1155Contract = new web3.eth.Contract(erc1155ABI, erc1155);
-            return await erc1155Contract.method.safeTransferFrom(
+            method = erc1155Contract.methods.safeTransferFrom(
                 address, rwp, obj.id, obj.value, web3.eth.abi.encodeParameters(
-                    ['bytes', 'bytes'], [PAY_BATCH, web3.eth.abi.encodeParameters(
+                    ['bytes', 'bytes'], [PAY, web3.eth.abi.encodeParameters(
                         ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
                         [obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
                          obj.args.rewardIds, obj.args.rewardValues, obj.args.rewardSignature,
                          obj.args.paymentSignature]
                     )]
                 )
-            ).send({from: address});
+            );
+            sendArgs = {from: address};
+            break;
         case 'tokens':
             erc1155Contract = new web3.eth.Contract(erc1155ABI, erc1155);
-            return await erc1155Contract.method.safeBatchTransferFrom(
+            method = erc1155Contract.methods.safeBatchTransferFrom(
                 address, rwp, obj.ids, obj.values, web3.eth.abi.encodeParameters(
                     ['bytes', 'bytes'], [PAY_BATCH, web3.eth.abi.encodeParameters(
                         ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
@@ -253,9 +261,16 @@ async function executePaymentOrderConfirmationCall(obj, address, web3, erc1155, 
                          obj.args.paymentSignature]
                     )]
                 )
-            ).send({from: address});
+            );
+            sendArgs = {from: address};
+            break;
         default:
             throw new Error("Invalid payment method type: " + obj.type);
+    }
+    if (dryRun) {
+        return await method.estimateGas(sendArgs);
+    } else {
+        return await method.send(sendArgs);
     }
 }
 
