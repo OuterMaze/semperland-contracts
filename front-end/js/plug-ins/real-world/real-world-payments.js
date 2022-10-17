@@ -16,9 +16,9 @@ const FUND_BATCH_CALL = '0xce3ee612000000000000000000000000000000000000000000000
  * they pay it.
  * @param domain The domain used for the final URI.
  * @param web3 The web3 client to use several EVM utils from.
- * @param dueTime The time, in seconds, this payment order will be valid until.
  * @param posAddress The signer address for this payment. It must be valid / imported
  *   in this web3 client.
+ * @param dueTime The time, in seconds, this payment order will be valid until.
  * @param toAddress The target address to send the payment to. It must not be the zero
  *   address (payments cannot be sent to the zero address).
  * @param reference An external reference. A string. Typically, this value will hold
@@ -46,8 +46,8 @@ const FUND_BATCH_CALL = '0xce3ee612000000000000000000000000000000000000000000000
  * @returns string
  */
 async function makePaymentOrderURI(
-    domain, web3, dueTime,
-    posAddress, toAddress, reference, description, brandAddress,
+    domain, web3, posAddress,
+    dueTime, toAddress, reference, description, brandAddress,
     rewardIds, rewardValues, rewardingAddress, rewardSignature,
     paymentMethod
 ) {
