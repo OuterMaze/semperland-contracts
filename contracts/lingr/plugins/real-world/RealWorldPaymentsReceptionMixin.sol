@@ -105,8 +105,8 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
             _ids[0] = _id;
             _amounts[0] = _value;
             PaidData memory paidData = PaidData({
-            payment: paymentData, matic: 0, ids: _ids, values: _amounts,
-            payer: _from, signer: signer
+                payment: paymentData, matic: 0, ids: _ids, values: _amounts,
+                payer: _from, signer: signer
             });
             _paid(paidData);
         } else {
@@ -133,8 +133,8 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
             address signer = _getBatchTokenPaymentSigningAddress(_ids, _values, paymentData);
             require(signer != address(0), "RealWorldPaymentsPlugin: batch token payment signature verification failed");
             PaidData memory paidData = PaidData({
-            payment: paymentData, matic: 0, ids: _ids, values: _values,
-            payer: _from, signer: signer
+                payment: paymentData, matic: 0, ids: _ids, values: _values,
+                payer: _from, signer: signer
             });
             _paid(paidData);
         } else {
