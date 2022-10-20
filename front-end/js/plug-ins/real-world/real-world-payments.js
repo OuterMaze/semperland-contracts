@@ -1,3 +1,6 @@
+const types = require("../../utils/types.js");
+const attributes = require("../../utils/attributes.js");
+
 const PAY = '0xa81ec8df';
 const PAY_BATCH = '0x119e6f29';
 const FUND_CALL = '0x0af6ce8500000000000000000000000000000000000000000000000000000000' +
@@ -35,6 +38,27 @@ async function rewardSign(
     posAddress, reference, description, now,
     rewardIds, rewardValues
 ) {
+    types.requireType("web3.utils.soliditySha3", Function, attributes.getAttr(web3, "utils.soliditySha3"));
+    types.requireType("web3.eth.sign", Function, attributes.getAttr(web3, "eth.sign"));
+    types.requireAddress("rewardingAddress", rewardingAddress);
+    types.requireAddress("posAddress", posAddress);
+    types.requireString("reference", reference);
+    types.requireString("description", description);
+    types.requireInt(false, 256, "now", now);
+    console.log("ids:", rewardIds);
+    types.requireArray(
+        types.requireInt.bind(null, false, 256),
+        "rewardIds", rewardIds
+    );
+    console.log("values:", rewardValues);
+    types.requireArray(
+        types.requireInt.bind(null, false, 256),
+        "rewardValues", rewardValues
+    );
+    if (rewardIds.length !== rewardValues.length) {
+        throw new Error("rewardIds and rewardValues must have the same length");
+    }
+
     let paymentId = web3.utils.soliditySha3(
         {type: 'address', value: posAddress},
         {type: 'string', value: reference},
