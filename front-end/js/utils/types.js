@@ -134,7 +134,7 @@ function requireInt(signed, size, field, value) {
  */
 function requireTuple(callbacks, field, values) {
     if (!(callbacks instanceof Array) || callbacks.length !== values.length) {
-        throw new Error("The values must have the same length of the callbacks");
+        throw new Error(field + ": the values must have the same length of the callbacks");
     }
     values.forEach(function (value, index) {
         try {
@@ -156,6 +156,9 @@ function requireTuple(callbacks, field, values) {
  * @param callback The callback to test each element.
  */
 function requireArray(callback, field, values) {
+    if (!(callbacks instanceof Array)) {
+        throw new Error(field + ": the values must be an array");
+    }
     values.forEach(function (value, index) {
         try {
             callback(field + "." + index, value);
