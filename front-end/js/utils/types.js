@@ -59,6 +59,20 @@ function requireBytes32(field, value) {
     }
 }
 
+/**
+ * Requires a value of the specified type.
+ * @param field The name of the field, path or argument to validate.
+ * @param type The type to expect.
+ * @param value The value to test.
+ */
+function requireType(field, type, value) {
+    if (!(value instanceof type)) {
+        throw new TypeError(
+            field + ": the value must be of type " + (type.name || ("<anonymous function: " + type.toString() + ">"))
+        )
+    }
+}
+
 function _requireBN(signed, size, field, value) {
     let BN = Web3.utils.BN;
     let lower = signed ?
