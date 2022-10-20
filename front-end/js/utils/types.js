@@ -130,9 +130,9 @@ function requireInt(signed, size, field, value) {
         case 160:
         case 256:
             if (Web3.utils.isBN(value)) {
-                _requireBN(signed, size, value);
+                _requireBN(signed, size, field, value);
             } else {
-                throw new TypeError(field + ": the value must be a number or BN instance");
+                throw new TypeError(field + ": the value must be a BN instance");
             }
             break;
         default:
@@ -147,8 +147,8 @@ function requireInt(signed, size, field, value) {
  * @param callbacks The callbacks to test, respectively, each element.
  */
 function requireTuple(callbacks, field, values) {
-    if (!(callbacks instanceof Array) || callbacks.length !== values.length) {
-        throw new Error(field + ": the values must have the same length of the callbacks");
+    if (!Array.isArray(callbacks) || !Array.isArray(values) || callbacks.length !== values.length) {
+        throw new Error(field + ": the values & callbacks must have the same length of the callbacks");
     }
     values.forEach(function (value, index) {
         try {
@@ -170,7 +170,7 @@ function requireTuple(callbacks, field, values) {
  * @param callback The callback to test each element.
  */
 function requireArray(callback, field, values) {
-    if (!(callbacks instanceof Array)) {
+    if (!Array.isArray(values)) {
         throw new Error(field + ": the values must be an array");
     }
     values.forEach(function (value, index) {
@@ -184,4 +184,17 @@ function requireArray(callback, field, values) {
             }
         }
     });
+}
+
+
+module.exports = {
+    requireBool: requireBool,
+    requireString: requireString,
+    requireAddress: requireAddress,
+    requireBytes: requireBytes,
+    requireBytes32: requireBytes32,
+    requireInt: requireInt,
+    requireType: requireType,
+    requireTuple: requireTuple,
+    requireArray: requireArray,
 }
