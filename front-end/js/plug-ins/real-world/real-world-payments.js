@@ -13,67 +13,6 @@ const FUND_BATCH_CALL = '0xce3ee612000000000000000000000000000000000000000000000
                           '0000000000000000000000000000000000000000000000000000000000000000';
 
 /**
- * Creates a reward signature for the given payment data (pos address, reference,
- * description and timestamp).
- * @param web3 The web3 client to use several EVM utils from, and sign the reward.
- * @param rewardingAddress The signer address for the reward for this payment. it must
- *   be valid / imported in this web3 client.
- * @param posAddress The signer address for this payment.
- * @param reference An external reference. A string. Typically, this value will hold
- *   the invoice id in the real world. But must be anything the user desires (typically
- *   a value that will never repeat).
- * @param description A description. A string. It will be used here as well, but it is
- *   only relevant to the customer as a description of their purchase. In blockchain,
- *   this value will not be present.
- * @param now The timestamp this order is being created for. The same will be used when
- *   signing the payment itself.
- * @param rewardIds The list of token ids that will be used for the reward. Typically
- *   only one or two tokens.
- * @param rewardValues The list of token values that will be used for the reward. They
- *   must match, in length, to the reward token ids.
- * @returns {Promise<String>} The reward URL.
- */
-async function rewardSign(
-    web3, rewardingAddress,
-    posAddress, reference, description, now,
-    rewardIds, rewardValues
-) {
-    types.requireType("web3.utils.soliditySha3", Function, attributes.getAttr(web3, "utils.soliditySha3"));
-    types.requireType("web3.eth.sign", Function, attributes.getAttr(web3, "eth.sign"));
-    types.requireAddress("rewardingAddress", rewardingAddress);
-    types.requireAddress("posAddress", posAddress);
-    types.requireString("reference", reference);
-    types.requireString("description", description);
-    types.requireInt(false, 256, "now", now);
-    console.log("ids:", rewardIds);
-    types.requireArray(
-        types.requireInt.bind(null, false, 256),
-        "rewardIds", rewardIds
-    );
-    console.log("values:", rewardValues);
-    types.requireArray(
-        types.requireInt.bind(null, false, 256),
-        "rewardValues", rewardValues
-    );
-    if (rewardIds.length !== rewardValues.length) {
-        throw new Error("rewardIds and rewardValues must have the same length");
-    }
-
-    let paymentId = web3.utils.soliditySha3(
-        {type: 'address', value: posAddress},
-        {type: 'string', value: reference},
-        {type: 'string', value: description},
-        {type: 'uint256', value: now}
-    );
-    let messageHash = web3.utils.soliditySha3(
-        {type: 'bytes32', value: paymentId},
-        {type: 'uint256[]', value: rewardIds},
-        {type: 'uint256[]', value: rewardValues},
-    );
-    return await web3.eth.sign(messageHash, rewardingAddress);
-}
-
-/**
  * Creates a payment order URI, useful to be QR-encoded and passed to the customer so
  * they pay it.
  * @param domain The domain used for the final URI.
@@ -94,26 +33,19 @@ async function rewardSign(
  * @param brandAddress An optional brand address. It may be the zero address. Only
  *   useful when the brand is committed so they are not charged fee for their sale.
  *   If used, however, the brand must allow the posAddress as a signer for them.
- * @param rewardingAddress If the payment involves a reward, this is the address of
- *   the account that will pay the reward. If there are no reward tokens, this one
- *   must be the zero address.
  * @param rewardIds The list of token ids that will be used for the reward. Typically
  *   only one or two tokens (or most commonly: zero - no reward) will be used in this
  *   place (small businesses don't use this concept at all).
  * @param rewardValues The list of token values that will be used for the reward. They
  *   must match, in length, to the reward token ids.
- * @param rewardSignature The signature, previously generated, of the rewarding address
- *   (perhaps even using a different web3 client & mnemonic), if rewards are used for
- *   this payment. It must be an empty bytes array when no rewards are used.
  * @param paymentMethod The method to use for payment. One out of 3 methods can be used
  *   in this payment orders mechanism: native, token, or tokens.
  * @returns {Promise<String>} The payment URL.
  */
 async function makePaymentOrderURI(
-    domain, web3, posAddress, now,
-    dueTime, toAddress, reference, description, brandAddress,
-    rewardIds, rewardValues, rewardingAddress, rewardSignature,
-    paymentMethod
+    domain, web3, posAddress, now, dueTime,
+    toAddress, reference, description, brandAddress,
+    rewardIds, rewardValues, paymentMethod
 ) {
     let dueDate = now + dueTime;
     let paymentId = web3.utils.soliditySha3(
@@ -132,7 +64,8 @@ async function makePaymentOrderURI(
                 {type: 'bytes32', value: paymentId},
                 {type: 'uint256', value: dueDate},
                 {type: 'address', value: brandAddress},
-                {type: 'address', value: rewardingAddress},
+                {type: 'uint256[]', value: rewardIds},
+                {type: 'uint256[]', value: rewardValues},
                 {type: 'uint256', value: paymentMethod.value},
             );
             break;
@@ -142,7 +75,8 @@ async function makePaymentOrderURI(
                 {type: 'bytes32', value: paymentId},
                 {type: 'uint256', value: dueDate},
                 {type: 'address', value: brandAddress},
-                {type: 'address', value: rewardingAddress},
+                {type: 'uint256[]', value: rewardIds},
+                {type: 'uint256[]', value: rewardValues},
                 {type: 'uint256', value: paymentMethod.id},
                 {type: 'uint256', value: paymentMethod.value},
             );
@@ -153,7 +87,8 @@ async function makePaymentOrderURI(
                 {type: 'bytes32', value: paymentId},
                 {type: 'uint256', value: dueDate},
                 {type: 'address', value: brandAddress},
-                {type: 'address', value: rewardingAddress},
+                {type: 'uint256[]', value: rewardIds},
+                {type: 'uint256[]', value: rewardValues},
                 {type: 'uint256[]', value: paymentMethod.ids},
                 {type: 'uint256[]', value: paymentMethod.values},
             );
@@ -177,7 +112,6 @@ async function makePaymentOrderURI(
             brandAddress: brandAddress,
             rewardIds: rewardIds,
             rewardValues: rewardValues,
-            rewardSignature: rewardSignature,
             paymentSignature: paymentSignature
         }
     };
@@ -250,8 +184,7 @@ async function executePaymentOrderConfirmationCall(obj, web3, address, erc1155, 
         case 'native':
             method = new web3.eth.Contract(rwpABI, rwp).methods.payNative(
                 obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
-                obj.args.rewardIds, obj.args.rewardValues, obj.args.rewardSignature,
-                obj.args.paymentSignature
+                obj.args.rewardIds, obj.args.rewardValues, obj.args.paymentSignature
             );
             sendArgs = {from: address, value: obj.value};
             break;
@@ -259,10 +192,9 @@ async function executePaymentOrderConfirmationCall(obj, web3, address, erc1155, 
             method = new web3.eth.Contract(erc1155ABI, erc1155).methods.safeTransferFrom(
                 address, rwp, obj.id, obj.value, web3.eth.abi.encodeParameters(
                     ['bytes', 'bytes'], [PAY, web3.eth.abi.encodeParameters(
-                        ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
+                        ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes'],
                         [obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
-                         obj.args.rewardIds, obj.args.rewardValues, obj.args.rewardSignature,
-                         obj.args.paymentSignature]
+                         obj.args.rewardIds, obj.args.rewardValues, obj.args.paymentSignature]
                     )]
                 )
             );
@@ -272,10 +204,9 @@ async function executePaymentOrderConfirmationCall(obj, web3, address, erc1155, 
             method = new web3.eth.Contract(erc1155ABI, erc1155).methods.safeBatchTransferFrom(
                 address, rwp, obj.ids, obj.values, web3.eth.abi.encodeParameters(
                     ['bytes', 'bytes'], [PAY_BATCH, web3.eth.abi.encodeParameters(
-                        ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes', 'bytes'],
+                        ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes'],
                         [obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
-                         obj.args.rewardIds, obj.args.rewardValues, obj.args.rewardSignature,
-                         obj.args.paymentSignature]
+                         obj.args.rewardIds, obj.args.rewardValues, obj.args.paymentSignature]
                     )]
                 )
             );

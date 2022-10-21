@@ -35,7 +35,7 @@ contract RealWorldPaymentsPlugin is
      * being processed in our payment system. This is done
      * to avoid the double payment of an invoice.
      */
-    mapping(bytes32 => bool) previousPayments;
+    mapping(bytes32 => bool) private previousPayments;
 
     /**
      * This permission allows PoSs to sign payments on behalf of a
@@ -43,6 +43,11 @@ contract RealWorldPaymentsPlugin is
      * but is anyway checked for all brands when present.
      */
     bytes32 constant BRAND_SIGN_PAYMENTS = keccak256("Plugins::RealWorldPayments::Brand::Payments::Sign");
+
+    // TODO: Methods, permissions and events to set the earnings receiver.
+    // TODO: Methods, permissions and events to set promotional fee.
+    // TODO: The effective fee will always be min(promo fee, fee), unless
+    // TODO:   the promo fee is 0.
 
     /**
      * Instantiating this plug-in requires the metaverse,
@@ -78,8 +83,8 @@ contract RealWorldPaymentsPlugin is
     }
 
     /**
- * Checks interface support both in MetaversePlugin and SignatureVerifier.
- */
+     * Checks interface support both in MetaversePlugin and SignatureVerifier.
+     */
     function supportsInterface(bytes4 _interfaceId) public view
         override(MetaversePlugin, SignatureVerifier) returns (bool) {
         return MetaversePlugin.supportsInterface(_interfaceId) || SignatureVerifier.supportsInterface(_interfaceId);
@@ -103,10 +108,8 @@ contract RealWorldPaymentsPlugin is
         // - signer (for when I'm a PoS watching my own events)
         // - from (for when I'm a customer watching my own events)
         // - paymentId (for both cases).
-        // It makes little sense to index the rewarder as well.
         address indexed signer, address to, address indexed from, bytes32 indexed paymentId,
-        uint256 matic, uint256[] ids, uint256[] values,
-        address rewarder, uint256[] rewardIds, uint256[] rewardValues
+        uint256 matic, uint256[] ids, uint256[] values, uint256[] rewardIds, uint256[] rewardValues
     );
 
     /**
@@ -132,11 +135,6 @@ contract RealWorldPaymentsPlugin is
         require(
             rewardIds.length == rewardValues.length,
             "RealWorldPaymentsPlugin: reward token ids and amounts length mismatch"
-        );
-        address rewardAddress = paidData.payment.rewardAddress;
-        require(
-            (rewardAddress == address(0)) == (rewardIds.length == 0),
-            "RealWorldPaymentsPlugin: either the reward address is nonzero, or there are rewards (but not both)"
         );
         address brandId = paidData.payment.brandId;
         require(
@@ -183,8 +181,8 @@ contract RealWorldPaymentsPlugin is
                 );
             }
         }
-        if (rewardAddress != address(0)) {
-            _defundTokens(rewardAddress, rewardIds, rewardValues);
+        if (rewardIds.length != 0) {
+            _defundTokens(paidData.signer, rewardIds, rewardValues);
             IEconomy(_economy()).safeBatchTransferFrom(
                 address(this), paidData.payer, rewardIds, rewardValues, ""
             );
@@ -192,7 +190,7 @@ contract RealWorldPaymentsPlugin is
         // Add the event to track everything.
         emit PaymentComplete(
             paidData.signer, to, paidData.payer, paymentId, paidData.matic,
-            paidData.ids, paidData.values, rewardAddress, rewardIds, rewardValues
+            paidData.ids, paidData.values, rewardIds, rewardValues
         );
     }
 

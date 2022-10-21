@@ -73,13 +73,12 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
     function _parsePaymentData(bytes memory _data) private returns (PaymentData memory) {
         (address to, bytes32 paymentId, uint256 dueDate, address brandId,
          uint256[] memory rewardIds, uint256[] memory rewardValues,
-         bytes memory rewardSignature, bytes memory paymentSignature) = abi.decode(
-            _data, (address, bytes32, uint256, address, uint256[], uint256[], bytes, bytes)
+         bytes memory paymentSignature) = abi.decode(
+            _data, (address, bytes32, uint256, address, uint256[], uint256[], bytes)
         );
         return PaymentData({
             to: to, paymentId: paymentId, dueDate: dueDate, brandId: brandId,
             rewardIds: rewardIds, rewardValues: rewardValues,
-            rewardSignature: rewardSignature, rewardAddress: address(0),
             paymentSignature: paymentSignature
         });
     }
@@ -149,12 +148,11 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
     function pay(
         address _to, bytes32 _paymentId, uint256 _dueDate, address _brandId,
         uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
-        bytes memory _rewardSignature, bytes memory _paymentSignature
+        bytes memory _paymentSignature
     ) external payable {
         PaymentData memory paymentData = PaymentData({
             to: _to, paymentId: _paymentId, dueDate: _dueDate, brandId: _brandId,
             rewardIds: _rewardTokenIds, rewardValues: _rewardTokenAmounts,
-            rewardSignature: _rewardSignature, rewardAddress: address(0),
             paymentSignature: _paymentSignature
         });
         address signer = _getNativePaymentSigningAddress(msg.value, paymentData);
