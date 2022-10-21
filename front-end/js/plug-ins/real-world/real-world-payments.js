@@ -47,7 +47,19 @@ async function makePaymentOrderURI(
     toAddress, reference, description, brandAddress,
     rewardIds, rewardValues, paymentMethod
 ) {
-    let dueDate = now + dueTime;
+    types.requireString(domain);
+    types.requireType('web3.utils.soliditySha3', Function, attributes.getAttr(web3, 'utils.soliditySha3'));
+    types.requireAddress('posAddress', posAddress);
+    types.requireUInt256('now', now);
+    types.requireUInt256('dueTime', dueTime);
+    types.requireAddress('toAddress', toAddress);
+    types.requireString('reference', reference);
+    types.requireString('description', description);
+    types.requireAddress('brandAddress', brandAddress);
+    types.requireArray(types.requireUInt256, 'rewardIds', rewardIds);
+    types.requireArray(types.requireUInt256, 'rewardValues', rewardValues);
+
+    let dueDate = now.add(dueTime);
     let paymentId = web3.utils.soliditySha3(
         {type: 'address', value: posAddress},
         {type: 'string', value: reference},
@@ -59,6 +71,7 @@ async function makePaymentOrderURI(
     let messageHash = null;
     switch(paymentMethod.type) {
         case 'native':
+            types.requireUInt256('paymentMethod.value', paymentMethod.value);
             messageHash = web3.utils.soliditySha3(
                 {type: 'address', value: toAddress},
                 {type: 'bytes32', value: paymentId},
@@ -70,6 +83,8 @@ async function makePaymentOrderURI(
             );
             break;
         case 'token':
+            types.requireUInt256('paymentMethod.id', paymentMethod.id);
+            types.requireUInt256('paymentMethod.value', paymentMethod.value);
             messageHash = web3.utils.soliditySha3(
                 {type: 'address', value: toAddress},
                 {type: 'bytes32', value: paymentId},
@@ -82,6 +97,8 @@ async function makePaymentOrderURI(
             );
             break;
         case 'tokens':
+            types.requireArray(types.requireUInt256, 'paymentMethod.ids', paymentMethod.ids);
+            types.requireArray(types.requireUInt256, 'paymentMethod.values', paymentMethod.values);
             messageHash = web3.utils.soliditySha3(
                 {type: 'address', value: toAddress},
                 {type: 'bytes32', value: paymentId},
@@ -147,10 +164,34 @@ function parsePaymentOrderURI(url, domain) {
         throw new Error("Invalid url: " + url + ". It does not start with: " + prefix);
     }
     let obj = JSON.parse(decodeURIComponent(domain.substr(prefix.length)));
+    types.requireAddress('obj.args.payment.posAddress', attributes.getAttr(obj, 'args.payment.posAddress'));
+    types.requireString('obj.args.payment.reference', attributes.getAttr(obj, 'args.payment.reference'));
+    types.requireString('obj.args.payment.description', attributes.getAttr(obj, 'args.payment.description'));
+    types.requireUInt256('obj.args.payment.now', attributes.getAttr(obj, 'args.payment.now'));
+    types.requireAddress('obj.args.toAddress', attributes.getAttr(obj, 'args.toAddress'));
+    types.requireUInt256('obj.args.dueDate', attributes.getAttr(obj, 'args.dueDate'));
+    types.requireAddress('obj.args.brandAddress', attributes.getAttr(obj, 'args.brandAddress'));
+    types.requireArray(
+        types.requireUInt256,
+        'obj.args.rewardIds', attributes.getAttr(obj, 'args.rewardIds')
+    );
+    types.requireArray(
+        types.requireUInt256,
+        'obj.args.rewardValues', attributes.getAttr(obj, 'args.rewardValues')
+    );
+    types.requireBytes('obj.args.paymentSignature', attributes.getAttr(obj, 'args.paymentSignature'));
+
     switch(obj.type) {
         case 'native':
+            types.requireUInt256('obj.value', obj.value);
+            return obj;
         case 'token':
+            types.requireUInt256('obj.id', obj.id);
+            types.requireUInt256('obj.value', obj.value);
+            return obj;
         case 'tokens':
+            types.requireArray(types.requireUInt256, 'obj.id', obj.id);
+            types.requireArray(types.requireUInt256, 'obj.value', obj.value);
             return obj;
         default:
             throw new Error("Invalid payment method type: " + obj.type);
@@ -224,7 +265,6 @@ async function executePaymentOrderConfirmationCall(obj, web3, address, erc1155, 
 
 
 module.exports = {
-    rewardSign: rewardSign,
     makePaymentOrderURI: makePaymentOrderURI,
     parsePaymentOrderURI: parsePaymentOrderURI,
     executePaymentOrderConfirmationCall: executePaymentOrderConfirmationCall,
