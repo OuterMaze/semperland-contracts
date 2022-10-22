@@ -47,7 +47,7 @@ async function makePaymentOrderURI(
     toAddress, reference, description, brandAddress,
     rewardIds, rewardValues, paymentMethod
 ) {
-    types.requireString(domain);
+    types.requireString("domain", domain);
     types.requireType('web3.utils.soliditySha3', Function, attributes.getAttr(web3, 'utils.soliditySha3'));
     types.requireAddress('posAddress', posAddress);
     types.requireUInt256('now', now);
@@ -123,26 +123,26 @@ async function makePaymentOrderURI(
                 posAddress: posAddress,
                 reference: reference,
                 description: description,
-                now: now,
+                now: now.toString(),
             },
-            dueDate: dueDate,
+            dueDate: dueDate.toString(),
             brandAddress: brandAddress,
-            rewardIds: rewardIds,
-            rewardValues: rewardValues,
+            rewardIds: rewardIds.map(function(e) { return e.toString(); }),
+            rewardValues: rewardValues.map(function(e) { return e.toString(); }),
             paymentSignature: paymentSignature
         }
     };
     switch(paymentMethod.type) {
         case 'native':
-            fullObj.value = paymentMethod.value
+            fullObj.value = paymentMethod.value.toString();
             break;
         case 'token':
-            fullObj.id = paymentMethod.id
-            fullObj.value = paymentMethod.value
+            fullObj.id = paymentMethod.id.toString();
+            fullObj.value = paymentMethod.value.toString();
             break;
         case 'tokens':
-            fullObj.ids = paymentMethod.ids
-            fullObj.values = paymentMethod.values
+            fullObj.ids = paymentMethod.ids.map(function(e) { return e.toString(); });
+            fullObj.values = paymentMethod.values.map(function(e) { return e.toString(); });
             break;
         // Nothing else will occur.
     }
@@ -154,44 +154,56 @@ async function makePaymentOrderURI(
 /**
  * Parses a payment URI and requires the fields to exist, depending on the payment type.
  * The return value will be an object equal to the one generated when creating the url.
- * @param url The payment URI to parse.
  * @param domain The expected domain in the payment URI.
+ * @param web3 The web3 client used to parse numbers.
+ * @param url The payment URI to parse.
  * @returns object The object describing the payment details.
  */
-function parsePaymentOrderURI(url, domain) {
+function parsePaymentOrderURI(domain, web3, url) {
     let prefix = "payto://" + domain + "/real-world-payments?data=";
     if (!url.startsWith(prefix)) {
         throw new Error("Invalid url: " + url + ". It does not start with: " + prefix);
     }
-    let obj = JSON.parse(decodeURIComponent(domain.substr(prefix.length)));
+    let obj = JSON.parse(decodeURIComponent(url.substr(prefix.length)));
+    let toBN = function(s) { return new web3.utils.BN(s); };
+
     types.requireAddress('obj.args.payment.posAddress', attributes.getAttr(obj, 'args.payment.posAddress'));
     types.requireString('obj.args.payment.reference', attributes.getAttr(obj, 'args.payment.reference'));
     types.requireString('obj.args.payment.description', attributes.getAttr(obj, 'args.payment.description'));
-    types.requireUInt256('obj.args.payment.now', attributes.getAttr(obj, 'args.payment.now'));
+    types.requireNumericString('obj.args.payment.now', attributes.getAttr(obj, 'args.payment.now'));
     types.requireAddress('obj.args.toAddress', attributes.getAttr(obj, 'args.toAddress'));
-    types.requireUInt256('obj.args.dueDate', attributes.getAttr(obj, 'args.dueDate'));
+    types.requireNumericString('obj.args.dueDate', attributes.getAttr(obj, 'args.dueDate'));
     types.requireAddress('obj.args.brandAddress', attributes.getAttr(obj, 'args.brandAddress'));
     types.requireArray(
-        types.requireUInt256,
+        types.requireNumericString,
         'obj.args.rewardIds', attributes.getAttr(obj, 'args.rewardIds')
     );
     types.requireArray(
-        types.requireUInt256,
+        types.requireNumericString,
         'obj.args.rewardValues', attributes.getAttr(obj, 'args.rewardValues')
     );
     types.requireBytes('obj.args.paymentSignature', attributes.getAttr(obj, 'args.paymentSignature'));
+    obj.args.payment.now = toBN(obj.args.payment.now);
+    obj.args.payment.dueDate = toBN(obj.args.payment.dueDate);
+    obj.args.rewardIds = obj.args.rewardIds.map(toBN);
+    obj.args.rewardValues = obj.args.rewardValues.map(toBN);
 
     switch(obj.type) {
         case 'native':
-            types.requireUInt256('obj.value', obj.value);
+            types.requireNumericString('obj.value', obj.value);
+            obj.value = toBN(obj.value);
             return obj;
         case 'token':
-            types.requireUInt256('obj.id', obj.id);
-            types.requireUInt256('obj.value', obj.value);
+            types.requireNumericString('obj.id', obj.id);
+            types.requireNumericString('obj.value', obj.value);
+            obj.id = toBN(obj.id);
+            obj.value = toBN(obj.value);
             return obj;
         case 'tokens':
-            types.requireArray(types.requireUInt256, 'obj.ids', obj.ids);
-            types.requireArray(types.requireUInt256, 'obj.values', obj.values);
+            types.requireArray(types.requireNumericString, 'obj.ids', obj.ids);
+            types.requireArray(types.requireNumericString, 'obj.values', obj.values);
+            obj.ids = obj.ids.map(toBN);
+            obj.values = obj.values.map(toBN);
             return obj;
         default:
             throw new Error("Invalid payment method type: " + obj.type);

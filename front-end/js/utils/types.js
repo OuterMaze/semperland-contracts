@@ -23,6 +23,29 @@ function requireString(field, value) {
 }
 
 /**
+ * Requires a string satisfying a regular expression.
+ * @param field The name of the field, path or argument to validate.
+ * @param rx The regular expression to satisfy.
+ * @param hint The human-readable name of the pattern.
+ * @param value The value to test.
+ */
+function requireRx(field, rx, hint, value) {
+    requireString(field, value);
+    if (!rx.test(value)) {
+        throw new TypeError(field + ": the value must satisfy pattern: " + hint);
+    }
+}
+
+/**
+ * Requires a string to be numeric.
+ * @param field The name of the field, path or argument to validate.
+ * @param value The value to test.
+ */
+function requireNumericString(field, value) {
+    requireRx(field, /^\d+$/, "numeric", value);
+}
+
+/**
  * Requires an address value.
  * @param field The name of the field, path or argument to validate.
  * @param value The value to test.
@@ -190,6 +213,8 @@ function requireArray(callback, field, values) {
 module.exports = {
     requireBool: requireBool,
     requireString: requireString,
+    requireRx: requireRx,
+    requireNumericString: requireNumericString,
     requireAddress: requireAddress,
     requireBytes: requireBytes,
     requireBytes32: requireBytes32,
