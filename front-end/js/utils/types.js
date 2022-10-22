@@ -103,7 +103,7 @@ function _requireBN(signed, size, field, value) {
         new BN(0);
     let upper = signed ?
         (new BN(2)).pow(new BN(size - 1).subn(1)) :
-        (new BN(2)).pow(new BN(size).subn(1));
+        (new BN(2)).pow(new BN(size)).subn(1);
     if (lower.cmp(value) > 0 || upper.cmp(value) < 0) {
         throw new TypeError(
             field + ": the value must be in the range of " +

@@ -184,7 +184,7 @@ function parsePaymentOrderURI(domain, web3, url) {
     );
     types.requireBytes('obj.args.paymentSignature', attributes.getAttr(obj, 'args.paymentSignature'));
     obj.args.payment.now = toBN(obj.args.payment.now);
-    obj.args.payment.dueDate = toBN(obj.args.payment.dueDate);
+    obj.args.dueDate = toBN(obj.args.dueDate);
     obj.args.rewardIds = obj.args.rewardIds.map(toBN);
     obj.args.rewardValues = obj.args.rewardValues.map(toBN);
 
