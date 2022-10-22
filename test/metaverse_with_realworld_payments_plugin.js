@@ -4,6 +4,9 @@ const Metaverse = artifacts.require("Metaverse");
 const RealWorldPaymentsPlugin = artifacts.require("RealWorldPaymentsPlugin");
 const CurrencyDefinitionPlugin = artifacts.require("CurrencyDefinitionPlugin");
 const CurrencyMintingPlugin = artifacts.require("CurrencyMintingPlugin");
+const payments = require("../front-end/js/plug-ins/real-world/real-world-payments.js")
+const types = require("../front-end/js/utils/types.js")
+const dates = require("../front-end/js/utils/dates.js")
 
 const {
     BN,           // Big Number support
@@ -127,4 +130,145 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "The title of the real-world markets plug-in must be: Real-World Payments, not: " + realWorldPaymentsTitle
     );
   });
+
+  /**
+   * Tests just a serialization and parsing of a payment object.
+   * @param web3 The web3 client to use.
+   * @param domainForMakingPayment The domain to use for making a payment.
+   * @param domainForParsingPayment The domain to use for parsing a payment.
+   * @param signer The address that signs the payment.
+   * @param timestamp The current timestamp of the payment.
+   * @param dueTime The due time (in seconds - it will be added to the timestamp).
+   * @param toAddress The address that must receive the payment.
+   * @param reference The external reference of the payment.
+   * @param description The description of the payment.
+   * @param brandAddress The brand address (It may be the zero address).
+   * @param rewardIds The ids of the rewards to give.
+   * @param rewardValues The values of the rewards to give.
+   * @param paymentType The type of the payment.
+   * @param paymentId The id, or ids, of the payment. Not used for native payment.
+   * @param paymentValue The value, or values, of the payment.
+   * @returns {Promise<void>} Just a promise to be awaited for
+   */
+  async function makePaymentAndThenParseIt(
+      web3, domainForMakingPayment, domainForParsingPayment, signer, timestamp, dueTime, toAddress,
+      reference, description, brandAddress, rewardIds, rewardValues, paymentType, paymentId, paymentValue
+  ) {
+    let payment = {
+      type: paymentType
+    }
+    switch(paymentType) {
+      case "native":
+        payment.value = paymentValue;
+        break;
+      case "token":
+        payment.id = paymentId;
+        payment.value = paymentValue;
+        break;
+      case "tokens":
+        payment.ids = paymentId;
+        payment.values = paymentValue;
+        break;
+    }
+    timestamp = new web3.utils.BN(timestamp);
+    dueTime = new web3.utils.BN(dueTime);
+    let dueDate = dueTime.add(timestamp);
+
+    // Making the payment order.
+    let url = await payments.makePaymentOrderURI(
+      domainForMakingPayment, web3, signer, timestamp, dueTime, toAddress,
+      reference, description, brandAddress, rewardIds, rewardValues, payment
+    );
+
+    // Parsing the payment order.
+    let obj = payments.parsePaymentOrderURI(domainForParsingPayment, web3, url);
+
+    // Assert on the payment type.
+    assert.isTrue(
+      obj.type === paymentType,
+      "The payment's type must match in parsed vs. making. But the initial " +
+      "type is " + paymentType + " and the final type is " + obj.type
+    );
+
+    // Assert on the due time.
+    assert.isTrue(
+      obj.args.dueDate.cmp(dueDate) === 0,
+      "The payment's due date must match in parsed vs. making. But the initial " +
+      "(computed) due date is " + dueDate.toString() + " and the final due date is " +
+      obj.args.dueDate.toString()
+    );
+
+    // Assert on the target address.
+    assert.isTrue(
+      obj.args.toAddress === toAddress,
+      "The payment's target address must match in parsed vs. making. But the initial " +
+      "target address is " + toAddress + " and the final target address is " + obj.args.toAddress
+    );
+
+    // Assert on the timestamp.
+    assert.isTrue(
+      obj.args.payment.now.cmp(timestamp) === 0,
+      "The payment's timestamp must match in parsed vs. making. But the initial " +
+      "timestamp is " + timestamp.toString() + " and the final timestamp is " +
+      obj.args.payment.now.toString()
+    );
+
+    // Assert on the reference.
+    assert.isTrue(
+      obj.args.payment.reference === reference,
+      "The payment's reference  must match in parsed vs. making. But the initial " +
+      "reference is " + reference + " and the final reference is " + obj.args.payment.reference
+    );
+
+    // Assert on the description.
+    assert.isTrue(
+      obj.args.payment.description === description,
+      "The payment's description  must match in parsed vs. making. But the initial " +
+      "description is " + reference + " and the final description is " + obj.args.payment.description
+    );
+
+    // Assert on the signer (pos) address.
+    assert.isTrue(
+      obj.args.payment.posAddress === signer,
+      "The payment's pos address must match in parsed vs. making. But the initial " +
+      "pos address is " + signer + " and the final pos address is " + obj.args.payment.posAddress
+    );
+
+    // Assert on the brand address.
+    assert.isTrue(
+      obj.args.brandAddress === brandAddress,
+      "The payment's brand address must match in parsed vs. making. But the initial " +
+      "brand address is " + brandAddress + " and the final brand address is " + obj.args.brandAddress
+    );
+
+    // Assert on reward ids.
+    assert.isTrue(
+      obj.args.rewardIds.length === rewardIds.length && obj.args.rewardIds.every(function(element, index) {
+        return element.cmp(rewardIds[index]) === 0
+      }),
+      "The payment's reward ids must match in parsed vs. making. But the initial " +
+      "ids are " + JSON.stringify(obj.args.rewardIds) + " and the final ids are " +
+      JSON.stringify(rewardIds)
+    );
+
+    // Assert on reward values.
+    assert.isTrue(
+      obj.args.rewardValues.length === rewardValues.length && obj.args.rewardValues.every(
+        function(element, index) {
+          return element.cmp(rewardValues[index]) === 0
+        }
+      ),
+      "The payment's reward values must match in parsed vs. making. But the initial " +
+      "values are " + JSON.stringify(obj.args.rewardValues) + " and the final values are " +
+      JSON.stringify(rewardValues)
+    );
+
+    // Assert on the signature.
+    let recovered = web3.eth.accounts.recover('Some data', obj.args.paymentSignature);
+    assert.isTrue(
+      recovered.toLowerCase() === signer.toLowerCase(),
+      "The payment's signer must match the recovered address in the end. But the chosen " +
+      "signer is " + signer + " and the recovered account is " + recovered
+    );
+  }
 });
