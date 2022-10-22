@@ -187,23 +187,81 @@ function parsePaymentOrderURI(domain, web3, url) {
     obj.args.dueDate = toBN(obj.args.dueDate);
     obj.args.rewardIds = obj.args.rewardIds.map(toBN);
     obj.args.rewardValues = obj.args.rewardValues.map(toBN);
+    let messageHash;
+    let recovered;
 
     switch(obj.type) {
         case 'native':
             types.requireNumericString('obj.value', obj.value);
             obj.value = toBN(obj.value);
+            messageHash = web3.utils.soliditySha3(
+                {type: 'address', value: obj.args.toAddress},
+                {type: 'bytes32', value: web3.utils.soliditySha3(
+                    {type: 'address', value: obj.args.payment.posAddress},
+                    {type: 'string', value: obj.args.payment.reference},
+                    {type: 'string', value: obj.args.payment.description},
+                    {type: 'uint256', value: obj.args.payment.now}
+                 )},
+                {type: 'uint256', value: obj.args.dueDate},
+                {type: 'address', value: obj.args.brandAddress},
+                {type: 'uint256[]', value: obj.args.rewardIds},
+                {type: 'uint256[]', value: obj.args.rewardValues},
+                {type: 'uint256', value: obj.value},
+            );
+            recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
+            if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
+                throw new Error("Signature check failed");
+            }
             return obj;
         case 'token':
             types.requireNumericString('obj.id', obj.id);
             types.requireNumericString('obj.value', obj.value);
             obj.id = toBN(obj.id);
             obj.value = toBN(obj.value);
+            messageHash = web3.utils.soliditySha3(
+                {type: 'address', value: obj.args.toAddress},
+                {type: 'bytes32', value: web3.utils.soliditySha3(
+                    {type: 'address', value: obj.args.payment.posAddress},
+                    {type: 'string', value: obj.args.payment.reference},
+                    {type: 'string', value: obj.args.payment.description},
+                    {type: 'uint256', value: obj.args.payment.now}
+                 )},
+                {type: 'uint256', value: obj.args.dueDate},
+                {type: 'address', value: obj.args.brandAddress},
+                {type: 'uint256[]', value: obj.args.rewardIds},
+                {type: 'uint256[]', value: obj.args.rewardValues},
+                {type: 'uint256', value: obj.id},
+                {type: 'uint256', value: obj.value},
+            );
+            recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
+            if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
+                throw new Error("Signature check failed");
+            }
             return obj;
         case 'tokens':
             types.requireArray(types.requireNumericString, 'obj.ids', obj.ids);
             types.requireArray(types.requireNumericString, 'obj.values', obj.values);
             obj.ids = obj.ids.map(toBN);
             obj.values = obj.values.map(toBN);
+            messageHash = web3.utils.soliditySha3(
+                {type: 'address', value: obj.args.toAddress},
+                {type: 'bytes32', value: web3.utils.soliditySha3(
+                    {type: 'address', value: obj.args.payment.posAddress},
+                    {type: 'string', value: obj.args.payment.reference},
+                    {type: 'string', value: obj.args.payment.description},
+                    {type: 'uint256', value: obj.args.payment.now}
+                 )},
+                {type: 'uint256', value: obj.args.dueDate},
+                {type: 'address', value: obj.args.brandAddress},
+                {type: 'uint256[]', value: obj.args.rewardIds},
+                {type: 'uint256[]', value: obj.args.rewardValues},
+                {type: 'uint256[]', value: obj.ids},
+                {type: 'uint256[]', value: obj.values},
+            );
+            recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
+            if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
+                throw new Error("Signature check failed");
+            }
             return obj;
         default:
             throw new Error("Invalid payment method type: " + obj.type);
