@@ -190,8 +190,8 @@ function parsePaymentOrderURI(url, domain) {
             types.requireUInt256('obj.value', obj.value);
             return obj;
         case 'tokens':
-            types.requireArray(types.requireUInt256, 'obj.id', obj.id);
-            types.requireArray(types.requireUInt256, 'obj.value', obj.value);
+            types.requireArray(types.requireUInt256, 'obj.ids', obj.ids);
+            types.requireArray(types.requireUInt256, 'obj.values', obj.values);
             return obj;
         default:
             throw new Error("Invalid payment method type: " + obj.type);
