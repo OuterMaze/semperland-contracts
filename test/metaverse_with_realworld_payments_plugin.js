@@ -182,8 +182,6 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
     // Parsing the payment order.
     let obj = payments.parsePaymentOrderURI(domainForParsingPayment, web3, url);
-    console.log("obj:", obj);
-    console.log("obj.args.dueDate:", obj.args.dueDate);
 
     // Assert on the payment type.
     assert.isTrue(
@@ -263,14 +261,6 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "The payment's reward values must match in parsed vs. making. But the initial " +
       "values are " + JSON.stringify(obj.args.rewardValues) + " and the final values are " +
       JSON.stringify(rewardValues)
-    );
-
-    // Assert on the signature.
-    let recovered = web3.eth.accounts.recover('Some data', obj.args.paymentSignature);
-    assert.isTrue(
-      recovered.toLowerCase() === signer.toLowerCase(),
-      "The payment's signer must match the recovered address in the end. But the chosen " +
-      "signer is " + signer + " and the recovered account is " + recovered
     );
   }
 
