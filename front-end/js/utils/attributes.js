@@ -5,11 +5,11 @@
  * @returns The object at a deeper level of the main object.
  */
 function getAttr(obj, path) {
-   let parts = path.split(".");
-   while(parts.length && obj !== null && obj !== undefined) {
-        obj = obj[parts.shift()];
-   }
-   return obj;
+    let parts = path.split(".");
+    while(parts.length && obj !== null && obj !== undefined) {
+         obj = obj[parts.shift()];
+    }
+    return obj;
 }
 
 
