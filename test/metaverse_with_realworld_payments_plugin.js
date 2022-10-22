@@ -182,6 +182,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
     // Parsing the payment order.
     let obj = payments.parsePaymentOrderURI(domainForParsingPayment, web3, url);
+    console.log("obj:", obj);
+    console.log("obj.args.dueDate:", obj.args.dueDate);
 
     // Assert on the payment type.
     assert.isTrue(
@@ -271,4 +273,64 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "signer is " + signer + " and the recovered account is " + recovered
     );
   }
+
+  it("must validate: good payment, native, no rewards", async function() {
+    await makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000")
+    );
+  });
+
+  it("must validate: good payment, token, no rewards", async function() {
+    await makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "token", WMATIC,
+      new web3.utils.BN("2000000000000000000")
+    );
+  });
+
+  it("must validate: good payment, tokens, no rewards", async function() {
+    await makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "tokens", [WMATIC],
+      [new web3.utils.BN("2000000000000000000")]
+    );
+  });
+
+  it("must validate: good payment, native, with rewards", async function() {
+    await makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [brand1Currency1], [new web3.utils.BN("500000000000000000")],
+      "native", null, new web3.utils.BN("2000000000000000000")
+    );
+  });
+
+  it("must validate: good payment, token, with rewards", async function() {
+    await makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [brand1Currency1], [new web3.utils.BN("500000000000000000")],
+      "token", WMATIC, new web3.utils.BN("2000000000000000000")
+    );
+  });
+
+  it("must validate: good payment, tokens, with rewards", async function() {
+    await makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [brand1Currency1], [new web3.utils.BN("500000000000000000")],
+      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
+    );
+  });
 });
