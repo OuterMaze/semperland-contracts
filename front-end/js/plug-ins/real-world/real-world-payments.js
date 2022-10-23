@@ -182,6 +182,9 @@ function parsePaymentOrderURI(domain, web3, url) {
         types.requireNumericString,
         'obj.args.rewardValues', attributes.getAttr(obj, 'args.rewardValues')
     );
+    if (obj.args.rewardIds.length !== obj.args.rewardValues.length) {
+        throw new Error("Reward ids and values length mismatch");
+    }
     types.requireBytes('obj.args.paymentSignature', attributes.getAttr(obj, 'args.paymentSignature'));
     obj.args.payment.now = toBN(obj.args.payment.now);
     obj.args.dueDate = toBN(obj.args.dueDate);
@@ -241,6 +244,9 @@ function parsePaymentOrderURI(domain, web3, url) {
         case 'tokens':
             types.requireArray(types.requireNumericString, 'obj.ids', obj.ids);
             types.requireArray(types.requireNumericString, 'obj.values', obj.values);
+            if (obj.ids.length !== obj.values.length) {
+                throw new Error("Payment ids and values length mismatch");
+            }
             obj.ids = obj.ids.map(toBN);
             obj.values = obj.values.map(toBN);
             messageHash = web3.utils.soliditySha3(
