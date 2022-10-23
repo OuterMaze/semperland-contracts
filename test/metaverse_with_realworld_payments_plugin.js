@@ -4,9 +4,13 @@ const Metaverse = artifacts.require("Metaverse");
 const RealWorldPaymentsPlugin = artifacts.require("RealWorldPaymentsPlugin");
 const CurrencyDefinitionPlugin = artifacts.require("CurrencyDefinitionPlugin");
 const CurrencyMintingPlugin = artifacts.require("CurrencyMintingPlugin");
-const payments = require("../front-end/js/plug-ins/real-world/real-world-payments.js")
-const types = require("../front-end/js/utils/types.js")
-const dates = require("../front-end/js/utils/dates.js")
+const payments = require("../front-end/js/plug-ins/real-world/real-world-payments.js");
+const types = require("../front-end/js/utils/types.js");
+const dates = require("../front-end/js/utils/dates.js");
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const expect = chai.expect;
+chai.use(chaiAsPromised);
 
 const {
     BN,           // Big Number support
@@ -322,5 +326,35 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
       "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
     );
+  });
+
+  it("must fail: the domain used for payment making is anything else", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, 1, "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [brand1Currency1], [new web3.utils.BN("500000000000000000")],
+      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
+    )).to.be.rejectedWith(TypeError, "domain: the value must be of string type");
+  });
+
+  it("must fail: the domains not matching on make vs. parse", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.con", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [brand1Currency1], [new web3.utils.BN("500000000000000000")],
+      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
+    )).to.be.rejectedWith(Error, "It does not start with: payto://lingr.com/real-world-payments?data=");
+  });
+
+  it("must fail: the signer not being a valid address for this web3 client", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      "0xacb7def96172617299ab987c8bb8e90c0098aedc", dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [brand1Currency1], [new web3.utils.BN("500000000000000000")],
+      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
+    )).to.be.rejectedWith(Error, "Returned error: cannot sign data; no private key");
   });
 });

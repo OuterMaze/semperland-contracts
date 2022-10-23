@@ -1,10 +1,14 @@
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
+
 const {
     BN,           // Big Number support
 } = require('@openzeppelin/test-helpers');
 
-
 /**
  * Returns the total gas of a transaction from its response.
+ * @param web3 The web3 client to use for gas calculation
  * @param response The response
  * @returns the total gas, as a BN instance
  */
@@ -14,7 +18,6 @@ async function txTotalGas(web3, response) {
     let gasPrice = new BN(nativeTx.gasPrice);
     return gasUsed.mul(gasPrice);
 }
-
 
 /**
  * Makes the string of a revert reason (for require()/revert()
@@ -26,7 +29,6 @@ async function txTotalGas(web3, response) {
 function revertReason(message, reasonGiven) {
     return message + " -- Reason given: " + (reasonGiven === undefined ? message : reasonGiven);
 }
-
 
 /**
  * Encodes a string as base64.

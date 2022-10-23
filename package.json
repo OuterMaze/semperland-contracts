@@ -2,6 +2,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.0",
     "@openzeppelin/test-helpers": "^0.5.15",
+    "chai-as-promised": "^7.1.1",
     "truffle-contract-size": "^2.0.1"
   }
 }
