@@ -357,4 +357,14 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
     )).to.be.rejectedWith(Error, "Returned error: cannot sign data; no private key");
   });
+
+  it("must fail: the timestamp is not a number", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      "0xacb7def96172617299ab987c8bb8e90c0098aedc", dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [brand1Currency1], [new web3.utils.BN("500000000000000000")],
+      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
+    )).to.be.rejectedWith(Error, "Returned error: cannot sign data; no private key");
+  });
 });
