@@ -194,7 +194,7 @@ function requireTuple(callbacks, field, values) {
  */
 function requireArray(callback, field, values) {
     if (!Array.isArray(values)) {
-        throw new Error(field + ": the values must be an array");
+        throw new TypeError(field + ": the values must be an array");
     }
     values.forEach(function (value, index) {
         try {

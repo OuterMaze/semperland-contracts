@@ -152,11 +152,13 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
    * @param paymentType The type of the payment.
    * @param paymentId The id, or ids, of the payment. Not used for native payment.
    * @param paymentValue The value, or values, of the payment.
+   * @param tamperUrlData An optional function to "hack" the tamper data.
    * @returns {Promise<void>} Just a promise to be awaited for
    */
   async function makePaymentAndThenParseIt(
       web3, domainForMakingPayment, domainForParsingPayment, signer, timestamp, dueTime, toAddress,
-      reference, description, brandAddress, rewardIds, rewardValues, paymentType, paymentId, paymentValue
+      reference, description, brandAddress, rewardIds, rewardValues, paymentType, paymentId, paymentValue,
+      tamperUrlData
   ) {
     let payment = {
       type: paymentType
@@ -183,6 +185,14 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       domainForMakingPayment, web3, signer, timestamp, dueTime, toAddress,
       reference, description, brandAddress, rewardIds, rewardValues, payment
     );
+
+    if (tamperUrlData) {
+      let prefix = "payto://" + domainForMakingPayment + "/real-world-payments?data=";
+      let _obj = JSON.parse(decodeURIComponent(url.substr(prefix.length)));
+      tamperUrlData(_obj);
+      url = "payto://" + domainForMakingPayment + "/real-world-payments?data=" +
+            encodeURIComponent(JSON.stringify(_obj));
+    }
 
     // Parsing the payment order.
     let obj = payments.parsePaymentOrderURI(domainForParsingPayment, web3, url);
@@ -358,13 +368,149 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(Error, "Returned error: cannot sign data; no private key");
   });
 
-  it("must fail: the timestamp is not a number", async function() {
+  it("must fail: the toAddress is not an address", async function() {
     await expect(makePaymentAndThenParseIt(
       web3, "lingr.com", "lingr.com",
-      "0xacb7def96172617299ab987c8bb8e90c0098aedc", dates.timestamp(), 300, accounts[1],
+      accounts[0], dates.timestamp(), 300, "0xinvalidaddress",
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
       "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
-    )).to.be.rejectedWith(Error, "Returned error: cannot sign data; no private key");
+    )).to.be.rejectedWith(TypeError, "toAddress: the value must be a valid address");
+  });
+
+  it("must fail: the reference is not a string", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      1, "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000")
+    )).to.be.rejectedWith(TypeError, "reference: the value must be of string type");
+  });
+
+  it("must fail: the description is not a string", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", 1, constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000")
+    )).to.be.rejectedWith(TypeError, "description: the value must be of string type");
+  });
+
+  it("must fail: the brandAddress is not an address", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", "0xinvalidaddress",
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000")
+    )).to.be.rejectedWith(TypeError, "brandAddress: the value must be a valid address");
+  });
+
+  it("must fail: reward ids and values have different length", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [new BN("1")], [], "native", null,
+      new web3.utils.BN("2000000000000000000")
+    )).to.be.rejectedWith(Error, "Reward ids and values length mismatch");
+  });
+
+  it("must fail: reward ids is not an array of BNs", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      "", [], "native", null,
+      new web3.utils.BN("2000000000000000000")
+    )).to.be.rejectedWith(TypeError, "rewardIds: the values must be an array");
+
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [""], [new web3.utils.BN("1")], "native", null,
+      new web3.utils.BN("2000000000000000000")
+    )).to.be.rejectedWith(Error, "rewardIds.0: the value must be a BN instance");
+  });
+
+  it("must fail: reward values is not an array of BNs", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], "", "native", null,
+      new web3.utils.BN("2000000000000000000")
+    )).to.be.rejectedWith(TypeError, "rewardValues: the values must be an array");
+
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [new web3.utils.BN("1")], [""], "native", null,
+      new web3.utils.BN("2000000000000000000")
+    )).to.be.rejectedWith(TypeError, "rewardValues.0: the value must be a BN instance");
+  });
+
+  it("must fail: invalid payment type", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "invalid", null,
+      new web3.utils.BN("2000000000000000000")
+    )).to.be.rejectedWith(Error, "Invalid payment method type: invalid");
+  });
+
+  it("must fail: invalid token id for method 'token'", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "token", "badtokenid",
+      new web3.utils.BN("2000000000000000000")
+    )).to.be.rejectedWith(TypeError, "paymentMethod.id: the value must be a BN instance");
+  });
+
+  it("must fail: invalid token ids for method 'tokens'", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "tokens", "badtokenid",
+      new web3.utils.BN("2000000000000000000")
+    )).to.be.rejectedWith(TypeError, "paymentMethod.ids: the values must be an array");
+  });
+
+  it("must fail: invalid token value for method 'native'", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      "badtokenvalue"
+    )).to.be.rejectedWith(TypeError, "paymentMethod.value: the value must be a BN instance");
+  });
+
+  it("must fail: invalid token value for method 'token'", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "token", WMATIC,
+      "badtokenvalue"
+    )).to.be.rejectedWith(TypeError, "paymentMethod.value: the value must be a BN instance");
+  });
+
+  it("must fail: invalid token values for method 'tokens'", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "tokens", [WMATIC],
+      "badtokenvalues"
+    )).to.be.rejectedWith(TypeError, "paymentMethod.values: the values must be an array");
   });
 });
