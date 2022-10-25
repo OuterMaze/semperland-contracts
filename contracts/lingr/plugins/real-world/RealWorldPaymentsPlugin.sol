@@ -86,8 +86,9 @@ contract RealWorldPaymentsPlugin is
      * Checks interface support both in MetaversePlugin and SignatureVerifier.
      */
     function supportsInterface(bytes4 _interfaceId) public view
-        override(MetaversePlugin, SignatureVerifier) returns (bool) {
-        return MetaversePlugin.supportsInterface(_interfaceId) || SignatureVerifier.supportsInterface(_interfaceId);
+        override(MetaversePlugin, RealWorldPaymentsReceptionMixin) returns (bool) {
+        return MetaversePlugin.supportsInterface(_interfaceId) ||
+               RealWorldPaymentsReceptionMixin.supportsInterface(_interfaceId);
     }
 
     /**

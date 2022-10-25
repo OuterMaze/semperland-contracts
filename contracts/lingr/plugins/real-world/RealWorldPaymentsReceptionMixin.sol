@@ -111,7 +111,7 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         } else {
             revert("RealWorldPaymentsPlugin: Unexpected incoming batch-transfer data");
         }
-        return 0xf23a6e61;
+        return IERC1155Receiver.onERC1155Received.selector;
     }
 
     /**
@@ -139,7 +139,16 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         } else {
             revert("RealWorldPaymentsPlugin: Unexpected incoming batch-transfer data");
         }
-        return 0xbc197c81;
+        return IERC1155Receiver.onERC1155BatchReceived.selector;
+    }
+
+    /**
+     * Checks interface support both in MetaversePlugin and SignatureVerifier.
+     */
+    function supportsInterface(bytes4 _interfaceId) public view
+        virtual override(IERC165, SignatureVerifier) returns (bool) {
+        return _interfaceId == type(IERC1155Receiver).interfaceId ||
+               SignatureVerifier.supportsInterface(_interfaceId);
     }
 
     /**
