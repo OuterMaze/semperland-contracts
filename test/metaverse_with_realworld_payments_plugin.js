@@ -125,6 +125,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     // Also get the default tokens:
     WMATIC = await definitionPlugin.WMATICType();
     BEAT = await definitionPlugin.BEATType();
+    // And wrap some MATIC for accounts[9]
+    let amount = new BN("20000000000000000000");
+    await web3.eth.sendTransaction({ from: accounts[9], to: mintingPlugin.address, value: amount });
   });
 
   it("must have the expected title", async function() {
@@ -153,12 +156,18 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
    * @param paymentId The id, or ids, of the payment. Not used for native payment.
    * @param paymentValue The value, or values, of the payment.
    * @param tamperUrlData An optional function to "hack" the tamper data.
+   * @param erc1155Address The address of the ERC1155 contract.
+   * @param erc1155ABI The ABI of the ERC1155 contract.
+   * @param paymentsAddress The address of the payments contract.
+   * @param paymentsABI The ABI of the payments contract.
+   * @param executorAddress The customer that will execute this query
+   *   (in this case, this only serves for dryRun (gas estimation)).
    * @returns {Promise<void>} Just a promise to be awaited for
    */
   async function makePaymentAndThenParseIt(
       web3, domainForMakingPayment, domainForParsingPayment, signer, timestamp, dueTime, toAddress,
       reference, description, brandAddress, rewardIds, rewardValues, paymentType, paymentId, paymentValue,
-      tamperUrlData
+      tamperUrlData, erc1155Address, erc1155ABI, paymentsAddress, paymentsABI, executorAddress
   ) {
     let payment = {
       type: paymentType
@@ -276,6 +285,11 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "values are " + JSON.stringify(obj.args.rewardValues) + " and the final values are " +
       JSON.stringify(rewardValues)
     );
+
+    let run = await payments.executePaymentOrderConfirmationCall(
+      obj, web3, executorAddress, erc1155Address, erc1155ABI, paymentsAddress, paymentsABI, true
+    );
+    console.log("dry run result:", run);
   }
 
   it("must validate: good payment, native, no rewards", async function() {
@@ -284,7 +298,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     );
   });
 
@@ -294,7 +310,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", WMATIC,
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     );
   });
 
@@ -304,7 +322,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
-      [new web3.utils.BN("2000000000000000000")]
+      [new web3.utils.BN("2000000000000000000")], null,
+      economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
     );
   });
 
@@ -314,7 +334,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
-      "native", null, new web3.utils.BN("2000000000000000000")
+      "native", null, new web3.utils.BN("2000000000000000000"),
+      null, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
     );
   });
 
@@ -324,7 +346,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
-      "token", WMATIC, new web3.utils.BN("2000000000000000000")
+      "token", WMATIC, new web3.utils.BN("2000000000000000000"), null,
+      economy.address, economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     );
   });
 
@@ -334,7 +358,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
-      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
+      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")],
+      null, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
     );
   });
 
@@ -344,7 +370,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
-      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
+      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")],
+      null, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
     )).to.be.rejectedWith(TypeError, "domain: the value must be of string type");
   });
 
@@ -354,7 +382,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
-      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
+      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")],
+      null, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
     )).to.be.rejectedWith(Error, "It does not start with: payto://lingr.com/real-world-payments?data=");
   });
 
@@ -364,7 +394,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "0xacb7def96172617299ab987c8bb8e90c0098aedc", dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
-      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
+      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")],
+      null, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
     )).to.be.rejectedWith(Error, "Returned error: cannot sign data; no private key");
   });
 
@@ -374,7 +406,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, "0xinvalidaddress",
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
-      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")]
+      "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")],
+      null, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
     )).to.be.rejectedWith(TypeError, "toAddress: the value must be a valid address");
   });
 
@@ -384,7 +418,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       1, "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     )).to.be.rejectedWith(TypeError, "reference: the value must be of string type");
   });
 
@@ -394,7 +430,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", 1, constants.ZERO_ADDRESS,
       [], [], "native", null,
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     )).to.be.rejectedWith(TypeError, "description: the value must be of string type");
   });
 
@@ -404,7 +442,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", "0xinvalidaddress",
       [], [], "native", null,
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     )).to.be.rejectedWith(TypeError, "brandAddress: the value must be a valid address");
   });
 
@@ -414,7 +454,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [new BN("1")], [], "native", null,
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     )).to.be.rejectedWith(Error, "Reward ids and values length mismatch");
   });
 
@@ -424,7 +466,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       "", [], "native", null,
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     )).to.be.rejectedWith(TypeError, "rewardIds: the values must be an array");
 
     await expect(makePaymentAndThenParseIt(
@@ -432,7 +476,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [""], [new web3.utils.BN("1")], "native", null,
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     )).to.be.rejectedWith(Error, "rewardIds.0: the value must be a BN instance");
   });
 
@@ -442,7 +488,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], "", "native", null,
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     )).to.be.rejectedWith(TypeError, "rewardValues: the values must be an array");
 
     await expect(makePaymentAndThenParseIt(
@@ -450,7 +498,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [new web3.utils.BN("1")], [""], "native", null,
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     )).to.be.rejectedWith(TypeError, "rewardValues.0: the value must be a BN instance");
   });
 
@@ -460,7 +510,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "invalid", null,
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     )).to.be.rejectedWith(Error, "Invalid payment method type: invalid");
   });
 
@@ -470,7 +522,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", "badtokenid",
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     )).to.be.rejectedWith(TypeError, "paymentMethod.id: the value must be a BN instance");
   });
 
@@ -480,7 +534,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", "badtokenid",
-      new web3.utils.BN("2000000000000000000")
+      new web3.utils.BN("2000000000000000000"), null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
     )).to.be.rejectedWith(TypeError, "paymentMethod.ids: the values must be an array");
   });
 
@@ -490,7 +546,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
-      "badtokenvalue"
+      "badtokenvalue", null, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi, accounts[9]
     )).to.be.rejectedWith(TypeError, "paymentMethod.value: the value must be a BN instance");
   });
 
@@ -500,7 +557,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", WMATIC,
-      "badtokenvalue"
+      "badtokenvalue", null, economy.address, economy.abi,
+      realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi, accounts[9]
     )).to.be.rejectedWith(TypeError, "paymentMethod.value: the value must be a BN instance");
   });
 
@@ -510,7 +568,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
-      "badtokenvalues"
+      "badtokenvalues", null, economy.address, economy.abi,
+      realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi, accounts[9]
     )).to.be.rejectedWith(TypeError, "paymentMethod.values: the values must be an array");
   });
 });
