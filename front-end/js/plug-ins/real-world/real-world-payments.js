@@ -308,7 +308,7 @@ async function executePaymentOrderConfirmationCall(obj, web3, address, erc1155, 
         case 'token':
             method = new web3.eth.Contract(erc1155ABI, erc1155).methods.safeTransferFrom(
                 address, rwp, obj.id, obj.value, web3.eth.abi.encodeParameters(
-                    ['bytes', 'bytes'], [PAY, web3.eth.abi.encodeParameters(
+                    ['bytes4', 'bytes'], [PAY, web3.eth.abi.encodeParameters(
                         ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes'],
                         [obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
                          obj.args.rewardIds, obj.args.rewardValues, obj.args.paymentSignature]
@@ -320,7 +320,7 @@ async function executePaymentOrderConfirmationCall(obj, web3, address, erc1155, 
         case 'tokens':
             method = new web3.eth.Contract(erc1155ABI, erc1155).methods.safeBatchTransferFrom(
                 address, rwp, obj.ids, obj.values, web3.eth.abi.encodeParameters(
-                    ['bytes', 'bytes'], [PAY_BATCH, web3.eth.abi.encodeParameters(
+                    ['bytes4', 'bytes'], [PAY_BATCH, web3.eth.abi.encodeParameters(
                         ['address', 'bytes32', 'uint256', 'address', 'uint256[]', 'uint256[]', 'bytes'],
                         [obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
                          obj.args.rewardIds, obj.args.rewardValues, obj.args.paymentSignature]
