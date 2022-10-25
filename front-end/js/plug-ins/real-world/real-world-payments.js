@@ -299,7 +299,7 @@ async function executePaymentOrderConfirmationCall(obj, web3, address, erc1155, 
 
     switch(obj.type) {
         case 'native':
-            method = new web3.eth.Contract(rwpABI, rwp).methods.payNative(
+            method = new web3.eth.Contract(rwpABI, rwp).methods.pay(
                 obj.args.toAddress, paymentId, obj.args.dueDate, obj.args.brandAddress,
                 obj.args.rewardIds, obj.args.rewardValues, obj.args.paymentSignature
             );
