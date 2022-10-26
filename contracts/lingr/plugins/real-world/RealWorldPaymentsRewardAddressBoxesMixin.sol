@@ -14,25 +14,9 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
  */
 abstract contract RealWorldPaymentsRewardAddressBoxesMixin is Context {
     /**
-     * Native and ERC1155 balances for a given address.
-     */
-    struct Box {
-        /**
-         * Balances of ERC1155 tokens in the related
-         * economy contract.
-         */
-        mapping(uint256 => uint256) tokens;
-
-        /**
-         * Balance of native tokens in this contract.
-         */
-        uint256 native;
-    }
-
-    /**
      * Balances for each address.
      */
-    mapping(address => Box) public balances;
+    mapping(address => mapping(uint256 => uint256)) public balances;
 
     /**
      * The Economy contract this trait is related to.
@@ -40,17 +24,10 @@ abstract contract RealWorldPaymentsRewardAddressBoxesMixin is Context {
     function _economy() internal view virtual returns (address);
 
     /**
-     * Adds native balance to the local balances of the sender address.
-     */
-    function fundNative() external payable {
-        balances[_msgSender()].native += msg.value;
-    }
-
-    /**
      * Adds token balance to the local balances of the source address.
      */
     function _fundToken(address _from, uint256 _id, uint256 _value) internal {
-        balances[_from].tokens[_id] += _value;
+        balances[_from][_id] += _value;
     }
 
     /**
@@ -59,7 +36,7 @@ abstract contract RealWorldPaymentsRewardAddressBoxesMixin is Context {
     function _fundTokens(address _from, uint256[] calldata _ids, uint256[] calldata _values) internal {
         uint256 length = _ids.length;
         for(uint256 index = 0; index < length; index++) {
-            balances[_from].tokens[_ids[index]] += _values[index];
+            balances[_from][_ids[index]] += _values[index];
         }
     }
 
@@ -69,18 +46,8 @@ abstract contract RealWorldPaymentsRewardAddressBoxesMixin is Context {
     function _defundTokens(address _from, uint256[] memory _ids, uint256[] memory _values) internal {
         uint256 length = _ids.length;
         for(uint256 index = 0; index < length; index++) {
-            balances[_from].tokens[_ids[index]] -= _values[index];
+            balances[_from][_ids[index]] -= _values[index];
         }
-    }
-
-    /**
-     * Withdraws native balance from the local balances of the sender address.
-     */
-    function withdrawNative(uint256 _balance) external {
-        address sender = _msgSender();
-        balances[sender].native -= _balance;
-        (bool sent,) = sender.call{value: _balance}("");
-        require(sent, "RealWorldPaymentsPlugin: native withdraw failed");
     }
 
     /**
@@ -88,7 +55,7 @@ abstract contract RealWorldPaymentsRewardAddressBoxesMixin is Context {
      */
     function withdrawToken(uint256 _id, uint256 _value) external {
         address sender = _msgSender();
-        balances[sender].tokens[_id] -= _value;
+        balances[sender][_id] -= _value;
         IERC1155(_economy()).safeTransferFrom(
             address(this), sender, _id, _value, "RealWorldPaymentsPlugin: withdraw"
         );
@@ -105,7 +72,7 @@ abstract contract RealWorldPaymentsRewardAddressBoxesMixin is Context {
         );
         address sender = _msgSender();
         for(uint256 index = 0; index < length; index++) {
-            balances[sender].tokens[_ids[index]] -= _values[index];
+            balances[sender][_ids[index]] -= _values[index];
         }
         IERC1155(_economy()).safeBatchTransferFrom(
             address(this), sender, _ids, _values, "RealWorldPaymentsPlugin: withdraw"

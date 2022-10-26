@@ -211,6 +211,7 @@ function parsePaymentOrderURI(domain, web3, url) {
                 {type: 'uint256[]', value: obj.args.rewardValues},
                 {type: 'uint256', value: obj.value},
             );
+            console.log("Message hash ('native') being validated on arrival:", messageHash);
             recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
             if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
                 throw new Error("Signature check failed");
@@ -236,6 +237,13 @@ function parsePaymentOrderURI(domain, web3, url) {
                 {type: 'uint256', value: obj.id},
                 {type: 'uint256', value: obj.value},
             );
+            console.log("computed paymentId:", web3.utils.soliditySha3(
+                {type: 'address', value: obj.args.payment.posAddress},
+                {type: 'string', value: obj.args.payment.reference},
+                {type: 'string', value: obj.args.payment.description},
+                {type: 'uint256', value: obj.args.payment.now}
+            ));
+            console.log("Message hash ('token') being validated on arrival:", messageHash);
             recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
             if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
                 throw new Error("Signature check failed");
@@ -264,6 +272,7 @@ function parsePaymentOrderURI(domain, web3, url) {
                 {type: 'uint256[]', value: obj.ids},
                 {type: 'uint256[]', value: obj.values},
             );
+            console.log("Message hash ('tokens') being validated on arrival:", messageHash);
             recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
             if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
                 throw new Error("Signature check failed");

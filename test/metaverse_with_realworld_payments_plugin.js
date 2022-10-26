@@ -1,6 +1,7 @@
 const BrandRegistry = artifacts.require("BrandRegistry");
 const Economy = artifacts.require("Economy");
 const Metaverse = artifacts.require("Metaverse");
+const SimpleECDSASignatureVerifier = artifacts.require("SimpleECDSASignatureVerifier");
 const RealWorldPaymentsPlugin = artifacts.require("RealWorldPaymentsPlugin");
 const CurrencyDefinitionPlugin = artifacts.require("CurrencyDefinitionPlugin");
 const CurrencyMintingPlugin = artifacts.require("CurrencyMintingPlugin");
@@ -49,6 +50,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
   var brand2Currency1 = null;
   var WMATIC = null;
   var BEAT = null;
+  var GAS_COST = parseFloat(process.env.GAS_COST || "120000000000");
+  var NATIVE_PRICE = parseFloat(process.env.NATIVE_PRICE || "0.8");
 
   const BRAND_SIGN_PAYMENTS = web3.utils.soliditySha3("Plugins::RealWorldPayments::Brand::Payments::Sign");
 
@@ -72,8 +75,11 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     mintingPlugin = await CurrencyMintingPlugin.new(
       metaverse.address, definitionPlugin.address, accounts[9], { from: accounts[0] }
     );
+
     realWorldPaymentsPlugin = await RealWorldPaymentsPlugin.new(
-      metaverse.address, 30, accounts[9], [], { from: accounts[0] }
+      metaverse.address, 30, accounts[9], [
+        (await SimpleECDSASignatureVerifier.new({ from: accounts[0] })).address
+      ], { from: accounts[0] }
     );
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
@@ -127,7 +133,23 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     BEAT = await definitionPlugin.BEATType();
     // And wrap some MATIC for accounts[9]
     let amount = new BN("20000000000000000000");
-    await web3.eth.sendTransaction({ from: accounts[9], to: mintingPlugin.address, value: amount });
+    await web3.eth.sendTransaction({from: accounts[9], to: mintingPlugin.address, value: amount});
+    // Also: mint some brand1currency1 to account 0 (also brand2currency1).
+    let cost = new BN("1000000000000000000");
+    amount = new BN("100000000000000000000");
+    await mintingPlugin.setCurrencyMintAmount(amount, {from: accounts[0]});
+    await mintingPlugin.setCurrencyMintCost(cost, {from: accounts[0]});
+    await mintingPlugin.mintBrandCurrency(accounts[0], brand1Currency1, 1, {from: accounts[1], value: cost});
+    await mintingPlugin.mintBrandCurrency(accounts[0], brand2Currency1, 1, {from: accounts[2], value: cost});
+    // Finally: fund the rewards pot.
+    await economy.safeTransferFrom(
+      accounts[0], realWorldPaymentsPlugin.address, brand1Currency1, amount, payments.FUND_CALL,
+      {from: accounts[0]}
+    );
+    await economy.safeBatchTransferFrom(
+      accounts[0], realWorldPaymentsPlugin.address, [brand2Currency1], [amount], payments.FUND_BATCH_CALL,
+      {from: accounts[0]}
+    );
   });
 
   it("must have the expected title", async function() {
@@ -286,10 +308,10 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       JSON.stringify(rewardValues)
     );
 
-    let run = await payments.executePaymentOrderConfirmationCall(
+    let gas = await payments.executePaymentOrderConfirmationCall(
       obj, web3, executorAddress, erc1155Address, erc1155ABI, paymentsAddress, paymentsABI, true
     );
-    console.log("dry run result:", run);
+    console.log("dry run result:", gas * GAS_COST / 1000000000000000000 * NATIVE_PRICE);
   }
 
   it("must validate: good payment, native, no rewards", async function() {
