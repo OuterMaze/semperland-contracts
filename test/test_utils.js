@@ -10,13 +10,26 @@ const {
  * Returns the total gas of a transaction from its response.
  * @param web3 The web3 client to use for gas calculation
  * @param response The response
- * @returns the total gas, as a BN instance
+ * @returns BN the total gas, as a BN instance
  */
 async function txTotalGas(web3, response) {
     let gasUsed = new BN(response.receipt.gasUsed);
     let nativeTx = await web3.eth.getTransaction(response.tx);
     let gasPrice = new BN(nativeTx.gasPrice);
     return gasUsed.mul(gasPrice);
+}
+
+/**
+ * Returns the gas details of a transaction from its response.
+ * @param web3 The web3 client to use for gas calculation
+ * @param response The response
+ * @returns object total gas, as a BN instance
+ */
+async function txGasDetails(web3, response) {
+    let gasUsed = new BN(response.receipt.gasUsed);
+    let nativeTx = await web3.eth.getTransaction(response.tx);
+    let gasPrice = new BN(nativeTx.gasPrice);
+    return {gas: gasUsed.toString(), gasPrice: gasPrice.toString()};
 }
 
 /**
@@ -59,4 +72,4 @@ function jsonUrl(payload) {
 }
 
 
-module.exports = { atob, btoa, jsonUrl, revertReason, txTotalGas };
+module.exports = { atob, btoa, jsonUrl, revertReason, txTotalGas, txGasDetails };
