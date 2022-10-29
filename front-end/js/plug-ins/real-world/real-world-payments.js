@@ -237,12 +237,6 @@ function parsePaymentOrderURI(domain, web3, url) {
                 {type: 'uint256', value: obj.id},
                 {type: 'uint256', value: obj.value},
             );
-            console.log("computed paymentId:", web3.utils.soliditySha3(
-                {type: 'address', value: obj.args.payment.posAddress},
-                {type: 'string', value: obj.args.payment.reference},
-                {type: 'string', value: obj.args.payment.description},
-                {type: 'uint256', value: obj.args.payment.now}
-            ));
 
             recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
             if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
@@ -294,9 +288,12 @@ function parsePaymentOrderURI(domain, web3, url) {
  * @param rwpABI The ABI of the Real-World Payments contract.
  * @param dryRun If true, then the transaction will not be executed and, instead of a
  *   transaction object, an integer will be returned: the estimated gas cost.
+ * @param gas An object {[amount], [price]} detailing the gas to pay.
  * @returns Promise<object|number> The resulting transaction or gas amount (depends on dryRun).
  */
-async function executePaymentOrderConfirmationCall(obj, web3, address, erc1155, erc1155ABI, rwp, rwpABI, dryRun) {
+async function executePaymentOrderConfirmationCall(
+    obj, web3, address, erc1155, erc1155ABI, rwp, rwpABI, dryRun, gas
+) {
     let paymentId = web3.utils.soliditySha3(
         {type: 'address', value: obj.args.payment.posAddress},
         {type: 'string', value: obj.args.payment.reference},
@@ -344,6 +341,9 @@ async function executePaymentOrderConfirmationCall(obj, web3, address, erc1155, 
     if (dryRun) {
         return await method.estimateGas(sendArgs);
     } else {
+        gas = gas || {};
+        if (gas.amount) sendArgs.gas = gas.amount;
+        if (gas.price) sendArgs.gasPrice = gas.price;
         return await method.send(sendArgs);
     }
 }
