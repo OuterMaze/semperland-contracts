@@ -170,16 +170,16 @@ function parsePaymentOrderURI(domain, web3, url) {
     types.requireAddress('obj.args.payment.posAddress', attributes.getAttr(obj, 'args.payment.posAddress'));
     types.requireString('obj.args.payment.reference', attributes.getAttr(obj, 'args.payment.reference'));
     types.requireString('obj.args.payment.description', attributes.getAttr(obj, 'args.payment.description'));
-    types.requireNumericString('obj.args.payment.now', attributes.getAttr(obj, 'args.payment.now'));
+    types.requireUIntString('obj.args.payment.now', attributes.getAttr(obj, 'args.payment.now'));
     types.requireAddress('obj.args.toAddress', attributes.getAttr(obj, 'args.toAddress'));
-    types.requireNumericString('obj.args.dueDate', attributes.getAttr(obj, 'args.dueDate'));
+    types.requireUIntString('obj.args.dueDate', attributes.getAttr(obj, 'args.dueDate'));
     types.requireAddress('obj.args.brandAddress', attributes.getAttr(obj, 'args.brandAddress'));
     types.requireArray(
-        types.requireNumericString,
+        types.requireUIntString,
         'obj.args.rewardIds', attributes.getAttr(obj, 'args.rewardIds')
     );
     types.requireArray(
-        types.requireNumericString,
+        types.requireUIntString,
         'obj.args.rewardValues', attributes.getAttr(obj, 'args.rewardValues')
     );
     if (obj.args.rewardIds.length !== obj.args.rewardValues.length) {
@@ -195,7 +195,7 @@ function parsePaymentOrderURI(domain, web3, url) {
 
     switch(obj.type) {
         case 'native':
-            types.requireNumericString('obj.value', obj.value);
+            types.requireUIntString('obj.value', obj.value);
             obj.value = toBN(obj.value);
             messageHash = web3.utils.soliditySha3(
                 {type: 'address', value: obj.args.toAddress},
@@ -211,15 +211,15 @@ function parsePaymentOrderURI(domain, web3, url) {
                 {type: 'uint256[]', value: obj.args.rewardValues},
                 {type: 'uint256', value: obj.value},
             );
-            console.log("Message hash ('native') being validated on arrival:", messageHash);
+
             recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
             if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
                 throw new Error("Signature check failed");
             }
             return obj;
         case 'token':
-            types.requireNumericString('obj.id', obj.id);
-            types.requireNumericString('obj.value', obj.value);
+            types.requireUIntString('obj.id', obj.id);
+            types.requireUIntString('obj.value', obj.value);
             obj.id = toBN(obj.id);
             obj.value = toBN(obj.value);
             messageHash = web3.utils.soliditySha3(
@@ -243,15 +243,15 @@ function parsePaymentOrderURI(domain, web3, url) {
                 {type: 'string', value: obj.args.payment.description},
                 {type: 'uint256', value: obj.args.payment.now}
             ));
-            console.log("Message hash ('token') being validated on arrival:", messageHash);
+
             recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
             if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
                 throw new Error("Signature check failed");
             }
             return obj;
         case 'tokens':
-            types.requireArray(types.requireNumericString, 'obj.ids', obj.ids);
-            types.requireArray(types.requireNumericString, 'obj.values', obj.values);
+            types.requireArray(types.requireUIntString, 'obj.ids', obj.ids);
+            types.requireArray(types.requireUIntString, 'obj.values', obj.values);
             if (obj.ids.length !== obj.values.length) {
                 throw new Error("Payment ids and values length mismatch");
             }
@@ -272,7 +272,7 @@ function parsePaymentOrderURI(domain, web3, url) {
                 {type: 'uint256[]', value: obj.ids},
                 {type: 'uint256[]', value: obj.values},
             );
-            console.log("Message hash ('tokens') being validated on arrival:", messageHash);
+
             recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
             if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
                 throw new Error("Signature check failed");

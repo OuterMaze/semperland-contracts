@@ -37,12 +37,21 @@ function requireRx(field, rx, hint, value) {
 }
 
 /**
- * Requires a string to be numeric.
+ * Requires a string to be an unsigned integer.
  * @param field The name of the field, path or argument to validate.
  * @param value The value to test.
  */
-function requireNumericString(field, value) {
-    requireRx(field, /^\d+$/, "numeric", value);
+function requireUIntString(field, value) {
+    requireRx(field, /^\d+$/, "unsigned integer", value);
+}
+
+/**
+ * Requires a string to be an integer.
+ * @param field The name of the field, path or argument to validate.
+ * @param value The value to test.
+ */
+function requireIntString(field, value) {
+    requireRx(field, /^-?\d+$/, "integer", value);
 }
 
 /**
@@ -214,7 +223,8 @@ module.exports = {
     requireBool: requireBool,
     requireString: requireString,
     requireRx: requireRx,
-    requireNumericString: requireNumericString,
+    requireUIntString: requireUIntString,
+    requireIntString: requireIntString,
     requireAddress: requireAddress,
     requireBytes: requireBytes,
     requireBytes32: requireBytes32,
