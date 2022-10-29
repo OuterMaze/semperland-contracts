@@ -594,4 +594,136 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi, accounts[9]
     )).to.be.rejectedWith(TypeError, "paymentMethod.values: the values must be an array");
   });
+
+  // The "url tampering" tests will start here.
+
+  it("must fail: invalid or non-matching PoS address", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.payment.posAddress = 1;
+      }, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
+    )).to.be.rejectedWith(TypeError, "obj.args.payment.posAddress: the value must be a valid address");
+
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.payment.posAddress = accounts[5];
+      }, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
+    )).to.be.rejectedWith(Error, "Signature check failed");
+  });
+
+  it("must fail: invalid or non-matching target address", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.toAddress = 1;
+      }, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
+    )).to.be.rejectedWith(TypeError, "obj.args.toAddress: the value must be a valid address");
+
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.toAddress = accounts[5];
+      }, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
+    )).to.be.rejectedWith(Error, "Signature check failed");
+  });
+
+  it("must fail: invalid or non-matching reference", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.payment.reference = 1;
+      }, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
+    )).to.be.rejectedWith(TypeError, "obj.args.payment.reference: the value must be of string type");
+
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.payment.reference = "A tampered reference";
+      }, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
+    )).to.be.rejectedWith(Error, "Signature check failed");
+  });
+
+  it("must fail: invalid or non-matching description", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.payment.description = 1;
+      }, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
+    )).to.be.rejectedWith(TypeError, "obj.args.payment.description: the value must be of string type");
+
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.payment.description = "A tampered description";
+      }, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
+    )).to.be.rejectedWith(Error, "Signature check failed");
+  });
+
+  it("must fail: invalid or non-matching brand address", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.brandAddress = 1;
+      }, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
+    )).to.be.rejectedWith(TypeError, "obj.args.brandAddress: the value must be a valid address");
+
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.brandAddress = accounts[5];
+      }, economy.address,
+      economy.abi, realWorldPaymentsPlugin.address, realWorldPaymentsPlugin.abi,
+      accounts[9]
+    )).to.be.rejectedWith(Error, "Signature check failed");
+  });
 });
