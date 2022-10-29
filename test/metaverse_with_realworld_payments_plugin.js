@@ -814,8 +814,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       web3, "lingr.com", "lingr.com",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
-      [], [], "native", null,
-      new web3.utils.BN("2000000000000000000"), function(obj) {
+      [brand1Currency1], [new web3.utils.BN("1000000000000000000")],
+      "native", null, new web3.utils.BN("2000000000000000000"),
+      function(obj) {
         obj.args.rewardValues = [new web3.utils.BN("4")];
       }, economy.address, economy.abi, realWorldPaymentsPlugin.address,
       realWorldPaymentsPlugin.abi, accounts[9]
@@ -825,8 +826,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       web3, "lingr.com", "lingr.com",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
-      [], [], "native", null,
-      new web3.utils.BN("2000000000000000000"), function(obj) {
+      [brand1Currency1], [new web3.utils.BN("1000000000000000000")],
+      "native", null, new web3.utils.BN("2000000000000000000"),
+      function(obj) {
         obj.args.rewardIds = [new web3.utils.BN("3")];
       }, economy.address, economy.abi, realWorldPaymentsPlugin.address,
       realWorldPaymentsPlugin.abi, accounts[9]
@@ -836,8 +838,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       web3, "lingr.com", "lingr.com",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
-      [], [], "native", null,
-      new web3.utils.BN("2000000000000000000"), function(obj) {
+      [brand1Currency1], [new web3.utils.BN("1000000000000000000")],
+      "native", null, new web3.utils.BN("2000000000000000000"),
+      function(obj) {
         obj.args.rewardIds = [new web3.utils.BN("3")];
         obj.args.rewardValues = [new web3.utils.BN("4")];
       }, economy.address, economy.abi, realWorldPaymentsPlugin.address,
