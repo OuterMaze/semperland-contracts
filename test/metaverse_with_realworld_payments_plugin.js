@@ -693,6 +693,76 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(Error, "Signature check failed");
   });
 
+  it("must fail: tamper -- invalid or non-matching stamp", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.payment.now = 1;
+      }, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
+    )).to.be.rejectedWith(TypeError, "obj.args.payment.now: the value must be of string type");
+
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.payment.now = "foo";
+      }, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
+    )).to.be.rejectedWith(TypeError, "obj.args.payment.now: the value must satisfy pattern: unsigned integer");
+
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.payment.now = "3";
+      }, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
+    )).to.be.rejectedWith(Error, "Signature check failed");
+  });
+
+  it("must fail: tamper -- invalid or non-matching due date", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.dueDate = 1;
+      }, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
+    )).to.be.rejectedWith(TypeError, "obj.args.dueDate: the value must be of string type");
+
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.dueDate = "foo";
+      }, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
+    )).to.be.rejectedWith(TypeError, "obj.args.dueDate: the value must satisfy pattern: unsigned integer");
+
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "native", null,
+      new web3.utils.BN("2000000000000000000"), function(obj) {
+        obj.args.dueDate = "3";
+      }, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
+    )).to.be.rejectedWith(Error, "Signature check failed");
+  });
+
   it("must fail: tamper -- invalid or non-matching brand address", async function() {
     await expect(makePaymentAndThenParseIt(
       web3, "lingr.com", "lingr.com",
@@ -1094,4 +1164,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       realWorldPaymentsPlugin.abi, accounts[9]
     )).to.be.rejectedWith(Error, "Signature check failed");
   });
+
+  // The true execution tests start here.
+
+
 });
