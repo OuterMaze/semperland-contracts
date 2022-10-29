@@ -1080,4 +1080,18 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       realWorldPaymentsPlugin.abi, accounts[9]
     )).to.be.rejectedWith(Error, "Signature check failed");
   });
+
+  it("must fail: tamper -- signature check", async function() {
+    await expect(makePaymentAndThenParseIt(
+      web3, "lingr.com", "lingr.com",
+      accounts[0], dates.timestamp(), 300, accounts[1],
+      "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
+      [], [], "tokens", [WMATIC],
+      [new web3.utils.BN("2000000000000000000")], function(obj) {
+        obj.args.paymentSignature = "0x1212121212121212121212121212121212121212121212121212121212121212" +
+                                    "121212121212121212121212121212121212121212121212121212121212121212";
+      }, economy.address, economy.abi, realWorldPaymentsPlugin.address,
+      realWorldPaymentsPlugin.abi, accounts[9]
+    )).to.be.rejectedWith(Error, "Signature check failed");
+  });
 });
