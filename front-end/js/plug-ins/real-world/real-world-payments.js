@@ -287,12 +287,14 @@ function parsePaymentOrderURI(domain, web3, url) {
  * @param rwp The address of a Real-World Payments contract.
  * @param rwpABI The ABI of the Real-World Payments contract.
  * @param dryRun If true, then the transaction will not be executed and, instead of a
- *   transaction object, an integer will be returned: the estimated gas cost.
+ *   transaction object, an integer will be returned: the estimated gas cost.address
  * @param gas An object {[amount], [price]} detailing the gas to pay.
+ * @param signer An address which may be different to the address from where the
+ *   funds can come from. Only meaningful for the IERC-1155 calls.
  * @returns Promise<object|number> The resulting transaction or gas amount (depends on dryRun).
  */
 async function executePaymentOrderConfirmationCall(
-    obj, web3, address, erc1155, erc1155ABI, rwp, rwpABI, dryRun, gas
+    obj, web3, address, erc1155, erc1155ABI, rwp, rwpABI, dryRun, gas, signer
 ) {
     let paymentId = web3.utils.soliditySha3(
         {type: 'address', value: obj.args.payment.posAddress},
@@ -306,6 +308,7 @@ async function executePaymentOrderConfirmationCall(
     );
     let method = null;
     let sendArgs = null;
+    signer = signer || address;
 
     switch(obj.type) {
         case 'native':
@@ -314,7 +317,7 @@ async function executePaymentOrderConfirmationCall(
                 obj.args.rewardIds, obj.args.rewardValues, obj.args.paymentSignature,
                 paymentAndSignerAddressHash
             );
-            sendArgs = {from: address, value: obj.value};
+            sendArgs = {from: signer, value: obj.value};
             break;
         case 'token':
             method = new web3.eth.Contract(erc1155ABI, erc1155).methods.safeTransferFrom(
@@ -327,7 +330,7 @@ async function executePaymentOrderConfirmationCall(
                     )]
                 )
             );
-            sendArgs = {from: address};
+            sendArgs = {from: signer};
             break;
         case 'tokens':
             method = new web3.eth.Contract(erc1155ABI, erc1155).methods.safeBatchTransferFrom(
@@ -340,7 +343,7 @@ async function executePaymentOrderConfirmationCall(
                     )]
                 )
             );
-            sendArgs = {from: address};
+            sendArgs = {from: signer};
             break;
         default:
             throw new Error("Invalid payment method type: " + obj.type);
