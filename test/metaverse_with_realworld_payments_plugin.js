@@ -1343,18 +1343,14 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             );
           }
 
-          let gasAmount = new web3.utils.BN("200000");
+          let gasAmount = new web3.utils.BN("300000");
           let tx = await payments.executePaymentOrderConfirmationCall(
             obj, web3, accounts[9], economy.address, economy.abi, realWorldPaymentsPlugin.address,
             realWorldPaymentsPlugin.abi, false, {amount: gasAmount}
           );
-          let wrappedTx = {
-            receipt: {
-              gasUsed: tx.gasUsed,
-            },
-            tx: tx.transactionHash
-          }
-          console.log("TX gas details (" + settingsCaption + "):", await txGasDetails(web3, wrappedTx));
+          console.log(
+            "TX price (USD for " + settingsCaption + "):", tx.gasUsed * GAS_COST / 1000000000000000000 * NATIVE_PRICE
+          );
 
           // Unset BRAND_SIGN_PAYMENTS to accounts[0] in the brand.
           if (brandPermissionGranter) {
