@@ -85,6 +85,15 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
     }
 
     /**
+     * Verifies the due date of the payment is not expired.
+     */
+    function _verifyDueDate(uint256 _dueDate) private {
+        require(
+            _dueDate >= block.timestamp, "RealWorldPaymentsPlugin: expired payment"
+        )  ;
+    }
+
+    /**
      * Verifies the signer address using a hash comparison.
      */
     function _verifySigningAddress(
@@ -111,6 +120,7 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         } else if (selector == PAY_SELECTOR) {
             PaymentData memory paymentData = _parsePaymentData(innerData);
             address signer = _getTokenPaymentSigningAddress(_id, _value, paymentData);
+            _verifyDueDate(paymentData.dueDate);
             _verifySigningAddress(
                 signer, paymentData.paymentId, paymentData.paymentAndSignerAddressHash,
                 "RealWorldPaymentsPlugin: token payment signature verification failed"
@@ -146,6 +156,7 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         } else if (selector == PAY_BATCH_SELECTOR) {
             PaymentData memory paymentData = _parsePaymentData(innerData);
             address signer = _getBatchTokenPaymentSigningAddress(_ids, _values, paymentData);
+            _verifyDueDate(paymentData.dueDate);
             _verifySigningAddress(
                 signer, paymentData.paymentId, paymentData.paymentAndSignerAddressHash,
                 "RealWorldPaymentsPlugin: batch token payment signature verification failed"
@@ -185,6 +196,7 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
             paymentAndSignerAddressHash: _paymentAndSignerAddressHash
         });
         address signer = _getNativePaymentSigningAddress(msg.value, paymentData);
+        _verifyDueDate(paymentData.dueDate);
         _verifySigningAddress(
             signer, paymentData.paymentId, paymentData.paymentAndSignerAddressHash,
             "RealWorldPaymentsPlugin: native payment signature verification failed"

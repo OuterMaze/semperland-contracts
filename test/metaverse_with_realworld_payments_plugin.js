@@ -1226,7 +1226,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
                 description: params.description || ("My 1st Payment (" + settingsCaption + ")"),
                 now: now
               },
-              dueDate: now + params.dueTime || 30
+              dueDate: now + (params.dueTime || 30)
             }
           };
 
@@ -1262,7 +1262,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           }
 
           let messageHash = "";
-          let tokenValue = new web3.utils.BN("1000000000000000000");
+          let tokenValue = new web3.utils.BN("10000000000000000");
           obj.type = paymentType;
           switch(paymentType) {
             case "native":
@@ -1354,7 +1354,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           // Get the balance(s) of the payment token, and the fee.
           let targetTokenBalance;
           let feeReceiverTokenBalance;
-          let tokenValue = new web3.utils.BN("1000000000000000000");
+          let tokenValue = new web3.utils.BN("10000000000000000");
           let absoluteFee = tokenValue.mul(await realWorldPaymentsPlugin.paymentFee()).divn(1000);
           let absoluteRemainder = tokenValue.sub(absoluteFee);
           switch(paymentType) {
@@ -1484,6 +1484,10 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
               "RealWorldPaymentsPlugin: a brand is given for the payment, " +
               "but the signer is not allowed to sign into it"
             );
+
+            await brandRegistry.brandSetPermission(
+              obj.args.brandAddress, BRAND_SIGN_PAYMENTS, accounts[0], true, {from: brandPermissionGranter}
+            );
           }
         });
 
@@ -1547,6 +1551,20 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             );
           });
         }
+
+        it("must reject expired payments using settings: " + settingsCaption, async function() {
+          let obj = await buildTestPaymentObj(
+            {now: dates.timestamp() - 2000, reference: "00003", description: "third payment"}
+          );
+
+          await new Promise(function(r) { setTimeout(r, 300); });
+          await expectRevert(
+            payments.executePaymentOrderConfirmationCall(
+              obj, web3, accounts[9], economy.address, economy.abi, realWorldPaymentsPlugin.address,
+              realWorldPaymentsPlugin.abi, false, {amount: gasAmount}
+            ), "RealWorldPaymentsPlugin: expired payment"
+          );
+        });
       }
     }
   }
