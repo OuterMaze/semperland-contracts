@@ -1341,6 +1341,11 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             );
           }
 
+          // Get the balance of the reward token
+          let rewardTokenBalance = obj.args.rewardIds.length === 0 ? 0 : (
+              await realWorldPaymentsPlugin.balances(accounts[0], obj.args.rewardIds[0])
+          );
+
           // Execute a working transaction.
           let gasAmount = new web3.utils.BN("250000");
           let tx = await payments.executePaymentOrderConfirmationCall(
@@ -1350,6 +1355,18 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           console.log(
             "TX price (USD for " + settingsCaption + "):", tx.gasUsed * GAS_COST / 1000000000000000000 * NATIVE_PRICE
           );
+
+          // Assert on the rewards being delivered.
+          if (obj.args.rewardIds.length) {
+            let newRewardTokenBalance = await realWorldPaymentsPlugin.balances(accounts[0], obj.args.rewardIds[0]);
+            let expectedNewRewardTokenBalance = rewardTokenBalance.sub(obj.args.rewardValues[0]);
+            assert.isTrue(
+              newRewardTokenBalance.cmp(expectedNewRewardTokenBalance) === 0,
+              "The new reward token balance should be " + expectedNewRewardTokenBalance.toString() + " since that " +
+              "one results of subtracting " + obj.args.rewardValues[0].toString() + " from " +
+              rewardTokenBalance.toString() + ", but instead it is " + newRewardTokenBalance.toString()
+            );
+          }
 
           // Execute a REPEATED transaction. This causes an exception.
           await expectRevert(
