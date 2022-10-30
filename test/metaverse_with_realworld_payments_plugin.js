@@ -1255,7 +1255,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
               break;
             case "with-rewards":
               obj.args.rewardIds = [rewardToken];
-              obj.args.rewardValues = [new web3.utils.BN("1000000000000000000")];
+              obj.args.rewardValues = [params.rewardAmount || new web3.utils.BN("1000000000000000000")];
               break;
             default:
               throw new Error("Unexpected rewardsType value on test: " + rewardsType);
@@ -1508,30 +1508,65 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
         switch(paymentType) {
           case "native":
             callbacks.push(
-                ["changing value", function(obj) { obj.value = new web3.utils.BN("2000000000000000000"); }]
+              ["changing value", function(obj) { obj.value = new web3.utils.BN("2000000000000000000"); }]
             );
             errorMessage = "RealWorldPaymentsPlugin: native payment signature verification failed";
             break;
           case "token":
             callbacks.push(
-                ["changing value", function(obj) { obj.value = new web3.utils.BN("2000000000000000000"); }],
-                ["changing id", function(obj) { obj.id = BEAT; }]
+              ["changing value", function(obj) { obj.value = new web3.utils.BN("2000000000000000000"); }],
+              ["changing id", function(obj) { obj.id = BEAT; }]
             );
             errorMessage = "RealWorldPaymentsPlugin: token payment signature verification failed";
             break;
           case "tokens":
             callbacks.push(
-                ["changing values", function(obj) { obj.values = [new web3.utils.BN("2000000000000000000")]; }],
-                ["changing ids", function(obj) { obj.ids = [BEAT]; }]
+              ["changing values", function(obj) { obj.values = [new web3.utils.BN("2000000000000000000")]; }],
+              ["changing ids", function(obj) { obj.ids = [BEAT]; }]
             );
             errorMessage = "RealWorldPaymentsPlugin: batch token payment signature verification failed";
             break;
         }
 
-        // TODO add:
-        // TODO - for when no reward is used: the cases.
-        // TODO - for when a reward is used: the cases.
-        // TODO - the expired due date case.
+        if (rewardsType === "no-rewards") {
+          callbacks.push(
+            ["changing reward ids", function(obj) { obj.args.rewardIds = [BEAT, WMATIC]; }],
+            ["changing reward values", function(obj) {
+              obj.args.rewardIds = [
+                new web3.utils.BN("10000000000000000"), new web3.utils.BN("10000000000000000")
+              ];
+            }],
+            ["changing both reward values (breaking lengths)", function(obj) {
+              obj.args.rewardIds = [BEAT, WMATIC];
+              obj.args.rewardIds = [
+                new web3.utils.BN("10000000000000000")
+              ];
+            }],
+            ["changing both reward values", function(obj) {
+              obj.args.rewardIds = [BEAT, WMATIC];
+              obj.args.rewardIds = [
+                new web3.utils.BN("10000000000000000"), new web3.utils.BN("10000000000000000")
+              ];
+            }],
+          );
+        } else {
+          callbacks.push(
+            ["changing reward ids (keeping length)", function(obj) { obj.args.rewardIds = [
+              obj.args.rewardIds[0] === brand1Currency1 ? BEAT : brand1Currency1
+            ]; }],
+            ["changing reward ids (breaking length)", function(obj) { obj.args.rewardIds = [BEAT, WMATIC]; }],
+            ["changing reward values (keeping length)", function(obj) {
+              obj.args.rewardIds = [
+                new web3.utils.BN("20000000000000000")
+              ];
+            }],
+            ["changing reward values (breaking length)", function(obj) {
+              obj.args.rewardIds = [
+                new web3.utils.BN("10000000000000000"), new web3.utils.BN("10000000000000000")
+              ];
+            }],
+          );
+        }
 
         for(let callbackIndex = 0; callbackIndex < callbacks.length; callbackIndex++) {
           let callback = callbacks[callbackIndex];
@@ -1539,6 +1574,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           it("must validate data errors using settings " + settingsCaption + " and callback: '" + callback[0] + "'",
               async function() {
             let obj = await buildTestPaymentObj();
+            await new Promise(function(r) { setTimeout(r, 5); });
             // console.log("posAddress:", obj.args.payment.posAddress, "signature:", obj.args.paymentSignature);
             // console.log("callback:", callbacks[callbackIndex]);
             callback[1](obj);
@@ -1557,7 +1593,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             {now: dates.timestamp() - 2000, reference: "00003", description: "third payment"}
           );
 
-          await new Promise(function(r) { setTimeout(r, 300); });
+          await new Promise(function(r) { setTimeout(r, 5); });
           await expectRevert(
             payments.executePaymentOrderConfirmationCall(
               obj, web3, accounts[9], economy.address, economy.abi, realWorldPaymentsPlugin.address,
@@ -1565,6 +1601,26 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             ), "RealWorldPaymentsPlugin: expired payment"
           );
         });
+
+        if (rewardsType === "with-rewards") {
+          it("must reject payments with exceeding rewards: " + settingsCaption, async function() {
+            let obj = await buildTestPaymentObj(
+              {rewardAmount: new web3.utils.BN("1000000000000000000000")}
+            );
+
+            await new Promise(function(r) { setTimeout(r, 5); });
+            // This returns an empty native exception, which is converted to the opaque
+            // message: "ERC1155: transfer to non ERC1155Receiver implementer". In my
+            // opinion this is a platform limitation, but this is what we have so far.
+            // BUT FOR THE NATIVE TRANSACTIONS the message is "revert".
+            await expectRevert(
+              payments.executePaymentOrderConfirmationCall(
+                obj, web3, accounts[9], economy.address, economy.abi, realWorldPaymentsPlugin.address,
+                realWorldPaymentsPlugin.abi, false, {amount: gasAmount}
+              ), "er"
+            );
+          });
+        }
       }
     }
   }
