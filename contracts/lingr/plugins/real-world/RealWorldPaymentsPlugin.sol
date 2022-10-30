@@ -162,7 +162,7 @@ contract RealWorldPaymentsPlugin is
             if (paidData.matic != 0) {
                 (bool success,) = to.call{value: paidData.matic * (1000 - paymentFee) / 1000}("");
                 require(success, "RealWorldPaymentsPlugin: error while transferring native to the target address");
-                (success,) = paymentFeeEarningsReceiver.call{value: paidData.matic * (paymentFee / 1000)}("");
+                (success,) = paymentFeeEarningsReceiver.call{value: paidData.matic * paymentFee / 1000}("");
                 require(
                     success,
                     "RealWorldPaymentsPlugin: error while transferring native to the earnings receiver address"
