@@ -1322,8 +1322,6 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           return obj;
         }
 
-        // TODO these tests fail: {with-rewards} x {token, tokens}
-
         it("must validate: a good transaction using settings " + settingsCaption, async function f() {
           let obj = await buildTestPaymentObj();
           let brandPermissionGranter = null;
@@ -1343,7 +1341,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             );
           }
 
-          let gasAmount = new web3.utils.BN("300000");
+          // Execute a working transaction.
+          let gasAmount = new web3.utils.BN("250000");
           let tx = await payments.executePaymentOrderConfirmationCall(
             obj, web3, accounts[9], economy.address, economy.abi, realWorldPaymentsPlugin.address,
             realWorldPaymentsPlugin.abi, false, {amount: gasAmount}
@@ -1352,10 +1351,32 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             "TX price (USD for " + settingsCaption + "):", tx.gasUsed * GAS_COST / 1000000000000000000 * NATIVE_PRICE
           );
 
+          // Execute a REPEATED transaction. This causes an exception.
+          await expectRevert(
+            payments.executePaymentOrderConfirmationCall(
+              obj, web3, accounts[9], economy.address, economy.abi, realWorldPaymentsPlugin.address,
+              realWorldPaymentsPlugin.abi, false, {amount: gasAmount}
+            ),
+            "RealWorldPaymentsPlugin: payment already processed"
+          );
+
           // Unset BRAND_SIGN_PAYMENTS to accounts[0] in the brand.
           if (brandPermissionGranter) {
             await brandRegistry.brandSetPermission(
               obj.args.brandAddress, BRAND_SIGN_PAYMENTS, accounts[0], false, {from: brandPermissionGranter}
+            );
+
+            // Now try executing a different request, but the brand does not
+            // authorize the PoS.
+            obj.args.payment.reference = "000002-" + settingsCaption;
+            obj.args.payment.description = "My 2nd Payment (" + settingsCaption + ")";
+            await expectRevert(
+              payments.executePaymentOrderConfirmationCall(
+                obj, web3, accounts[9], economy.address, economy.abi, realWorldPaymentsPlugin.address,
+                realWorldPaymentsPlugin.abi, false, {amount: gasAmount}
+              ),
+              "RealWorldPaymentsPlugin: a brand is given for the payment, " +
+              "but the signer is not allowed to sign into it"
             );
           }
         });
