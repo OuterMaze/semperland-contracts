@@ -60,9 +60,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     // Set up the metaverse and two plug-ins.
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] });
-    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
+    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[8], { from: accounts[0] });
     definitionPlugin = await CurrencyDefinitionPlugin.new(
-      metaverse.address, accounts[9],
+      metaverse.address, accounts[8],
       "http://example.org/images/wmatic-image.png",
       "http://example.org/images/wmatic-16x16.png",
       "http://example.org/images/wmatic-32x32.png",
@@ -74,11 +74,11 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       { from: accounts[0] }
     );
     mintingPlugin = await CurrencyMintingPlugin.new(
-      metaverse.address, definitionPlugin.address, accounts[9], { from: accounts[0] }
+      metaverse.address, definitionPlugin.address, accounts[8], { from: accounts[0] }
     );
 
     realWorldPaymentsPlugin = await RealWorldPaymentsPlugin.new(
-      metaverse.address, 30, accounts[9], [
+      metaverse.address, 30, accounts[8], [
         (await SimpleECDSASignatureVerifier.new({ from: accounts[0] })).address
       ], { from: accounts[0] }
     );
@@ -1258,10 +1258,11 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           }
 
           let messageHash = "";
+          let tokenValue = new web3.utils.BN("1000000000000000000");
           obj.type = paymentType;
           switch(paymentType) {
             case "native":
-              obj.value = new web3.utils.BN("1000000000000000000");
+              obj.value = tokenValue;
               messageHash = web3.utils.soliditySha3(
                 {type: 'address', value: obj.args.toAddress},
                 {type: 'bytes32', value: web3.utils.soliditySha3(
@@ -1279,7 +1280,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
               break;
             case "token":
               obj.id = WMATIC;
-              obj.value = new web3.utils.BN("1000000000000000000");
+              obj.value = tokenValue;
               messageHash = web3.utils.soliditySha3(
                 {type: 'address', value: obj.args.toAddress},
                 {type: 'bytes32', value: web3.utils.soliditySha3(
@@ -1298,7 +1299,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
               break;
             case "tokens":
               obj.ids = [WMATIC];
-              obj.values = [new web3.utils.BN("1000000000000000000")];
+              obj.values = [tokenValue];
               messageHash = web3.utils.soliditySha3(
                 {type: 'address', value: obj.args.toAddress},
                 {type: 'bytes32', value: web3.utils.soliditySha3(
@@ -1341,10 +1342,37 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             );
           }
 
-          // Get the balance of the reward token
+          // Get the balance of the reward token.
           let rewardTokenBalance = obj.args.rewardIds.length === 0 ? 0 : (
               await realWorldPaymentsPlugin.balances(accounts[0], obj.args.rewardIds[0])
           );
+
+          // Get the balance(s) of the payment token, and the fee.
+          let targetTokenBalance;
+          let feeReceiverTokenBalance;
+          let tokenValue = new web3.utils.BN("1000000000000000000");
+          let absoluteFee = tokenValue.mul(await realWorldPaymentsPlugin.paymentFee()).divn(1000);
+          let absoluteRemainder = tokenValue.sub(absoluteFee);
+          switch(paymentType) {
+            case "native":
+              targetTokenBalance = new web3.utils.BN(await web3.eth.getBalance(obj.args.toAddress));
+              feeReceiverTokenBalance = new web3.utils.BN(await web3.eth.getBalance(
+                await realWorldPaymentsPlugin.paymentFeeEarningsReceiver()
+              ));
+              break;
+            case "token":
+              targetTokenBalance = await economy.balanceOf(obj.args.toAddress, obj.id);
+              feeReceiverTokenBalance = await economy.balanceOf(
+                await realWorldPaymentsPlugin.paymentFeeEarningsReceiver(), obj.id
+              );
+              break;
+            case "tokens":
+              targetTokenBalance = await economy.balanceOf(obj.args.toAddress, obj.ids[0]);
+              feeReceiverTokenBalance = await economy.balanceOf(
+                await realWorldPaymentsPlugin.paymentFeeEarningsReceiver(), obj.ids[0]
+              );
+              break;
+          }
 
           // Execute a working transaction.
           let gasAmount = new web3.utils.BN("250000");
@@ -1365,6 +1393,61 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
               "The new reward token balance should be " + expectedNewRewardTokenBalance.toString() + " since that " +
               "one results of subtracting " + obj.args.rewardValues[0].toString() + " from " +
               rewardTokenBalance.toString() + ", but instead it is " + newRewardTokenBalance.toString()
+            );
+          }
+
+          // Get the NEW balance(s) of the payment token, and the fee.
+          let newTargetTokenBalance;
+          let newFeeReceiverTokenBalance;
+          switch(paymentType) {
+            case "native":
+              newTargetTokenBalance = new web3.utils.BN(await web3.eth.getBalance(obj.args.toAddress));
+              newFeeReceiverTokenBalance = new web3.utils.BN(await web3.eth.getBalance(
+                await realWorldPaymentsPlugin.paymentFeeEarningsReceiver()
+              ));
+              break;
+            case "token":
+              newTargetTokenBalance = await economy.balanceOf(obj.args.toAddress, obj.id);
+              newFeeReceiverTokenBalance = await economy.balanceOf(
+                await realWorldPaymentsPlugin.paymentFeeEarningsReceiver(), obj.id
+              );
+              break;
+            case "tokens":
+              newTargetTokenBalance = await economy.balanceOf(obj.args.toAddress, obj.ids[0]);
+              newFeeReceiverTokenBalance = await economy.balanceOf(
+                await realWorldPaymentsPlugin.paymentFeeEarningsReceiver(), obj.ids[0]
+              );
+              break;
+          }
+
+          // Assert on the balances & fees.
+          if (brandType === "committed-brand") {
+            assert.isTrue(
+              newFeeReceiverTokenBalance.cmp(feeReceiverTokenBalance) === 0,
+              "The new and old fee receiver token balances must be the same, since the commission is 0%. " +
+              "Expected value: " + feeReceiverTokenBalance.toString() +
+              ", actual value: " + newFeeReceiverTokenBalance.toString()
+            );
+            assert.isTrue(
+              newTargetTokenBalance.cmp(targetTokenBalance.add(tokenValue)) === 0,
+              "The new and old target token balances must be the original plus the full token value, since " +
+              "the commission is 0%. " +
+              "Expected value: " + targetTokenBalance.toString() + " + " + tokenValue.toString() +
+              ", actual value: " + newTargetTokenBalance.toString()
+            );
+          } else {
+            assert.isTrue(
+              newFeeReceiverTokenBalance.cmp(feeReceiverTokenBalance.add(absoluteFee)) === 0,
+              "The new and old fee receiver token balances must be right, since the commission is 3%. " +
+              "Expected value: " + feeReceiverTokenBalance.toString() + " + " + absoluteFee.toString() +
+              ", actual value: " + newFeeReceiverTokenBalance.toString()
+            );
+            assert.isTrue(
+              newTargetTokenBalance.cmp(targetTokenBalance.add(absoluteRemainder)) === 0,
+              "The new and old target token balances must be the original plus the remaining value, since " +
+              "the commission is 3%. " +
+              "Expected value: " + targetTokenBalance.toString() + " + " + absoluteRemainder.toString() +
+              ", actual value: " + newTargetTokenBalance.toString()
             );
           }
 
