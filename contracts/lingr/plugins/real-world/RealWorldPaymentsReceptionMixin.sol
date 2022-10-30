@@ -73,14 +73,27 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
     function _parsePaymentData(bytes memory _data) private returns (PaymentData memory) {
         (address to, bytes32 paymentId, uint256 dueDate, address brandId,
          uint256[] memory rewardIds, uint256[] memory rewardValues,
-         bytes memory paymentSignature) = abi.decode(
-            _data, (address, bytes32, uint256, address, uint256[], uint256[], bytes)
+         bytes memory paymentSignature, bytes32 paymentAndSignerAddressHash) = abi.decode(
+            _data, (address, bytes32, uint256, address, uint256[], uint256[], bytes, bytes32)
         );
         return PaymentData({
             to: to, paymentId: paymentId, dueDate: dueDate, brandId: brandId,
             rewardIds: rewardIds, rewardValues: rewardValues,
-            paymentSignature: paymentSignature
+            paymentSignature: paymentSignature,
+            paymentAndSignerAddressHash: paymentAndSignerAddressHash
         });
+    }
+
+    /**
+     * Verifies the signer address using a hash comparison.
+     */
+    function _verifySigningAddress(
+        address _signer, bytes32 _paymentId, bytes32 _paymentAndSignerAddressHash, string memory _message
+    ) private {
+        require(
+            _signer != address(0) && keccak256(abi.encodePacked(_paymentId, _signer)) == _paymentAndSignerAddressHash,
+            _message
+        );
     }
 
     /**
@@ -98,7 +111,10 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         } else if (selector == PAY_SELECTOR) {
             PaymentData memory paymentData = _parsePaymentData(innerData);
             address signer = _getTokenPaymentSigningAddress(_id, _value, paymentData);
-            require(signer != address(0), "RealWorldPaymentsPlugin: token payment signature verification failed");
+            _verifySigningAddress(
+                signer, paymentData.paymentId, paymentData.paymentAndSignerAddressHash,
+                "RealWorldPaymentsPlugin: token payment signature verification failed"
+            );
             uint256[] memory _ids = new uint256[](1);
             uint256[] memory _amounts = new uint256[](1);
             _ids[0] = _id;
@@ -130,7 +146,10 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
         } else if (selector == PAY_BATCH_SELECTOR) {
             PaymentData memory paymentData = _parsePaymentData(innerData);
             address signer = _getBatchTokenPaymentSigningAddress(_ids, _values, paymentData);
-            require(signer != address(0), "RealWorldPaymentsPlugin: batch token payment signature verification failed");
+            _verifySigningAddress(
+                signer, paymentData.paymentId, paymentData.paymentAndSignerAddressHash,
+                "RealWorldPaymentsPlugin: batch token payment signature verification failed"
+            );
             PaidData memory paidData = PaidData({
                 payment: paymentData, matic: 0, ids: _ids, values: _values,
                 payer: _from, signer: signer
@@ -157,15 +176,19 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
     function pay(
         address _to, bytes32 _paymentId, uint256 _dueDate, address _brandId,
         uint256[] memory _rewardTokenIds, uint256[] memory _rewardTokenAmounts,
-        bytes memory _paymentSignature
+        bytes memory _paymentSignature, bytes32 _paymentAndSignerAddressHash
     ) external payable {
         PaymentData memory paymentData = PaymentData({
             to: _to, paymentId: _paymentId, dueDate: _dueDate, brandId: _brandId,
             rewardIds: _rewardTokenIds, rewardValues: _rewardTokenAmounts,
-            paymentSignature: _paymentSignature
+            paymentSignature: _paymentSignature,
+            paymentAndSignerAddressHash: _paymentAndSignerAddressHash
         });
         address signer = _getNativePaymentSigningAddress(msg.value, paymentData);
-        require(signer != address(0), "RealWorldPaymentsPlugin: native payment signature verification failed");
+        _verifySigningAddress(
+            signer, paymentData.paymentId, paymentData.paymentAndSignerAddressHash,
+            "RealWorldPaymentsPlugin: native payment signature verification failed"
+        );
         PaidData memory paidData = PaidData({
             payment: paymentData, matic: msg.value, ids: new uint256[](0), values: new uint256[](0),
             payer: _msgSender(), signer: signer

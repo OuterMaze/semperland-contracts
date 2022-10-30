@@ -139,6 +139,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     let cost = new BN("1000000000000000000");
     amount = new BN("100000000000000000000");
     await mintingPlugin.setCurrencyMintAmount(amount, {from: accounts[0]});
+    // And grant some BEAT to accounts[9].
+    await mintingPlugin.mintBEAT(accounts[9], 1, {from: accounts[0]});
+    // And continue minting for accounts[0] (rewards).
     await mintingPlugin.setCurrencyMintCost(cost, {from: accounts[0]});
     await mintingPlugin.mintBrandCurrency(accounts[0], brand1Currency1, 1, {from: accounts[1], value: cost});
     await mintingPlugin.mintBrandCurrency(accounts[0], brand2Currency1, 1, {from: accounts[2], value: cost});
@@ -1211,18 +1214,19 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
         // First, the base settings.
 
-        async function buildTestPaymentObj() {
-          let now = dates.timestamp();
+        async function buildTestPaymentObj(params) {
+          params = params || {};
+          let now = params.now || dates.timestamp();
           let obj = {
             args: {
-              toAddress: accounts[3],
+              toAddress: params.toAddress || accounts[3],
               payment: {
-                posAddress: accounts[0],
-                reference: "000001-" + settingsCaption,
-                description: "My 1st Payment (" + settingsCaption + ")",
+                posAddress: params.posAddress || accounts[0],
+                reference: params.reference || ("000001-" + settingsCaption),
+                description: params.description || ("My 1st Payment (" + settingsCaption + ")"),
                 now: now
               },
-              dueDate: now + 30
+              dueDate: now + params.dueTime || 30
             }
           };
 
@@ -1344,7 +1348,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
           // Get the balance of the reward token.
           let rewardTokenBalance = obj.args.rewardIds.length === 0 ? 0 : (
-              await realWorldPaymentsPlugin.balances(accounts[0], obj.args.rewardIds[0])
+            await realWorldPaymentsPlugin.balances(accounts[0], obj.args.rewardIds[0])
           );
 
           // Get the balance(s) of the payment token, and the fee.
@@ -1468,8 +1472,10 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
             // Now try executing a different request, but the brand does not
             // authorize the PoS.
-            obj.args.payment.reference = "000002-" + settingsCaption;
-            obj.args.payment.description = "My 2nd Payment (" + settingsCaption + ")";
+            obj = await buildTestPaymentObj({
+              reference: "000002-" + settingsCaption, description: "My 2nd Payment (" + settingsCaption + ")"
+            });
+            // console.log("new obj is (second request):", obj);
             await expectRevert(
               payments.executePaymentOrderConfirmationCall(
                 obj, web3, accounts[9], economy.address, economy.abi, realWorldPaymentsPlugin.address,
@@ -1480,6 +1486,62 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             );
           }
         });
+
+        // Data corruption validation starts here.
+
+        let gasAmount = new web3.utils.BN("250000");
+        let errorMessage;
+        let callbacks = [
+          ["changing posAddress", function(obj) { obj.args.payment.posAddress = accounts[5]; }],
+          ["changing reference", function(obj) { obj.args.payment.reference = "00000INVALID"; }],
+          ["changing description", function(obj) { obj.args.payment.description = "A corrupted description"; }],
+          ["changing timestamp", function(obj) { obj.args.payment.now += 7; }],
+          ["changing due date", function(obj) { obj.args.dueDate += 7; }],
+          ["changing toAddress", function(obj) { obj.args.toAddress = accounts[9]; }],
+          ["changing brandAddress", function(obj) { obj.args.brandAddress = accounts[0]; }],
+        ];
+
+        switch(paymentType) {
+          case "native":
+            callbacks.push(
+                ["changing value", function(obj) { obj.value = new web3.utils.BN("2000000000000000000"); }]
+            );
+            errorMessage = "RealWorldPaymentsPlugin: native payment signature verification failed";
+            break;
+          case "token":
+            callbacks.push(
+                ["changing value", function(obj) { obj.value = new web3.utils.BN("2000000000000000000"); }],
+                ["changing id", function(obj) { obj.id = BEAT; }]
+            );
+            errorMessage = "RealWorldPaymentsPlugin: token payment signature verification failed";
+            break;
+          case "tokens":
+            callbacks.push(
+                ["changing values", function(obj) { obj.values = [new web3.utils.BN("2000000000000000000")]; }],
+                ["changing ids", function(obj) { obj.ids = [BEAT]; }]
+            );
+            errorMessage = "RealWorldPaymentsPlugin: batch token payment signature verification failed";
+            break;
+        }
+
+        for(let callbackIndex = 0; callbackIndex < callbacks.length; callbackIndex++) {
+          let callback = callbacks[callbackIndex];
+
+          it("must validate data errors using settings " + settingsCaption + " and callback: '" + callback[0] + "'",
+              async function() {
+            let obj = await buildTestPaymentObj();
+            // console.log("posAddress:", obj.args.payment.posAddress, "signature:", obj.args.paymentSignature);
+            // console.log("callback:", callbacks[callbackIndex]);
+            callback[1](obj);
+            // console.log("posAddress:", obj.args.payment.posAddress, "signature:", obj.args.paymentSignature);
+            await expectRevert(
+              payments.executePaymentOrderConfirmationCall(
+                obj, web3, accounts[9], economy.address, economy.abi, realWorldPaymentsPlugin.address,
+                realWorldPaymentsPlugin.abi, false, {amount: gasAmount}
+              ), errorMessage
+            );
+          });
+        }
       }
     }
   }

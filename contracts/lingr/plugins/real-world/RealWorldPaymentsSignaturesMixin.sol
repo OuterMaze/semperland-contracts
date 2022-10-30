@@ -58,6 +58,12 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
         address to;
 
         /**
+         * A hash of both the payment id (being itself a hash) and the
+         * signer (posAddress) address.
+         */
+        bytes32 paymentAndSignerAddressHash;
+
+        /**
          * The id of the payment. This one should be a unique hash of the
          * tuple: (PoS address, external ID, concept, stamp), but always
          * computing this externally (off-chain).
