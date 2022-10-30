@@ -1524,6 +1524,11 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             break;
         }
 
+        // TODO add:
+        // TODO - for when no reward is used: the cases.
+        // TODO - for when a reward is used: the cases.
+        // TODO - the expired due date case.
+
         for(let callbackIndex = 0; callbackIndex < callbacks.length; callbackIndex++) {
           let callback = callbacks[callbackIndex];
 
