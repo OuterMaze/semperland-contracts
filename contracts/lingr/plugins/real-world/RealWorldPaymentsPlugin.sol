@@ -131,37 +131,29 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
         bool committed = IBrandRegistry(IMetaverse(metaverse).brandRegistry()).isCommitted(brandId);
         if (committed) {
             if (paidData.matic != 0) {
-                (bool success,) = to.call{value: paidData.matic}("");
-                require(success, "RealWorldPaymentsPlugin: error while transferring native to the target address");
+                _sendNative(paidData.matic, 1000000, to, "the target address");
             } else if (paidData.ids.length > 0) {
-                IEconomy(_economy()).safeBatchTransferFrom(
-                    address(this), to, paidData.ids, paidData.values, ""
-                );
+                _sendTokens(paidData.ids, paidData.values, 1000000, to);
             }
         } else {
             uint256 length = paidData.ids.length;
-            uint256 finalFee = paymentFee(paidData.signer);
+            (uint256 receiverFee, uint256 agentFee, address agent) = paymentFee(paidData.signer);
+            uint256 fee = receiverFee + agentFee;
             if (paidData.matic != 0) {
-                (bool success,) = to.call{value: paidData.matic * (1000 - finalFee) / 1000}("");
-                require(success, "RealWorldPaymentsPlugin: error while transferring native to the target address");
-                (success,) = paymentFeeEarningsReceiver.call{value: paidData.matic * finalFee / 1000}("");
-                require(
-                    success,
-                    "RealWorldPaymentsPlugin: error while transferring native to the earnings receiver address"
+                _sendNative(paidData.matic, (1000000 - fee), to, "the target address");
+                _sendNative(
+                    paidData.matic, receiverFee, paymentFeeEarningsReceiver, "the earnings receiver target"
                 );
-            } else if (length > 0) {
-                uint256[] memory feeValues = new uint256[](length);
-                uint256[] memory remainingValues = new uint256[](length);
-                for(uint256 index = 0; index < length; index++) {
-                    feeValues[index] = paidData.values[index] * finalFee / 1000;
-                    remainingValues[index] = paidData.values[index] - feeValues[index];
+                if (agentFee != 0) {
+                    // The agent will be nonzero.
+                    _sendNative(paidData.matic, agentFee, agent, "the agent address");
                 }
-                IEconomy(_economy()).safeBatchTransferFrom(
-                    address(this), to, paidData.ids, remainingValues, ""
-                );
-                IEconomy(_economy()).safeBatchTransferFrom(
-                    address(this), paymentFeeEarningsReceiver, paidData.ids, feeValues, ""
-                );
+            } else if (length > 0) {
+                _sendTokens(paidData.ids, paidData.values, (1000000 - fee), to);
+                _sendTokens(paidData.ids, paidData.values, receiverFee, paymentFeeEarningsReceiver);
+                if (agentFee != 0) {
+                    _sendTokens(paidData.ids, paidData.values, agentFee, agent);
+                }
             }
         }
         if (rewardIds.length != 0) {
@@ -174,6 +166,33 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
         emit PaymentComplete(
             paidData.signer, to, paidData.payer, paymentId, paidData.matic,
             paidData.ids, paidData.values, rewardIds, rewardValues
+        );
+    }
+
+    /**
+     * Sends native tokens by using a fractional multiplier.
+     */
+    function _sendNative(uint256 _value, uint256 _fee, address _to, string memory _text) private {
+        (bool success,) = _to.call{value: _value * _fee / 1000000}("");
+        require(
+            success,
+            string(abi.encodePacked(
+                "RealWorldPaymentsPlugin: error while transferring native to ", _text
+            ))
+        );
+    }
+
+    /**
+     * Sends tokens by using a fractional multiplier.
+     */
+    function _sendTokens(uint256[] memory _ids, uint256[] memory _values, uint256 _fee, address _to) private {
+        uint256 length = _values.length;
+        uint256[] memory fractionalValues = new uint256[](length);
+        for(uint256 index = 0; index < length; index++) {
+            fractionalValues[index] = _values[index] * _fee / 1000000;
+        }
+        IEconomy(_economy()).safeBatchTransferFrom(
+            address(this), _to, _ids, fractionalValues, ""
         );
     }
 

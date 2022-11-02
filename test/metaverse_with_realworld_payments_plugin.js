@@ -1355,10 +1355,10 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           let targetTokenBalance;
           let feeReceiverTokenBalance;
           let tokenValue = new web3.utils.BN("10000000000000000");
-          let absoluteFee = tokenValue.mul(await realWorldPaymentsPlugin.paymentFee(
-              obj.args.payment.posAddress
-          )).divn(1000);
-          let absoluteRemainder = tokenValue.sub(absoluteFee);
+          let paymentFeeDetails = await realWorldPaymentsPlugin.paymentFee(obj.args.payment.posAddress);
+          let receiverFee = paymentFeeDetails['0'];
+          let absoluteReceiverFee = tokenValue.mul(receiverFee).divn(1000000);
+          let absoluteRemainder = tokenValue.sub(absoluteReceiverFee);
           switch(paymentType) {
             case "native":
               targetTokenBalance = new web3.utils.BN(await web3.eth.getBalance(obj.args.toAddress));
@@ -1443,9 +1443,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             );
           } else {
             assert.isTrue(
-              newFeeReceiverTokenBalance.cmp(feeReceiverTokenBalance.add(absoluteFee)) === 0,
+              newFeeReceiverTokenBalance.cmp(feeReceiverTokenBalance.add(absoluteReceiverFee)) === 0,
               "The new and old fee receiver token balances must be right, since the commission is 3%. " +
-              "Expected value: " + feeReceiverTokenBalance.toString() + " + " + absoluteFee.toString() +
+              "Expected value: " + feeReceiverTokenBalance.toString() + " + " + absoluteReceiverFee.toString() +
               ", actual value: " + newFeeReceiverTokenBalance.toString()
             );
             assert.isTrue(

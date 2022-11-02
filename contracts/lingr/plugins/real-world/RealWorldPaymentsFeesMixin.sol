@@ -90,9 +90,14 @@ abstract contract RealWorldPaymentsFeesMixin is MetaversePlugin {
      * The payment fee is derived from:
      * - min(agent's fee, default amount) if it has an agent.
      * - default amount otherwise.
+     * Two fees are returned actually: the sub-fee for the
+     * fee receiver, and the sub-fee for the agent. Both fees
+     * are expressed in per-thousand units. It also returns
+     * the agent of the PoS if-and-only-if the agent fee is
+     * nonzero.
      */
-    function paymentFee(address posAddress) public view returns (uint256) {
+    function paymentFee(address posAddress) public view returns (uint256, uint256, address) {
         // TODO implement properly.
-        return paymentFeeDefaultAmount;
+        return (paymentFeeDefaultAmount * 1000, 0, address(0));
     }
 }
