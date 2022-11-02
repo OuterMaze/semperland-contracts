@@ -7,6 +7,7 @@ import "../../economy/IEconomy.sol";
 import "../base/MetaversePlugin.sol";
 import "./RealWorldPaymentsRewardAddressBoxesMixin.sol";
 import "./RealWorldPaymentsReceptionMixin.sol";
+import "./RealWorldPaymentsFeesMixin.sol";
 
 /**
  * This plug-in enables people to do real-world payments.
@@ -15,21 +16,8 @@ import "./RealWorldPaymentsReceptionMixin.sol";
  * interact via an external website or another medium not
  * integrated with the blockchain itself).
  */
-contract RealWorldPaymentsPlugin is
-    MetaversePlugin, RealWorldPaymentsRewardAddressBoxesMixin, RealWorldPaymentsReceptionMixin  {
-    /**
-     * This is a global payment fee. The fee is expressed
-     * as units per 10000 and will not, typically, exceed
-     * 300 (3%) in this global setting.
-     */
-    uint256 public paymentFee;
-
-    /**
-     * This is the address that will collect the earnings
-     * arising from payment fees.
-     */
-    address public paymentFeeEarningsReceiver;
-
+contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, RealWorldPaymentsReceptionMixin,
+    RealWorldPaymentsFeesMixin {
     /**
      * This is the tracking of previous payments already
      * being processed in our payment system. This is done
@@ -44,11 +32,6 @@ contract RealWorldPaymentsPlugin is
      */
     bytes32 constant BRAND_SIGN_PAYMENTS = keccak256("Plugins::RealWorldPayments::Brand::Payments::Sign");
 
-    // TODO: Methods, permissions and events to set the earnings receiver.
-    // TODO: Methods, permissions and events to set promotional fee.
-    // TODO: The effective fee will always be min(promo fee, fee), unless
-    // TODO:   the promo fee is 0.
-
     /**
      * Instantiating this plug-in requires the metaverse,
      * a set of allowed payment order signers and a global
@@ -58,12 +41,10 @@ contract RealWorldPaymentsPlugin is
      * instead of per market).
      */
     constructor(
-        address _metaverse, uint256 _paymentFee, address _paymentFeeEarningsReceiver,
+        address _metaverse, uint256 _paymentFeeLimit, address _paymentFeeEarningsReceiver,
         address[] memory _verifiers
-    ) MetaversePlugin(_metaverse) RealWorldPaymentsSignaturesMixin(_verifiers) {
-        paymentFee = _paymentFee;
-        paymentFeeEarningsReceiver = _paymentFeeEarningsReceiver;
-    }
+    ) RealWorldPaymentsFeesMixin(_metaverse, _paymentFeeLimit, _paymentFeeEarningsReceiver)
+      RealWorldPaymentsSignaturesMixin(_verifiers) {}
 
     /**
      * No initialization is required for this plug-in.
@@ -159,10 +140,11 @@ contract RealWorldPaymentsPlugin is
             }
         } else {
             uint256 length = paidData.ids.length;
+            uint256 finalFee = paymentFee(paidData.signer);
             if (paidData.matic != 0) {
-                (bool success,) = to.call{value: paidData.matic * (1000 - paymentFee) / 1000}("");
+                (bool success,) = to.call{value: paidData.matic * (1000 - finalFee) / 1000}("");
                 require(success, "RealWorldPaymentsPlugin: error while transferring native to the target address");
-                (success,) = paymentFeeEarningsReceiver.call{value: paidData.matic * paymentFee / 1000}("");
+                (success,) = paymentFeeEarningsReceiver.call{value: paidData.matic * finalFee / 1000}("");
                 require(
                     success,
                     "RealWorldPaymentsPlugin: error while transferring native to the earnings receiver address"
@@ -171,7 +153,7 @@ contract RealWorldPaymentsPlugin is
                 uint256[] memory feeValues = new uint256[](length);
                 uint256[] memory remainingValues = new uint256[](length);
                 for(uint256 index = 0; index < length; index++) {
-                    feeValues[index] = paidData.values[index] * paymentFee / 1000;
+                    feeValues[index] = paidData.values[index] * finalFee / 1000;
                     remainingValues[index] = paidData.values[index] - feeValues[index];
                 }
                 IEconomy(_economy()).safeBatchTransferFrom(

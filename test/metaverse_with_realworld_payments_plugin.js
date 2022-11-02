@@ -1355,7 +1355,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           let targetTokenBalance;
           let feeReceiverTokenBalance;
           let tokenValue = new web3.utils.BN("10000000000000000");
-          let absoluteFee = tokenValue.mul(await realWorldPaymentsPlugin.paymentFee()).divn(1000);
+          let absoluteFee = tokenValue.mul(await realWorldPaymentsPlugin.paymentFee(
+              obj.args.payment.posAddress
+          )).divn(1000);
           let absoluteRemainder = tokenValue.sub(absoluteFee);
           switch(paymentType) {
             case "native":
