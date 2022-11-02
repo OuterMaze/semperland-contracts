@@ -181,14 +181,18 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
   it("must allow account 0 to set the receiver to account 8", async function() {
     await expectEvent(
       await definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[8], { from: accounts[0] }),
-      "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[8] }
+      "BrandCurrencyDefinitionEarningsReceiverUpdated", {
+        "newReceiver": accounts[8], "updatedBy": accounts[0]
+      }
     );
   });
 
   it("must allow account 0 to set the receiver to account 9, again", async function() {
     await expectEvent(
       await definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[9], { from: accounts[0] }),
-      "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[9] }
+      "BrandCurrencyDefinitionEarningsReceiverUpdated", {
+        "newReceiver": accounts[9], "updatedBy": accounts[0]
+      }
     );
   });
 
@@ -225,14 +229,18 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
   it("must allow account 7 to set the receiver to account 8", async function() {
     await expectEvent(
       await definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[8], { from: accounts[7] }),
-      "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[8] }
+      "BrandCurrencyDefinitionEarningsReceiverUpdated", {
+        "newReceiver": accounts[8], "updatedBy": accounts[7]
+      }
     );
   });
 
   it("must allow account 7 to set the receiver to account 9, again", async function() {
     await expectEvent(
       await definitionPlugin.setBrandCurrencyDefinitionEarningsReceiver(accounts[9], { from: accounts[7] }),
-      "BrandCurrencyDefinitionEarningsReceiverUpdated", { "newReceiver": accounts[9] }
+      "BrandCurrencyDefinitionEarningsReceiverUpdated", {
+        "newReceiver": accounts[9], "updatedBy": accounts[7]
+      }
     );
   });
 
@@ -367,7 +375,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     await expectEvent(
       await definitionPlugin.setCurrencyDefinitionCost(new BN("10000000000000000000"), {from: accounts[0]}),
       "CurrencyDefinitionCostUpdated", {
-        "newCost": new BN("10000000000000000000")
+        "newCost": new BN("10000000000000000000"), "updatedBy": accounts[0]
       }
     );
   });
@@ -406,7 +414,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     await expectEvent(
       await definitionPlugin.setCurrencyDefinitionCost(new BN("5000000000000000000"), {from: accounts[7]}),
       "CurrencyDefinitionCostUpdated", {
-        "newCost": new BN("5000000000000000000")
+        "newCost": new BN("5000000000000000000"), "updatedBy": accounts[7]
       }
     );
   });
@@ -415,7 +423,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     await expectEvent(
       await definitionPlugin.setCurrencyDefinitionCost(new BN("10000000000000000000"), {from: accounts[7]}),
       "CurrencyDefinitionCostUpdated", {
-        "newCost": new BN("10000000000000000000")
+        "newCost": new BN("10000000000000000000"), "updatedBy": accounts[7]
       }
     );
   });

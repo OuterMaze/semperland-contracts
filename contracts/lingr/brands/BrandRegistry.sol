@@ -167,12 +167,12 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
     /**
      * An event for when the brand registration cost is updated.
      */
-    event BrandRegistrationCostUpdated(uint256 newCost);
+    event BrandRegistrationCostUpdated(address indexed updatedBy, uint256 newCost);
 
     /**
      * An event for when the brand registration earnings receiver is changed.
      */
-    event BrandRegistrationEarningsReceiverUpdated(address newReceiver);
+    event BrandRegistrationEarningsReceiverUpdated(address indexed updatedBy, address newReceiver);
 
     /**
      * Creating a brand registry requires a valid metaverse
@@ -208,7 +208,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
             "BrandRegistry: the brand registry cost must not be less than 0.01 native tokens"
         );
         brandRegistrationCost = _newCost;
-        emit BrandRegistrationCostUpdated(_newCost);
+        emit BrandRegistrationCostUpdated(_msgSender(), _newCost);
     }
 
     /**
@@ -222,7 +222,7 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
             "BrandRegistry: the brand registry earnings receiver must not be the 0 address"
         );
         brandEarningsReceiver = _newReceiver;
-        emit BrandRegistrationEarningsReceiverUpdated(_newReceiver);
+        emit BrandRegistrationEarningsReceiverUpdated(_msgSender(), _newReceiver);
     }
 
     // ********** Brand registration & management goes here **********

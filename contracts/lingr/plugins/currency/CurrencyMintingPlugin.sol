@@ -102,7 +102,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * An event for when the brand currency minting earnings
      * receiver is changed.
      */
-    event BrandCurrencyMintingEarningsReceiverUpdated(address newReceiver);
+    event BrandCurrencyMintingEarningsReceiverUpdated(address indexed updatedBy, address newReceiver);
 
     /**
      * Set the new brand currency minting earnings receiver.
@@ -115,14 +115,14 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
             "CurrencyMintingPlugin: the brand currency minting earnings receiver must not be the 0 address"
         );
         brandCurrencyMintingEarningsReceiver = _newReceiver;
-        emit BrandCurrencyMintingEarningsReceiverUpdated(_newReceiver);
+        emit BrandCurrencyMintingEarningsReceiverUpdated(_msgSender(), _newReceiver);
     }
 
     /**
      * An event for when the currency mint cost is updated.
      * Updating it to 0 disables it completely.
      */
-    event CurrencyMintCostUpdated(uint256 newCost);
+    event CurrencyMintCostUpdated(address indexed updatedBy, uint256 newCost);
 
     /**
      * Sets the currency mint cost.
@@ -131,7 +131,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
         onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         currencyMintCost = newCost;
-        emit CurrencyMintCostUpdated(newCost);
+        emit CurrencyMintCostUpdated(_msgSender(), newCost);
     }
 
     /**
@@ -139,7 +139,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * Typically, this value will be something like 1000 eth
      * (1000 * 10^18). Updating it to 0 disables it completely.
      */
-    event CurrencyMintAmountUpdated(uint256 newAmount);
+    event CurrencyMintAmountUpdated(address indexed updatedBy, uint256 newAmount);
 
     /**
      * Sets the currency mint amount.
@@ -148,7 +148,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
         onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         currencyMintAmount = newAmount;
-        emit CurrencyMintAmountUpdated(newAmount);
+        emit CurrencyMintAmountUpdated(_msgSender(), newAmount);
     }
 
     /**

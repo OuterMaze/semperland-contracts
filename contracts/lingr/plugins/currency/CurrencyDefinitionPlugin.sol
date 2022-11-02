@@ -238,7 +238,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * An event for when the currency definition cost is updated.
      * Updating it to 0 disables it completely.
      */
-    event CurrencyDefinitionCostUpdated(uint256 newCost);
+    event CurrencyDefinitionCostUpdated(address indexed updatedBy, uint256 newCost);
 
     /**
      * Sets the currency definition cost.
@@ -247,14 +247,14 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         currencyDefinitionCost = newCost;
-        emit CurrencyDefinitionCostUpdated(newCost);
+        emit CurrencyDefinitionCostUpdated(_msgSender(), newCost);
     }
 
     /**
      * An event for when the brand currency definition earnings
      * receiver is changed.
      */
-    event BrandCurrencyDefinitionEarningsReceiverUpdated(address newReceiver);
+    event BrandCurrencyDefinitionEarningsReceiverUpdated(address indexed updatedBy, address newReceiver);
 
     /**
      * Set the new brand currency actions earnings receiver.
@@ -267,7 +267,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
             "CurrencyDefinitionPlugin: the brand currency definition earnings receiver must not be the 0 address"
         );
         brandCurrencyDefinitionEarningsReceiver = _newReceiver;
-        emit BrandCurrencyDefinitionEarningsReceiverUpdated(_newReceiver);
+        emit BrandCurrencyDefinitionEarningsReceiverUpdated(_msgSender(), _newReceiver);
     }
 
     /**
@@ -401,7 +401,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Notifies that the metadata of a currency is updated.
      */
-    event CurrencyMetadataUpdated(uint256 indexed tokenId);
+    event CurrencyMetadataUpdated(address indexed updatedBy, uint256 indexed tokenId);
 
     /**
      * This modifier post-decorates the code to emit an event for the
@@ -409,7 +409,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      */
     modifier emitCurrencyUpdate(uint256 _tokenId) {
         _;
-        emit CurrencyMetadataUpdated(_tokenId);
+        emit CurrencyMetadataUpdated(_msgSender(), _tokenId);
     }
 
     /**

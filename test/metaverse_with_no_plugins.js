@@ -46,7 +46,9 @@ contract("Metaverse", function (accounts) {
   it("must allow the account 0 to set the price to 10 ether", async function () {
     await expectEvent(
       await contract.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[0] }),
-      "BrandRegistrationCostUpdated", {"newCost": new BN("10000000000000000000")}
+      "BrandRegistrationCostUpdated", {
+        "newCost": new BN("10000000000000000000"), "updatedBy": accounts[0]
+      }
     );
   });
 
@@ -64,7 +66,9 @@ contract("Metaverse", function (accounts) {
   it("must allow the account 0 to set the brand registration price to 2 ether", async function () {
     await expectEvent(
       await contract.setBrandRegistrationCost(new BN("2000000000000000000"), { from: accounts[0] }),
-      "BrandRegistrationCostUpdated", {"newCost": new BN("2000000000000000000")}
+      "BrandRegistrationCostUpdated", {
+        "newCost": new BN("2000000000000000000"), "updatedBy": accounts[0]
+      }
     );
   });
 
@@ -142,7 +146,9 @@ contract("Metaverse", function (accounts) {
   it("must allow the account 0 to set the brand registration price to 4 ether", async function () {
     await expectEvent(
       await contract.setBrandRegistrationEarningsReceiver(accounts[8], { from: accounts[1] }),
-      "BrandRegistrationEarningsReceiverUpdated", {"newReceiver": accounts[8]}
+      "BrandRegistrationEarningsReceiverUpdated", {
+        "newReceiver": accounts[8], "updatedBy": accounts[1]
+      }
     );
   });
 
@@ -193,7 +199,9 @@ contract("Metaverse", function (accounts) {
   it("must allow the account 0 to set the brand registration price to 4 ether", async function () {
     await expectEvent(
       await contract.setBrandRegistrationCost(new BN("4000000000000000000"), { from: accounts[0] }),
-      "BrandRegistrationCostUpdated", {"newCost": new BN("4000000000000000000")}
+      "BrandRegistrationCostUpdated", {
+        "newCost": new BN("4000000000000000000"), "updatedBy": accounts[0]
+      }
     );
   });
 
@@ -737,7 +745,9 @@ contract("Metaverse", function (accounts) {
   it("must allow an appropriate user to set the brand registration cost to 0", async function() {
     await expectEvent(
       await contract.setBrandRegistrationCost(new BN("0"), { from: accounts[0] }),
-      "BrandRegistrationCostUpdated", {"newCost": new BN("0")}
+      "BrandRegistrationCostUpdated", {
+        "newCost": new BN("0"), "updatedBy": accounts[0]
+      }
     );
   });
 
@@ -823,7 +833,9 @@ contract("Metaverse", function (accounts) {
   it("must allow an appropriate user to set the brand registration cost to 2 MATIC", async function() {
     await expectEvent(
       await contract.setBrandRegistrationCost(new BN("2000000000000000000"), { from: accounts[0] }),
-      "BrandRegistrationCostUpdated", {"newCost": new BN("2000000000000000000")}
+      "BrandRegistrationCostUpdated", {
+        "newCost": new BN("2000000000000000000"), "updatedBy": accounts[0]
+      }
     );
   });
 });

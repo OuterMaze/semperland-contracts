@@ -199,14 +199,18 @@ contract("CurrencyMintingPlugin", function (accounts) {
   it("must allow account 0 to set the receiver to account 8", async function() {
     await expectEvent(
       await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[8], { from: accounts[0] }),
-      "BrandCurrencyMintingEarningsReceiverUpdated", { "newReceiver": accounts[8] }
+      "BrandCurrencyMintingEarningsReceiverUpdated", {
+        "newReceiver": accounts[8], "updatedBy": accounts[0]
+      }
     );
   });
 
   it("must allow account 0 to set the receiver to account 9, again", async function() {
     await expectEvent(
       await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[9], { from: accounts[0] }),
-      "BrandCurrencyMintingEarningsReceiverUpdated", { "newReceiver": accounts[9] }
+      "BrandCurrencyMintingEarningsReceiverUpdated", {
+        "newReceiver": accounts[9], "updatedBy": accounts[0]
+      }
     );
   });
 
@@ -243,14 +247,18 @@ contract("CurrencyMintingPlugin", function (accounts) {
   it("must allow account 7 to set the receiver to account 8", async function() {
     await expectEvent(
       await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[8], { from: accounts[7] }),
-      "BrandCurrencyMintingEarningsReceiverUpdated", { "newReceiver": accounts[8] }
+      "BrandCurrencyMintingEarningsReceiverUpdated", {
+        "newReceiver": accounts[8], "updatedBy": accounts[7]
+      }
     );
   });
 
   it("must allow account 7 to set the receiver to account 9, again", async function() {
     await expectEvent(
       await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[9], { from: accounts[7] }),
-      "BrandCurrencyMintingEarningsReceiverUpdated", { "newReceiver": accounts[9] }
+      "BrandCurrencyMintingEarningsReceiverUpdated", {
+        "newReceiver": accounts[9], "updatedBy": accounts[7]
+      }
     );
   });
 
@@ -307,7 +315,9 @@ contract("CurrencyMintingPlugin", function (accounts) {
   it("must allow account 0 to set the minting amount to 10 matic", async function() {
     await expectEvent(
       await mintingPlugin.setCurrencyMintAmount(new BN("10000000000000000000"), {from: accounts[0]}),
-      "CurrencyMintAmountUpdated", {"newAmount": new BN("10000000000000000000")}
+      "CurrencyMintAmountUpdated", {
+        "newAmount": new BN("10000000000000000000"), "updatedBy": accounts[0]
+      }
     );
   });
 
@@ -344,14 +354,18 @@ contract("CurrencyMintingPlugin", function (accounts) {
   it("must allow account 7 to set the minting amount to 15 matic", async function() {
     await expectEvent(
       await mintingPlugin.setCurrencyMintAmount(new BN("15000000000000000000"), {from: accounts[7]}),
-      "CurrencyMintAmountUpdated", {"newAmount": new BN("15000000000000000000")}
+      "CurrencyMintAmountUpdated", {
+        "newAmount": new BN("15000000000000000000"), "updatedBy": accounts[7]
+      }
     );
   });
 
   it("must allow account 7 to set the minting amount to 10 matic", async function() {
     await expectEvent(
       await mintingPlugin.setCurrencyMintAmount(new BN("10000000000000000000"), {from: accounts[7]}),
-      "CurrencyMintAmountUpdated", {"newAmount": new BN("10000000000000000000")}
+      "CurrencyMintAmountUpdated", {
+        "newAmount": new BN("10000000000000000000"), "updatedBy": accounts[7]
+      }
     );
   });
 
@@ -545,7 +559,9 @@ contract("CurrencyMintingPlugin", function (accounts) {
   it("must allow account 0 to set the minting cost to 5 matic", async function() {
     await expectEvent(
       await mintingPlugin.setCurrencyMintCost(new BN("5000000000000000000"), {from: accounts[0]}),
-      "CurrencyMintCostUpdated", {"newCost": new BN("5000000000000000000")}
+      "CurrencyMintCostUpdated", {
+        "newCost": new BN("5000000000000000000"), "updatedBy": accounts[0]
+      }
     );
   });
 
@@ -575,14 +591,18 @@ contract("CurrencyMintingPlugin", function (accounts) {
   it("must allow account 7 to set the minting amount to 6 matic", async function() {
     await expectEvent(
       await mintingPlugin.setCurrencyMintCost(new BN("6000000000000000000"), {from: accounts[7]}),
-      "CurrencyMintCostUpdated", {"newCost": new BN("6000000000000000000")}
+      "CurrencyMintCostUpdated", {
+        "newCost": new BN("6000000000000000000"), "updatedBy": accounts[7]
+      }
     );
   });
 
   it("must allow account 7 to set the minting amount to 5 matic", async function() {
     await expectEvent(
       await mintingPlugin.setCurrencyMintCost(new BN("5000000000000000000"), {from: accounts[7]}),
-      "CurrencyMintCostUpdated", {"newCost": new BN("5000000000000000000")}
+      "CurrencyMintCostUpdated", {
+        "newCost": new BN("5000000000000000000"), "updatedBy": accounts[7]
+      }
     );
   });
 
