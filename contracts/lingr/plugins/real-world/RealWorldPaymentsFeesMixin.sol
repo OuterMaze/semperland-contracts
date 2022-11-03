@@ -65,11 +65,39 @@ abstract contract RealWorldPaymentsFeesMixin is MetaversePlugin {
     }
 
     /**
+     * This is a PoS sponsorship. This means that an agent
+     * is sponsoring (and managing a custom commission) for
+     * this PoS.
+     */
+    struct PoSSponsorship {
+        /**
+         * The agent that sponsors this PoS. The 0 address
+         * means a PoS has no sponsor, and then the default
+         * payment fee will take place.
+         */
+        address agent;
+
+        /**
+         * The fee assigned by the agent. This fee will be
+         * expressed in units per 1000 and will replace the
+         * payment fee default amount if, and only if, this
+         * amount is lower. This value will be between 1 and
+         * 999.
+         */
+        uint256 customFee;
+    }
+
+    /**
      * The agents are stored here. Each agent has a nonzero
      * share (literally 1 / 1000 to 999 / 100) of whatever
      * fees are meant to be collected from a PoS they promote.
      */
     mapping(address => Agent) agents;
+
+    /**
+     * The PoS sponsorships are stored here.
+     */
+    mapping(address => PoSSponsorship) posSponsorships;
 
     /**
      * This permission allows an account to manage every setting that
@@ -135,6 +163,79 @@ abstract contract RealWorldPaymentsFeesMixin is MetaversePlugin {
     }
 
     /**
+     * This event is triggered when an agent is set, along
+     * its fraction (1 to 999). If 0 is the specified fee,
+     * then the fee is not changed but the agent is disabled.
+     * Disabled agents can still earn commissions from PoSs
+     * that have it as agent.
+     */
+    event PaymentFeeAgentUpdated(address indexed updatedBy, address indexed agent, uint256 feeFraction);
+
+    /**
+     * Updates an agent (if already set, only updates the fee
+     * fraction this agent has). If the fee is 0, then it is
+     * not updated, but the agent is disabled. Setting a fee
+     * of other value (up to 999) instantiates (if missing)
+     * and updates a manager.
+     */
+    function updatePaymentFeeAgent(address agent, uint256 feeFraction) external
+        onlyMetaverseAllowed(METAVERSE_MANAGE_AGENT_SETTINGS)
+    {
+        require(
+            agent != address(0),
+            "RealWorldPaymentsPlugin: the agent must not be the zero address"
+        );
+        require(
+            feeFraction <= 999,
+            "RealWorldPaymentsPlugin: the fee fraction must be between 1 and 999"
+        );
+        if (feeFraction != 0) {
+            agents[agent] = Agent({active: true, feeFraction: feeFraction});
+        } else {
+            Agent storage agentEntry = agents[agent];
+            if (agentEntry.active) agentEntry.active = false;
+        }
+        emit PaymentFeeAgentUpdated(_msgSender(), agent, feeFraction);
+    }
+
+    /**
+     * Sets an agent for the sender (the sender is considered
+     * a PoS). The customFee is always reset to the payment
+     * fee default amount.
+     */
+    function setAgent(address agent) external {
+        address sender = _msgSender();
+        require(
+            agent == address(0) && agents[agent].active,
+            "RealWorldPaymentsPlugin: the chosen address is not an active agent"
+        );
+        posSponsorships[sender] = PoSSponsorship({
+            agent: agent, customFee: paymentFeeDefaultAmount
+        });
+    }
+
+    /**
+     * Sets a fee for a PoS managed by the sender (agent).
+     * This is only allowed if the PoS allows that agent,
+     * and the fee must always between 1 per 1000 and the
+     * payment fee limit specified on construction.
+     */
+    function setFee(address posAddress, uint256 customFee) external {
+        address sender = _msgSender();
+        require(agents[sender].active, "RealWorldPaymentsPlugin: the sender is not an active agent");
+        PoSSponsorship storage posSponsorship = posSponsorships[posAddress];
+        require(
+            posSponsorship.agent == sender,
+            "RealWorldPaymentsPlugin: the sender is not an agent of the given PoS"
+        );
+        require(
+            customFee >= 1 && customFee <= paymentFeeLimit,
+            "RealWorldPaymentsPlugin: invalid custom fee"
+        );
+        posSponsorship.customFee = customFee;
+    }
+
+    /**
      * The payment fee is derived from:
      * - min(agent's fee, default amount) if it has an agent.
      * - default amount otherwise.
@@ -145,7 +246,20 @@ abstract contract RealWorldPaymentsFeesMixin is MetaversePlugin {
      * nonzero.
      */
     function paymentFee(address posAddress) public view returns (uint256, uint256, address) {
-        // TODO implement properly.
-        return (paymentFeeDefaultAmount * 1000, 0, address(0));
+        PoSSponsorship storage posSponsorship = posSponsorships[posAddress];
+        if (posSponsorship.agent == address(0)) {
+            return (paymentFeeDefaultAmount * 1000, 0, address(0));
+        }
+
+        Agent storage agentEntry = agents[posSponsorship.agent];
+        uint256 customFee = posSponsorship.customFee;
+        if (paymentFeeDefaultAmount < customFee) {
+            customFee = paymentFeeDefaultAmount;
+        }
+        return (
+            customFee * (1000 - agentEntry.feeFraction),
+            customFee * agentEntry.feeFraction,
+            posSponsorship.agent
+        );
     }
 }
