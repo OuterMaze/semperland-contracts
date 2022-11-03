@@ -1357,6 +1357,10 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           let tokenValue = new web3.utils.BN("10000000000000000");
           let paymentFeeDetails = await realWorldPaymentsPlugin.paymentFee(obj.args.payment.posAddress);
           let receiverFee = paymentFeeDetails['0'];
+          assert.isTrue(
+            receiverFee.cmp(new web3.utils.BN('30000')) === 0,
+            "The receiver fee must be 30000 for this test, not " + receiverFee.toString()
+          )
           let absoluteReceiverFee = tokenValue.mul(receiverFee).divn(1000000);
           let absoluteRemainder = tokenValue.sub(absoluteReceiverFee);
           switch(paymentType) {
