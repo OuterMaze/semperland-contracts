@@ -33,11 +33,43 @@ abstract contract RealWorldPaymentsFeesMixin is MetaversePlugin {
     address public paymentFeeEarningsReceiver;
 
     /**
+     * This is the agent details, describing a current or
+     * former agent that promotes the platform.
+     */
+    struct Agent {
+        /**
+         * The fee fraction is expressed in units per 1000
+         * and tells how much of the effective fee is earned
+         * by the agent (also, 1000 - feeFraction is how
+         * much of the effective fee is earned by the global
+         * fee earnings receiver, also expressed in units per
+         * 1000).
+         *
+         * The fee fraction will never be zero for existing
+         * records. This means, that no promoter can have a
+         * fee fraction of zero. This value will always be
+         * between 1 and 999 (both inclusive) for existing
+         * records, and 0 for non-existing records.
+         */
+        uint256 feeFraction;
+
+        /**
+         * Whether new PoSs can choose this agent still for
+         * themselves (this does not affect agent settings
+         * that are currently set for the PoSs, nor the
+         * ability to get fee fraction from them - just the
+         * ability to be [new] promoters being set to other
+         * PoSs).
+         */
+        bool active;
+    }
+
+    /**
      * The agents are stored here. Each agent has a nonzero
      * share (literally 1 / 1000 to 999 / 100) of whatever
      * fees are meant to be collected from a PoS they promote.
      */
-    mapping(address => uint256) agents;
+    mapping(address => Agent) agents;
 
     /**
      * This permission allows an account to manage every setting that
@@ -53,14 +85,11 @@ abstract contract RealWorldPaymentsFeesMixin is MetaversePlugin {
      */
     bytes32 constant METAVERSE_MANAGE_AGENT_SETTINGS = keccak256("Plugins::RealWorldPayments::Agents::Manage");
 
-    // TODO: Methods, permissions and events to set the earnings receiver.
-    // TODO: Methods, permissions and events to set promotional fee.
-
     constructor(address _metaverse, uint256 _paymentFeeLimit, address _paymentFeeEarningsReceiver)
         MetaversePlugin(_metaverse)
     {
-        require(_paymentFeeEarningsReceiver != address(0), "RealWorldPaymentsPlugin: Invalid receiver address");
-        require(_paymentFeeLimit <= 100 && _paymentFeeLimit >= 10, "RealWorldPaymentsPlugin: Invalid payment fee");
+        require(_paymentFeeEarningsReceiver != address(0), "RealWorldPaymentsPlugin: invalid receiver address");
+        require(_paymentFeeLimit <= 100 && _paymentFeeLimit >= 10, "RealWorldPaymentsPlugin: invalid payment fee");
         paymentFeeLimit = _paymentFeeLimit;
         paymentFeeDefaultAmount = _paymentFeeLimit;
         paymentFeeEarningsReceiver = _paymentFeeEarningsReceiver;
@@ -80,10 +109,29 @@ abstract contract RealWorldPaymentsFeesMixin is MetaversePlugin {
     {
         require(
             _paymentFeeDefaultAmount >= 1 && _paymentFeeDefaultAmount <= paymentFeeLimit,
-            "RealWorldPaymentsPlugin: The default payment fee must be between 1 / 1000 and the payment fee limit"
+            "RealWorldPaymentsPlugin: the default payment fee must be between 1 / 1000 and the payment fee limit"
         );
         paymentFeeDefaultAmount = _paymentFeeDefaultAmount;
         emit PaymentFeeDefaultAmountUpdated(_msgSender(), _paymentFeeDefaultAmount);
+    }
+
+    /**
+     * This event is triggered when the default payment fee amount is updated.
+     */
+    event PaymentFeeEarningsReceiverUpdated(address indexed updatedBy, address newReceiver);
+
+    /**
+     * Set the new fee earnings receiver.
+     */
+    function setPaymentFeeEarningsReceiver(address _newReceiver) public
+        onlyMetaverseAllowed(METAVERSE_MANAGE_FEE_SETTINGS)
+    {
+        require(
+            _newReceiver != address(0),
+            "RealWorldPaymentsPlugin: the fee earnings receiver must not be the 0 address"
+        );
+        paymentFeeEarningsReceiver = _newReceiver;
+        emit PaymentFeeEarningsReceiverUpdated(_msgSender(), _newReceiver);
     }
 
     /**
