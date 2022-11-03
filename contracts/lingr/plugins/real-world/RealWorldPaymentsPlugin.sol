@@ -133,7 +133,8 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
             if (paidData.matic != 0) {
                 _sendNative(paidData.matic, 1000000, to, "the target address");
             } else if (paidData.ids.length > 0) {
-                _sendTokens(paidData.ids, paidData.values, 1000000, to);
+                uint256[] memory amounts = new uint256[](paidData.ids.length);
+                _sendTokens(paidData.ids, paidData.values, 1000000, to, amounts);
             }
         } else {
             uint256 length = paidData.ids.length;
@@ -149,11 +150,12 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
                 }
                 _sendNative(paidData.matic - sentNative, 1000000, to, "the target address");
             } else if (length > 0) {
-                _sendTokens(paidData.ids, paidData.values, (1000000 - fee), to);
-                _sendTokens(paidData.ids, paidData.values, receiverFee, paymentFeeEarningsReceiver);
+                uint256[] memory amounts = new uint256[](paidData.ids.length);
+                _sendTokens(paidData.ids, paidData.values, receiverFee, paymentFeeEarningsReceiver, amounts);
                 if (agentFee != 0) {
-                    _sendTokens(paidData.ids, paidData.values, agentFee, agent);
+                    _sendTokens(paidData.ids, paidData.values, agentFee, agent, amounts);
                 }
+                _sendTokens(paidData.ids, paidData.values, 1000000, to, amounts);
             }
         }
         if (rewardIds.length != 0) {
@@ -187,11 +189,15 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
     /**
      * Sends tokens by using a fractional multiplier.
      */
-    function _sendTokens(uint256[] memory _ids, uint256[] memory _values, uint256 _fee, address _to) private {
+    function _sendTokens(
+        uint256[] memory _ids, uint256[] memory _values, uint256 _fee, address _to, uint256[] memory amounts
+    ) private {
         uint256 length = _values.length;
         uint256[] memory fractionalValues = new uint256[](length);
         for(uint256 index = 0; index < length; index++) {
-            fractionalValues[index] = _values[index] * _fee / 1000000;
+            uint256 amount = _fee == 1000000 ? _values[index] - amounts[index] : _values[index] * _fee / 1000000;
+            fractionalValues[index] = amount;
+            amounts[index] += amount;
         }
         IEconomy(_economy()).safeBatchTransferFrom(
             address(this), _to, _ids, fractionalValues, ""
