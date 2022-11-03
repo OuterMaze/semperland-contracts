@@ -140,14 +140,14 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
             (uint256 receiverFee, uint256 agentFee, address agent) = paymentFee(paidData.signer);
             uint256 fee = receiverFee + agentFee;
             if (paidData.matic != 0) {
-                _sendNative(paidData.matic, (1000000 - fee), to, "the target address");
-                _sendNative(
+                uint256 sentNative = _sendNative(
                     paidData.matic, receiverFee, paymentFeeEarningsReceiver, "the earnings receiver target"
                 );
                 if (agentFee != 0) {
                     // The agent will be nonzero.
-                    _sendNative(paidData.matic, agentFee, agent, "the agent address");
+                    sentNative += _sendNative(paidData.matic, agentFee, agent, "the agent address");
                 }
+                _sendNative(paidData.matic - sentNative, 1000000, to, "the target address");
             } else if (length > 0) {
                 _sendTokens(paidData.ids, paidData.values, (1000000 - fee), to);
                 _sendTokens(paidData.ids, paidData.values, receiverFee, paymentFeeEarningsReceiver);
@@ -172,14 +172,16 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
     /**
      * Sends native tokens by using a fractional multiplier.
      */
-    function _sendNative(uint256 _value, uint256 _fee, address _to, string memory _text) private {
-        (bool success,) = _to.call{value: _value * _fee / 1000000}("");
+    function _sendNative(uint256 _value, uint256 _fee, address _to, string memory _text) private returns (uint256) {
+        uint256 fraction = _fee == 1000000 ? _value : _value * _fee / 1000000;
+        (bool success,) = _to.call{value: fraction}("");
         require(
             success,
             string(abi.encodePacked(
                 "RealWorldPaymentsPlugin: error while transferring native to ", _text
             ))
         );
+        return fraction;
     }
 
     /**
