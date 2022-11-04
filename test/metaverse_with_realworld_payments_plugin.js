@@ -14,10 +14,10 @@ const expect = chai.expect;
 chai.use(chaiAsPromised);
 
 const {
-    BN,           // Big Number support
-    constants,    // Common constants, like the zero address and largest integers
-    expectEvent,  // Assertions for emitted events
-    expectRevert, // Assertions for transactions that should fail
+  BN,           // Big Number support
+  constants,    // Common constants, like the zero address and largest integers
+  expectEvent,  // Assertions for emitted events
+  expectRevert, // Assertions for transactions that should fail
 } = require('@openzeppelin/test-helpers');
 
 const {
@@ -77,7 +77,6 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     mintingPlugin = await CurrencyMintingPlugin.new(
       metaverse.address, definitionPlugin.address, accounts[8], { from: accounts[0] }
     );
-
     realWorldPaymentsPlugin = await RealWorldPaymentsPlugin.new(
       metaverse.address, 30, accounts[8], [
         (await SimpleECDSASignatureVerifier.new({ from: accounts[0] })).address
@@ -1735,59 +1734,70 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     );
   });
 
-  it("", async function() {
-
+  it("must have the fee receiver as account 8", async function() {
+    let earningsReceiver = await realWorldPaymentsPlugin.paymentFeeEarningsReceiver();
+    assert.isTrue(
+      earningsReceiver === accounts[8],
+      "The initial paymentFeeEarningsReceiver must account 8, not " + earningsReceiver
+    );
   });
 
-  it("", async function() {
-
+  it("must not allow account 8 to set the earnings receiver, because it lacks the permission", async function() {
+    await expectRevert(
+      realWorldPaymentsPlugin.setPaymentFeeEarningsReceiver(accounts[7], {from: accounts[8]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    )
   });
 
-  it("", async function() {
-
+  it("must allow account 0 to grant METAVERSE_MANAGE_FEE_SETTINGS to account 8", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_FEE_SETTINGS, accounts[8], true, {from: accounts[0]}),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_FEE_SETTINGS, "user": accounts[8], "set": true, sender: accounts[0]
+      }
+    )
   });
 
-  it("", async function() {
-
+  it("must not allow setting the earnings receiver to the zero address", async function() {
+    await expectRevert(
+      realWorldPaymentsPlugin.setPaymentFeeEarningsReceiver(constants.ZERO_ADDRESS, {from: accounts[8]}),
+      revertReason(
+        "RealWorldPaymentsPlugin: the fee earnings receiver must not be the 0 address"
+      )
+    );
   });
 
-  it("", async function() {
-
+  it("must allow account 8 to set the earnings receiver to account 7", async function() {
+    await expectEvent(
+      await realWorldPaymentsPlugin.setPaymentFeeEarningsReceiver(accounts[7], {from: accounts[8]}),
+      "PaymentFeeEarningsReceiverUpdated", {
+        "updatedBy": accounts[8], "newReceiver": accounts[7]
+      }
+    );
   });
 
-  it("", async function() {
-
+  it("must allow account 0 to set the earnings receiver to account 8", async function() {
+    await expectEvent(
+      await realWorldPaymentsPlugin.setPaymentFeeEarningsReceiver(accounts[8], {from: accounts[0]}),
+      "PaymentFeeEarningsReceiverUpdated", {
+        "updatedBy": accounts[0], "newReceiver": accounts[8]
+      }
+    );
   });
 
-  it("", async function() {
-
+  it("must allow account 0 to revoke METAVERSE_MANAGE_FEE_SETTINGS to account 8", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_FEE_SETTINGS, accounts[8], false, {from: accounts[0]}),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_FEE_SETTINGS, "user": accounts[8], "set": false, sender: accounts[0]
+      }
+    )
   });
 
-  it("", async function() {
-
-  });
-
-  it("", async function() {
-
-  });
-
-  it("", async function() {
-
-  });
-
-  it("", async function() {
-
-  });
-
-  it("", async function() {
-
-  });
-
-  it("", async function() {
-
-  });
-
-  it("", async function() {
-
+  it("must not allow account 8 to set the earnings receiver, because it lacks the permission", async function() {
+    await expectRevert(
+      realWorldPaymentsPlugin.setPaymentFeeEarningsReceiver(accounts[7], {from: accounts[8]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    )
   });
 });
