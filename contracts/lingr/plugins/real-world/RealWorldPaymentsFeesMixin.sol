@@ -126,7 +126,7 @@ abstract contract RealWorldPaymentsFeesMixin is MetaversePlugin {
     /**
      * This event is triggered when the default payment fee amount is updated.
      */
-    event PaymentFeeDefaultAmountUpdated(address indexed updatedBy, uint256 paymentFeeDefaultAmount);
+    event PaymentFeeDefaultAmountUpdated(address indexed updatedBy, uint256 newAmount);
 
     /**
      * Updates the default payment fee amount (this one applies for every

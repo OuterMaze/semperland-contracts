@@ -55,6 +55,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
   var NATIVE_PRICE = parseFloat(process.env.NATIVE_PRICE || "0.8");
 
   const BRAND_SIGN_PAYMENTS = web3.utils.soliditySha3("Plugins::RealWorldPayments::Brand::Payments::Sign");
+  const METAVERSE_MANAGE_FEE_SETTINGS = web3.utils.soliditySha3("Plugins::RealWorldPayments::Fee::Manage");
 
   before(async function () {
     // Set up the metaverse and two plug-ins.
@@ -1630,4 +1631,163 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       }
     }
   }
+
+  // Tests on permissions and restrictions for setPaymentFeeEarningsReceiver and setPaymentFeeDefaultAmount.
+
+  it("must have an initial fee of 30 (this is: 30 over 1000)", async function() {
+    let defaultAmount = await realWorldPaymentsPlugin.paymentFeeDefaultAmount();
+    assert.isTrue(
+      defaultAmount.cmp(new BN("30")) === 0,
+      "The initial paymentFeeDefaultAmount must be 30, not " + defaultAmount.toString()
+    );
+  });
+
+  it("must have a limit of 30 (this is: 30 over 1000)", async function() {
+    let limit = await realWorldPaymentsPlugin.paymentFeeLimit();
+    assert.isTrue(
+      limit.cmp(new BN("30")) === 0,
+      "The paymentFeeLimit must be 30, not " + limit.toString()
+    );
+  });
+
+  it("must not allow account 8 to set the default fee amount, because it lacks the permission", async function() {
+    await expectRevert(
+      realWorldPaymentsPlugin.setPaymentFeeDefaultAmount(new BN("29"), {from: accounts[8]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    )
+  });
+
+  it("must not allow account 8 to grant the METAVERSE_MANAGE_FEE_SETTINGS on itself", async function() {
+    await expectRevert(
+      metaverse.setPermission(METAVERSE_MANAGE_FEE_SETTINGS, accounts[8], true, { from: accounts[8] }),
+      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("must allow account 0 to grant METAVERSE_MANAGE_FEE_SETTINGS to account 8", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_FEE_SETTINGS, accounts[8], true, {from: accounts[0]}),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_FEE_SETTINGS, "user": accounts[8], "set": true, sender: accounts[0]
+      }
+    )
+  });
+
+  it("must not allow account 8 to set the default amount to 31 since it passes the limit", async function() {
+    await expectRevert(
+      realWorldPaymentsPlugin.setPaymentFeeDefaultAmount(new BN("31"), {from: accounts[8]}),
+      revertReason(
+        "RealWorldPaymentsPlugin: the default payment fee must be between 1 / 1000 and the payment fee limit"
+      )
+    );
+  });
+
+  it("must not allow account 8 to set the default amount to 0", async function() {
+    await expectRevert(
+      realWorldPaymentsPlugin.setPaymentFeeDefaultAmount(new BN("0"), {from: accounts[8]}),
+      revertReason(
+        "RealWorldPaymentsPlugin: the default payment fee must be between 1 / 1000 and the payment fee limit"
+      )
+    );
+  });
+
+  it("must allow account 8 to set the default value to 25", async function() {
+    await expectEvent(
+      await realWorldPaymentsPlugin.setPaymentFeeDefaultAmount(new BN("25"), {from: accounts[8]}),
+      "PaymentFeeDefaultAmountUpdated", {
+        "updatedBy": accounts[8], "newAmount": new BN("25")
+      }
+    );
+    let defaultAmount = await realWorldPaymentsPlugin.paymentFeeDefaultAmount();
+    assert.isTrue(
+      defaultAmount.cmp(new BN("25")) === 0,
+      "The initial paymentFeeDefaultAmount must be 25, not " + defaultAmount.toString()
+    );
+  });
+
+  it("must allow account 0 to set the default value to 27", async function() {
+    await expectEvent(
+      await realWorldPaymentsPlugin.setPaymentFeeDefaultAmount(new BN("27"), {from: accounts[0]}),
+      "PaymentFeeDefaultAmountUpdated", {
+        "updatedBy": accounts[0], "newAmount": new BN("27")
+      }
+    );
+    let defaultAmount = await realWorldPaymentsPlugin.paymentFeeDefaultAmount();
+    assert.isTrue(
+      defaultAmount.cmp(new BN("27")) === 0,
+      "The initial paymentFeeDefaultAmount must be 27, not " + defaultAmount.toString()
+    );
+  });
+
+  it("must allow account 0 to revoke METAVERSE_MANAGE_FEE_SETTINGS to account 8", async function() {
+    await expectEvent(
+      await metaverse.setPermission(METAVERSE_MANAGE_FEE_SETTINGS, accounts[8], false, {from: accounts[0]}),
+      "PermissionChanged", {
+        "permission": METAVERSE_MANAGE_FEE_SETTINGS, "user": accounts[8], "set": false, sender: accounts[0]
+      }
+    );
+  });
+
+  it("must not allow account 8 to set the default fee amount, because it lacks the permission", async function() {
+    await expectRevert(
+      realWorldPaymentsPlugin.setPaymentFeeDefaultAmount(new BN("29"), {from: accounts[8]}),
+      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+    );
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
+
+  it("", async function() {
+
+  });
 });
