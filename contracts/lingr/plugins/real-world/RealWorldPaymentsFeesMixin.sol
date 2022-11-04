@@ -92,12 +92,12 @@ abstract contract RealWorldPaymentsFeesMixin is MetaversePlugin {
      * share (literally 1 / 1000 to 999 / 100) of whatever
      * fees are meant to be collected from a PoS they promote.
      */
-    mapping(address => Agent) agents;
+    mapping(address => Agent) public agents;
 
     /**
      * The PoS sponsorships are stored here.
      */
-    mapping(address => PoSSponsorship) posSponsorships;
+    mapping(address => PoSSponsorship) public posSponsorships;
 
     /**
      * This permission allows an account to manage every setting that
