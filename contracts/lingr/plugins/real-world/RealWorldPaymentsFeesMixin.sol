@@ -206,7 +206,7 @@ abstract contract RealWorldPaymentsFeesMixin is MetaversePlugin {
     function setAgent(address agent) external {
         address sender = _msgSender();
         require(
-            agent == address(0) && agents[agent].active,
+            agent == address(0) || agents[agent].active,
             "RealWorldPaymentsPlugin: the chosen address is not an active agent"
         );
         posSponsorships[sender] = PoSSponsorship({
