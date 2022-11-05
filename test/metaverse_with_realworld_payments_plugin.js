@@ -1939,7 +1939,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
     it("must not allow account 7 to set the fee to account 2, since it is not their agent", async function() {
       await expectRevert(
-        realWorldPaymentsPlugin.setFee(accounts[7], new BN(27), {from: accounts[2]}),
+        realWorldPaymentsPlugin.setFee(accounts[2], new BN(28), {from: accounts[6]}),
         "RealWorldPaymentsPlugin: the sender is not an active agent"
       );
     });
@@ -1949,14 +1949,173 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     });
 
     it("must have the proper fee settings", async function() {
-      let result = await realWorldPaymentsPlugin.paymentFee(accounts[1]);
-      // The fraction is (600 * min(29, 30)) / 1000000
+      let result1 = await realWorldPaymentsPlugin.paymentFee(accounts[1]);
+      // The fraction is (600 * min(27, 30)) / 1000000
       assert.isTrue(
-        result['0'].cmp(new BN(27 * 400)) === 0 &&
-        result['1'].cmp(new BN(27 * 600)) === 0 &&
-        result['2'] === accounts[7],
-        "The expected fee settings for account 1 must be (27 * 400, 27 * 600, account 1), not " +
-        "(" + result['0'].toString() + ", " + result['1'].toString() + ", " + result['7'] + ")"
+        result1['0'].cmp(new BN(27 * 400)) === 0 &&
+        result1['1'].cmp(new BN(27 * 600)) === 0 &&
+        result1['2'] === accounts[7],
+        "The expected fee settings for account 1 must be (27 * 400, 27 * 600, account 7), not " +
+        "(" + result1['0'].toString() + ", " + result1['1'].toString() + ", " + result1['2'] + ")"
+      );
+
+      let result2 = await realWorldPaymentsPlugin.paymentFee(accounts[2]);
+      // The fraction is (600 * min(27, 30)) / 1000000
+      assert.isTrue(
+        result2['0'].cmp(new BN(27 * 400)) === 0 &&
+        result2['1'].cmp(new BN(27 * 600)) === 0 &&
+        result2['2'] === accounts[7],
+        "The expected fee settings for account 1 must be (27 * 400, 27 * 600, account 2), not " +
+        "(" + result2['0'].toString() + ", " + result2['1'].toString() + ", " + result2['2'] + ")"
+      );
+    });
+
+    // TODO The 18 tests here (first test).
+
+    it("must have proper PoS settings", async function() {
+      let pos1 = await realWorldPaymentsPlugin.posSponsorships(accounts[1]);
+      assert.isTrue(
+        pos1.agent === accounts[7],
+        "The agent for account 1 must be account 7, not " + pos1.agent
+      );
+      assert.isTrue(
+        pos1.customFee.cmp(new BN(27)) === 0,
+        "The fee for account 1 must be 27 / 1000, not " + pos1.customFee + " / 1000"
+      );
+      let pos2 = await realWorldPaymentsPlugin.posSponsorships(accounts[2]);
+      assert.isTrue(
+        pos2.agent === accounts[7],
+        "The agent for account 1 must be account 7, not " + pos1.agent
+      );
+      assert.isTrue(
+        pos2.customFee.cmp(new BN(27)) === 0,
+        "The fee for account 1 must be 27 / 1000, not " + pos2.customFee + " / 1000"
+      );
+    });
+
+    it("must not allow changing the fee for account 1 to 0", async function() {
+      await expectRevert(
+        realWorldPaymentsPlugin.setFee(accounts[2], new BN(0), {from: accounts[7]}),
+        "RealWorldPaymentsPlugin: invalid custom fee"
+      );
+    });
+
+    it("must not allow changing the fee for account 1 to 31", async function() {
+      await expectRevert(
+        realWorldPaymentsPlugin.setFee(accounts[2], new BN(31), {from: accounts[7]}),
+        "RealWorldPaymentsPlugin: invalid custom fee"
+      );
+    });
+
+    it("must allow changing the fee for account 1 to 30", async function() {
+      await realWorldPaymentsPlugin.setFee(accounts[2], new BN(26), {from: accounts[7]});
+    });
+
+    it("must have the proper fee settings", async function() {
+      let result1 = await realWorldPaymentsPlugin.paymentFee(accounts[1]);
+      // The fraction is (600 * min(27, 30)) / 1000000
+      assert.isTrue(
+        result1['0'].cmp(new BN(27 * 400)) === 0 &&
+        result1['1'].cmp(new BN(27 * 600)) === 0 &&
+        result1['2'] === accounts[7],
+        "The expected fee settings for account 1 must be (27 * 400, 27 * 600, account 7), not " +
+        "(" + result1['0'].toString() + ", " + result1['1'].toString() + ", " + result1['2'] + ")"
+      );
+
+      let result2 = await realWorldPaymentsPlugin.paymentFee(accounts[2]);
+      // The fraction is (600 * min(27, 30)) / 1000000
+      assert.isTrue(
+        result2['0'].cmp(new BN(26 * 400)) === 0 &&
+        result2['1'].cmp(new BN(26 * 600)) === 0 &&
+        result2['2'] === accounts[7],
+        "The expected fee settings for account 1 must be (26 * 400, 26 * 600, account 2), not " +
+        "(" + result2['0'].toString() + ", " + result2['1'].toString() + ", " + result2['2'] + ")"
+      );
+    });
+
+    // TODO the 18 tests here (second test).
+
+    it("must have proper PoS settings", async function() {
+      let pos1 = await realWorldPaymentsPlugin.posSponsorships(accounts[1]);
+      assert.isTrue(
+        pos1.agent === accounts[7],
+        "The agent for account 1 must be account 7, not " + pos1.agent
+      );
+      assert.isTrue(
+        pos1.customFee.cmp(new BN(27)) === 0,
+        "The fee for account 1 must be 27 / 1000, not " + pos1.customFee + " / 1000"
+      );
+      let pos2 = await realWorldPaymentsPlugin.posSponsorships(accounts[2]);
+      assert.isTrue(
+        pos2.agent === accounts[7],
+        "The agent for account 1 must be account 7, not " + pos1.agent
+      );
+      assert.isTrue(
+        pos2.customFee.cmp(new BN(26)) === 0,
+        "The fee for account 1 must be 26 / 1000, not " + pos2.customFee + " / 1000"
+      );
+    });
+
+    it("must allow account 0 to change the fraction for agent 7 to 700, and agent 6 (re-set) to 650", async function() {
+      await realWorldPaymentsPlugin.updatePaymentFeeAgent(accounts[7], new BN(700), {from: accounts[0]});
+      await realWorldPaymentsPlugin.updatePaymentFeeAgent(accounts[6], new BN(650), {from: accounts[0]});
+    });
+
+    it("must allow account 1 to choose account 6 as agent (resets fee to 27)", async function() {
+      await realWorldPaymentsPlugin.setAgent(accounts[6], {from: accounts[2]});
+    });
+
+    it("must allow account 0 to disable account 7 as agent", async function() {
+      await realWorldPaymentsPlugin.updatePaymentFeeAgent(accounts[7], new BN(0), {from: accounts[0]});
+    });
+
+    it("must now allow account 1 to [re-]set account 7 as agent", async function() {
+      await expectRevert(
+        realWorldPaymentsPlugin.setAgent(accounts[7], {from: accounts[1]}),
+        revertReason("RealWorldPaymentsPlugin: the chosen address is not an active agent")
+      );
+    });
+
+    it("must have the proper fee settings", async function() {
+      let result1 = await realWorldPaymentsPlugin.paymentFee(accounts[1]);
+      // The fraction is (600 * min(27, 30)) / 1000000
+      assert.isTrue(
+          result1['0'].cmp(new BN(27 * 300)) === 0 &&
+          result1['1'].cmp(new BN(27 * 700)) === 0 &&
+          result1['2'] === accounts[7],
+          "The expected fee settings for account 1 must be (27 * 400, 27 * 600, account 7), not " +
+          "(" + result1['0'].toString() + ", " + result1['1'].toString() + ", " + result1['2'] + ")"
+      );
+
+      let result2 = await realWorldPaymentsPlugin.paymentFee(accounts[2]);
+      // The fraction is (600 * min(27, 30)) / 1000000
+      assert.isTrue(
+        result2['0'].cmp(new BN(27 * 350)) === 0 &&
+        result2['1'].cmp(new BN(27 * 650)) === 0 &&
+        result2['2'] === accounts[6],
+        "The expected fee settings for account 1 must be (26 * 400, 26 * 600, account 2), not " +
+        "(" + result2['0'].toString() + ", " + result2['1'].toString() + ", " + result2['2'] + ")"
+      );
+    });
+
+    it("must have proper PoS settings", async function() {
+      let pos1 = await realWorldPaymentsPlugin.posSponsorships(accounts[1]);
+      assert.isTrue(
+        pos1.agent === accounts[7],
+        "The agent for account 1 must be account 7, not " + pos1.agent
+      );
+      assert.isTrue(
+        pos1.customFee.cmp(new BN(27)) === 0,
+        "The fee for account 1 must be 27 / 1000, not " + pos1.customFee + " / 1000"
+      );
+      let pos2 = await realWorldPaymentsPlugin.posSponsorships(accounts[2]);
+      assert.isTrue(
+        pos2.agent === accounts[6],
+        "The agent for account 1 must be account 6, not " + pos1.agent
+      );
+      assert.isTrue(
+        pos2.customFee.cmp(new BN(27)) === 0,
+        "The fee for account 1 must be 27 / 1000, not " + pos2.customFee + " / 1000"
       );
     });
   });
