@@ -56,6 +56,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   const BRAND_SIGN_PAYMENTS = web3.utils.soliditySha3("Plugins::RealWorldPayments::Brand::Payments::Sign");
   const METAVERSE_MANAGE_FEE_SETTINGS = web3.utils.soliditySha3("Plugins::RealWorldPayments::Fee::Manage");
+  const METAVERSE_MANAGE_AGENT_SETTINGS = web3.utils.soliditySha3("Plugins::RealWorldPayments::Agents::Manage");
 
   before(async function () {
     // Set up the metaverse and two plug-ins.
@@ -1746,7 +1747,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     await expectRevert(
       realWorldPaymentsPlugin.setPaymentFeeEarningsReceiver(accounts[7], {from: accounts[8]}),
       revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
-    )
+    );
   });
 
   it("must allow account 0 to grant METAVERSE_MANAGE_FEE_SETTINGS to account 8", async function() {
@@ -1755,7 +1756,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "PermissionChanged", {
         "permission": METAVERSE_MANAGE_FEE_SETTINGS, "user": accounts[8], "set": true, sender: accounts[0]
       }
-    )
+    );
   });
 
   it("must not allow setting the earnings receiver to the zero address", async function() {
@@ -1791,13 +1792,154 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "PermissionChanged", {
         "permission": METAVERSE_MANAGE_FEE_SETTINGS, "user": accounts[8], "set": false, sender: accounts[0]
       }
-    )
+    );
   });
 
   it("must not allow account 8 to set the earnings receiver, because it lacks the permission", async function() {
     await expectRevert(
       realWorldPaymentsPlugin.setPaymentFeeEarningsReceiver(accounts[7], {from: accounts[8]}),
       revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
-    )
+    );
+  });
+
+  describe.only("agent-related tests", function() {
+    it("must not allow account 1 to use account 7 as agent, since account 7 it not an agent", async function() {
+      await expectRevert(
+        realWorldPaymentsPlugin.setAgent(accounts[7], {from: accounts[1]}),
+        revertReason("RealWorldPaymentsPlugin: the chosen address is not an active agent")
+      );
+    });
+
+    it("must not allow account 9 to set account 7 as an agent, because it lacks the permission", async function() {
+      await expectRevert(
+        realWorldPaymentsPlugin.updatePaymentFeeAgent(accounts[7], new BN(600), {from: accounts[9]}),
+        revertReason(
+          "MetaversePlugin: caller is not metaverse owner, and does not have the required permission"
+        )
+      );
+    });
+
+    it("must not allow account 8 to grant the METAVERSE_MANAGE_FEE_SETTINGS on itself", async function() {
+      await expectRevert(
+        metaverse.setPermission(METAVERSE_MANAGE_AGENT_SETTINGS, accounts[9], true, { from: accounts[9] }),
+        revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
+      );
+    });
+
+    it("must allow account 0 to grant METAVERSE_MANAGE_FEE_SETTINGS to account 9", async function() {
+      await expectEvent(
+        await metaverse.setPermission(METAVERSE_MANAGE_AGENT_SETTINGS, accounts[9], true, {from: accounts[0]}),
+        "PermissionChanged", {
+          "permission": METAVERSE_MANAGE_AGENT_SETTINGS, "user": accounts[9], "set": true, sender: accounts[0]
+        }
+      );
+    });
+
+    it("must not allow account 9 to set address 0 as agent, since that address is not allowed", async function() {
+      await expectRevert(
+        realWorldPaymentsPlugin.updatePaymentFeeAgent(constants.ZERO_ADDRESS, new BN(600), {from: accounts[9]}),
+        revertReason(
+          "RealWorldPaymentsPlugin: the agent must not be the zero address"
+        )
+      );
+    });
+
+    it("must now allow account 0 to set account 7 as agent with a fraction > 999", async function() {
+      await expectRevert(
+        realWorldPaymentsPlugin.updatePaymentFeeAgent(accounts[7], new BN(1000), {from: accounts[9]}),
+        revertReason(
+          "RealWorldPaymentsPlugin: the fee fraction must be between 1 and 999"
+        )
+      );
+    });
+
+    it("must allow account 9 to set accounts 7 as agent with a fraction of 600", async function() {
+      await expectEvent(
+        await realWorldPaymentsPlugin.updatePaymentFeeAgent(accounts[7], new BN(600), {from: accounts[9]}),
+        "PaymentFeeAgentUpdated", {
+          "updatedBy": accounts[9], "agent": accounts[7], "feeFraction": new BN(600)
+        }
+      );
+    });
+
+    it("must allow account 0 to set accounts 6 as agent with a fraction of 550", async function() {
+      await expectEvent(
+        await realWorldPaymentsPlugin.updatePaymentFeeAgent(accounts[6], new BN(550), {from: accounts[0]}),
+        "PaymentFeeAgentUpdated", {
+          "updatedBy": accounts[0], "agent": accounts[6], "feeFraction": new BN(550)
+        }
+      );
+    });
+
+    it("must have the agents settings appropriately", async function() {
+      let agent6 = await realWorldPaymentsPlugin.agents(accounts[6]);
+      let agent7 = await realWorldPaymentsPlugin.agents(accounts[7]);
+      console.log("Agent 6:", agent6);
+      console.log("Agent 7:", agent7);
+      assert.isTrue(
+        agent6.feeFraction.cmp(new BN(550)) === 0 && agent6.active,
+        "The account 6 must be an active agent with a fraction of 550"
+      );
+      assert.isTrue(
+        agent7.feeFraction.cmp(new BN(600)) === 0 && agent7.active,
+        "The account 7 must be an active agent with a fraction of 600"
+      );
+    });
+
+    it("must allow account 0 to revoke account 6 as agent", async function() {
+      await expectEvent(
+        await realWorldPaymentsPlugin.updatePaymentFeeAgent(accounts[6], new BN(0), {from: accounts[0]}),
+        "PaymentFeeAgentUpdated", {
+          "updatedBy": accounts[0], "agent": accounts[6], "feeFraction": new BN(0)
+        }
+      );
+    });
+
+    it("must have the agents settings appropriately (2)", async function() {
+      let agent6 = await realWorldPaymentsPlugin.agents(accounts[6]);
+      let agent7 = await realWorldPaymentsPlugin.agents(accounts[7]);
+      assert.isTrue(
+        agent6.feeFraction.cmp(new BN(550)) === 0 && !agent6.active,
+        "The account 6 must be an INactive agent with a fraction of 550"
+      );
+      assert.isTrue(
+        agent7.feeFraction.cmp(new BN(600)) === 0 && agent7.active,
+        "The account 7 must be an active agent with a fraction of 600"
+      );
+    });
+
+    it("must allow account 0 to revoke METAVERSE_MANAGE_FEE_SETTINGS to account 9", async function() {
+      await expectEvent(
+        await metaverse.setPermission(METAVERSE_MANAGE_AGENT_SETTINGS, accounts[9], false, {from: accounts[0]}),
+        "PermissionChanged", {
+          "permission": METAVERSE_MANAGE_AGENT_SETTINGS, "user": accounts[9], "set": false, sender: accounts[0]
+        }
+      );
+    });
+
+    it("must not allow account 9 to set account 7 as an agent, because it lacks the permission", async function() {
+      await expectRevert(
+        realWorldPaymentsPlugin.updatePaymentFeeAgent(accounts[7], new BN(600), {from: accounts[9]}),
+        revertReason(
+          "MetaversePlugin: caller is not metaverse owner, and does not have the required permission"
+        )
+      );
+    });
+
+    it("must allow account 1 to choose account 7 as agent", async function() {
+      console.log(await realWorldPaymentsPlugin.agents(accounts[7]));
+      await realWorldPaymentsPlugin.setAgent(accounts[7], {from: accounts[1]});
+    });
+
+    it("must now allow account 1 to choose account 6 as agent", async function() {
+      await expectRevert(
+        realWorldPaymentsPlugin.setAgent(accounts[6], {from: accounts[1]}),
+        revertReason(
+          "RealWorldPaymentsPlugin: the chosen address is not an active agent"
+        )
+      );
+    });
+
+
   });
 });
