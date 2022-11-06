@@ -93,6 +93,15 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
          * images are not appropriately loaded.
          */
         string color;
+
+        /**
+         * The currency supply. If 0, it will be an unbounded
+         * currency (starts with no tokens, and can mint many
+         * tokens as needed). Otherwise, the supply is minted
+         * initially and cannot mint more of them. Also, when
+         * using limited supply, the tokens cannot be burned.
+         */
+        uint256 supply;
     }
 
     /**
@@ -211,12 +220,12 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         WMATICType = _defineSystemCurrency(address(this), CurrencyMetadata({
             registered: true, name: "WMATIC", description: "Wrapped MATIC in this world",
             color: "#ffd700", image: wmaticImage, icon16x16: wmaticIcon16x16,
-            icon32x32: wmaticIcon32x32, icon64x64: wmaticIcon64x64
+            icon32x32: wmaticIcon32x32, icon64x64: wmaticIcon64x64, supply: 0
         }));
         BEATType = _defineSystemCurrency(address(this), CurrencyMetadata({
             registered: true, name: "BEAT", description: "BEAT coin",
             color: "#87cefa", image: beatImage, icon16x16: beatIcon16x16,
-            icon32x32: beatIcon32x32, icon64x64: beatIcon64x64
+            icon32x32: beatIcon32x32, icon64x64: beatIcon64x64, supply: 0
         }));
     }
 
@@ -235,11 +244,13 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         if (!currency.registered) {
             return abi.encodePacked("");
         } else {
+            string memory supply = currency.supply == 0 ? '"unbounded"' : Strings.toString(currency.supply);
             return abi.encodePacked(
                 '{"name":"',currency.name,'","description":"', currency.description,
                 '","image":"', currency.image, '","decimals":18,"properties":{"icon16x16":"',
                 currency.icon16x16, '","icon32x32":"', currency.icon32x32, '","icon64x64":"',
-                currency.icon64x64, '","color":"', currency.color, '","type":"currency"}}'
+                currency.icon64x64, '","color":"', currency.color, '","type":"currency"',
+                ',"supply":', supply, '}}'
             );
         }
     }
@@ -366,7 +377,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         CurrencyMetadata memory metadata = CurrencyMetadata({
             registered: true, name: _name, description: _description, color: _color,
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
-            icon64x64: _icon64x64
+            icon64x64: _icon64x64, supply: 0
         });
         _defineSystemCurrency(_definedBy, metadata);
     }
@@ -384,7 +395,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         CurrencyMetadata memory metadata = CurrencyMetadata({
             registered: true, name: _name, description: _description, color: _color,
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
-            icon64x64: _icon64x64
+            icon64x64: _icon64x64, supply: 0
         });
         _defineBrandCurrency(_brandId, msg.value, msg.sender, metadata);
         payable(brandCurrencyDefinitionEarningsReceiver).transfer(msg.value);
@@ -403,7 +414,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         CurrencyMetadata memory metadata = CurrencyMetadata({
             registered: true, name: _name, description: _description, color: _color,
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
-            icon64x64: _icon64x64
+            icon64x64: _icon64x64, supply: 0
         });
         _defineBrandCurrency(_brandId, 0, msg.sender, metadata);
     }
@@ -497,11 +508,15 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     function mintCurrency(address _to, uint256 _id, uint256 _amount, bytes memory _data) external {
         require(
             mintingPlugin != address(0),
-            "CurrencyMintingPlugin: the minting plugin is not set"
+            "CurrencyDefinitionPlugin: the minting plugin is not set"
         );
         require(
             _msgSender() == mintingPlugin,
             "CurrencyDefinitionPlugin: only the minting plugin is allowed to mint currencies"
+        );
+        require(
+            currencies[_id].supply == 0,
+            "CurrencyDefinitionPlugin: the chosen currency has limited supply and cannot be minted"
         );
         _mintFTFor(_to, _id, _amount, _data);
     }
