@@ -1204,6 +1204,119 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
   let paymentTypes = ["native", "token", "tokens"];
   let brandTypes = ["no-brand", "non-committed-brand", "committed-brand"];
 
+  async function buildTestPaymentObj(rewardsType, paymentType, brandType, settingsCaption, params) {
+    params = params || {};
+    let now = params.now || dates.timestamp();
+    let obj = {
+      args: {
+        toAddress: params.toAddress || accounts[3],
+        payment: {
+          posAddress: params.posAddress || accounts[0],
+          reference: params.reference || ("000001-" + settingsCaption),
+          description: params.description || ("My 1st Payment (" + settingsCaption + ")"),
+          now: now
+        },
+        dueDate: now + (params.dueTime || 30)
+      }
+    };
+
+    let rewardToken = null;
+    switch(brandType) {
+      case "no-brand":
+        obj.args.brandAddress = constants.ZERO_ADDRESS;
+        rewardToken = BEAT;
+        break;
+      case "non-committed-brand":
+        obj.args.brandAddress = brand2;
+        rewardToken = brand2Currency1;
+        break;
+      case "committed-brand":
+        obj.args.brandAddress = brand1;
+        rewardToken = brand1Currency1
+        break;
+      default:
+        throw new Error("Unexpected brandType value on test: " + brandType);
+    }
+
+    switch(rewardsType) {
+      case "no-rewards":
+        obj.args.rewardIds = [];
+        obj.args.rewardValues = [];
+        break;
+      case "with-rewards":
+        obj.args.rewardIds = [rewardToken];
+        obj.args.rewardValues = [params.rewardAmount || new web3.utils.BN("1000000000000000000")];
+        break;
+      default:
+        throw new Error("Unexpected rewardsType value on test: " + rewardsType);
+    }
+
+    let messageHash = "";
+    let tokenValue = new web3.utils.BN("10000000000000000");
+    obj.type = paymentType;
+    switch(paymentType) {
+      case "native":
+        obj.value = tokenValue;
+        messageHash = web3.utils.soliditySha3(
+            {type: 'address', value: obj.args.toAddress},
+            {type: 'bytes32', value: web3.utils.soliditySha3(
+                  {type: 'address', value: obj.args.payment.posAddress},
+                  {type: 'string', value: obj.args.payment.reference},
+                  {type: 'string', value: obj.args.payment.description},
+                  {type: 'uint256', value: obj.args.payment.now}
+              )},
+            {type: 'uint256', value: obj.args.dueDate},
+            {type: 'address', value: obj.args.brandAddress},
+            {type: 'uint256[]', value: obj.args.rewardIds},
+            {type: 'uint256[]', value: obj.args.rewardValues},
+            {type: 'uint256', value: obj.value},
+        );
+        break;
+      case "token":
+        obj.id = WMATIC;
+        obj.value = tokenValue;
+        messageHash = web3.utils.soliditySha3(
+            {type: 'address', value: obj.args.toAddress},
+            {type: 'bytes32', value: web3.utils.soliditySha3(
+                  {type: 'address', value: obj.args.payment.posAddress},
+                  {type: 'string', value: obj.args.payment.reference},
+                  {type: 'string', value: obj.args.payment.description},
+                  {type: 'uint256', value: obj.args.payment.now}
+              )},
+            {type: 'uint256', value: obj.args.dueDate},
+            {type: 'address', value: obj.args.brandAddress},
+            {type: 'uint256[]', value: obj.args.rewardIds},
+            {type: 'uint256[]', value: obj.args.rewardValues},
+            {type: 'uint256', value: obj.id},
+            {type: 'uint256', value: obj.value},
+        );
+        break;
+      case "tokens":
+        obj.ids = [WMATIC];
+        obj.values = [tokenValue];
+        messageHash = web3.utils.soliditySha3(
+            {type: 'address', value: obj.args.toAddress},
+            {type: 'bytes32', value: web3.utils.soliditySha3(
+                  {type: 'address', value: obj.args.payment.posAddress},
+                  {type: 'string', value: obj.args.payment.reference},
+                  {type: 'string', value: obj.args.payment.description},
+                  {type: 'uint256', value: obj.args.payment.now}
+              )},
+            {type: 'uint256', value: obj.args.dueDate},
+            {type: 'address', value: obj.args.brandAddress},
+            {type: 'uint256[]', value: obj.args.rewardIds},
+            {type: 'uint256[]', value: obj.args.rewardValues},
+            {type: 'uint256[]', value: obj.ids},
+            {type: 'uint256[]', value: obj.values},
+        );
+        break;
+    }
+
+    obj.args.paymentSignature = await web3.eth.sign(messageHash, accounts[0]);
+
+    return obj;
+  }
+
   for(let idxRewardsType = 0; idxRewardsType < rewardsTypes.length; idxRewardsType++) {
     for(let idxPaymentType = 0; idxPaymentType < paymentTypes.length; idxPaymentType++) {
       for(let idxBrandType = 0; idxBrandType < brandTypes.length; idxBrandType++) {
@@ -1215,121 +1328,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
         // First, the base settings.
 
-        async function buildTestPaymentObj(params) {
-          params = params || {};
-          let now = params.now || dates.timestamp();
-          let obj = {
-            args: {
-              toAddress: params.toAddress || accounts[3],
-              payment: {
-                posAddress: params.posAddress || accounts[0],
-                reference: params.reference || ("000001-" + settingsCaption),
-                description: params.description || ("My 1st Payment (" + settingsCaption + ")"),
-                now: now
-              },
-              dueDate: now + (params.dueTime || 30)
-            }
-          };
-
-          let rewardToken = null;
-          switch(brandType) {
-            case "no-brand":
-              obj.args.brandAddress = constants.ZERO_ADDRESS;
-              rewardToken = BEAT;
-              break;
-            case "non-committed-brand":
-              obj.args.brandAddress = brand2;
-              rewardToken = brand2Currency1;
-              break;
-            case "committed-brand":
-              obj.args.brandAddress = brand1;
-              rewardToken = brand1Currency1
-              break;
-            default:
-              throw new Error("Unexpected brandType value on test: " + brandType);
-          }
-
-          switch(rewardsType) {
-            case "no-rewards":
-              obj.args.rewardIds = [];
-              obj.args.rewardValues = [];
-              break;
-            case "with-rewards":
-              obj.args.rewardIds = [rewardToken];
-              obj.args.rewardValues = [params.rewardAmount || new web3.utils.BN("1000000000000000000")];
-              break;
-            default:
-              throw new Error("Unexpected rewardsType value on test: " + rewardsType);
-          }
-
-          let messageHash = "";
-          let tokenValue = new web3.utils.BN("10000000000000000");
-          obj.type = paymentType;
-          switch(paymentType) {
-            case "native":
-              obj.value = tokenValue;
-              messageHash = web3.utils.soliditySha3(
-                {type: 'address', value: obj.args.toAddress},
-                {type: 'bytes32', value: web3.utils.soliditySha3(
-                  {type: 'address', value: obj.args.payment.posAddress},
-                  {type: 'string', value: obj.args.payment.reference},
-                  {type: 'string', value: obj.args.payment.description},
-                  {type: 'uint256', value: obj.args.payment.now}
-                )},
-                {type: 'uint256', value: obj.args.dueDate},
-                {type: 'address', value: obj.args.brandAddress},
-                {type: 'uint256[]', value: obj.args.rewardIds},
-                {type: 'uint256[]', value: obj.args.rewardValues},
-                {type: 'uint256', value: obj.value},
-              );
-              break;
-            case "token":
-              obj.id = WMATIC;
-              obj.value = tokenValue;
-              messageHash = web3.utils.soliditySha3(
-                {type: 'address', value: obj.args.toAddress},
-                {type: 'bytes32', value: web3.utils.soliditySha3(
-                  {type: 'address', value: obj.args.payment.posAddress},
-                  {type: 'string', value: obj.args.payment.reference},
-                  {type: 'string', value: obj.args.payment.description},
-                  {type: 'uint256', value: obj.args.payment.now}
-                )},
-                {type: 'uint256', value: obj.args.dueDate},
-                {type: 'address', value: obj.args.brandAddress},
-                {type: 'uint256[]', value: obj.args.rewardIds},
-                {type: 'uint256[]', value: obj.args.rewardValues},
-                {type: 'uint256', value: obj.id},
-                {type: 'uint256', value: obj.value},
-              );
-              break;
-            case "tokens":
-              obj.ids = [WMATIC];
-              obj.values = [tokenValue];
-              messageHash = web3.utils.soliditySha3(
-                {type: 'address', value: obj.args.toAddress},
-                {type: 'bytes32', value: web3.utils.soliditySha3(
-                  {type: 'address', value: obj.args.payment.posAddress},
-                  {type: 'string', value: obj.args.payment.reference},
-                  {type: 'string', value: obj.args.payment.description},
-                  {type: 'uint256', value: obj.args.payment.now}
-                )},
-                {type: 'uint256', value: obj.args.dueDate},
-                {type: 'address', value: obj.args.brandAddress},
-                {type: 'uint256[]', value: obj.args.rewardIds},
-                {type: 'uint256[]', value: obj.args.rewardValues},
-                {type: 'uint256[]', value: obj.ids},
-                {type: 'uint256[]', value: obj.values},
-              );
-              break;
-          }
-
-          obj.args.paymentSignature = await web3.eth.sign(messageHash, accounts[0]);
-
-          return obj;
-        }
-
         it("must validate: a good transaction using settings " + settingsCaption, async function f() {
-          let obj = await buildTestPaymentObj();
+          let obj = await buildTestPaymentObj(rewardsType, paymentType, brandType, settingsCaption);
           let brandPermissionGranter = null;
           switch(obj.args.brandAddress) {
             case brand1:
@@ -1479,7 +1479,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
             // Now try executing a different request, but the brand does not
             // authorize the PoS.
-            obj = await buildTestPaymentObj({
+            obj = await buildTestPaymentObj(rewardsType, paymentType, brandType, settingsCaption, {
               reference: "000002-" + settingsCaption, description: "My 2nd Payment (" + settingsCaption + ")"
             });
             // console.log("new obj is (second request):", obj);
@@ -1580,7 +1580,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
           it("must validate data errors using settings " + settingsCaption + " and callback: '" + callback[0] + "'",
               async function() {
-            let obj = await buildTestPaymentObj();
+            let obj = await buildTestPaymentObj(rewardsType, paymentType, brandType, settingsCaption);
             await new Promise(function(r) { setTimeout(r, 5); });
             // console.log("posAddress:", obj.args.payment.posAddress, "signature:", obj.args.paymentSignature);
             // console.log("callback:", callbacks[callbackIndex]);
@@ -1597,6 +1597,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
         it("must reject expired payments using settings: " + settingsCaption, async function() {
           let obj = await buildTestPaymentObj(
+            rewardsType, paymentType, brandType, settingsCaption,
             {now: dates.timestamp() - 2000, reference: "00003", description: "third payment"}
           );
 
@@ -1612,6 +1613,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
         if (rewardsType === "with-rewards") {
           it("must reject payments with exceeding rewards: " + settingsCaption, async function() {
             let obj = await buildTestPaymentObj(
+              rewardsType, paymentType, brandType, settingsCaption,
               {rewardAmount: new web3.utils.BN("1000000000000000000000")}
             );
 
@@ -1634,7 +1636,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   // Tests on permissions and restrictions for setPaymentFeeEarningsReceiver and setPaymentFeeDefaultAmount.
 
-  describe.only("agent-related tests", function() {
+  describe("agent-related tests", function() {
     it("must have an initial fee of 30 (this is: 30 over 1000)", async function() {
       let defaultAmount = await realWorldPaymentsPlugin.paymentFeeDefaultAmount();
       assert.isTrue(
@@ -1970,7 +1972,195 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       );
     });
 
-    // TODO The 18 tests here (first test).
+    function testAppropriateFees() {
+      let rewardsTypes = ["no-rewards", "with-rewards"];
+      let paymentTypes = ["native", "token", "tokens"];
+      let brandTypes = ["no-brand", "non-committed-brand", "committed-brand"];
+
+      for(let idxRewardsType = 0; idxRewardsType < rewardsTypes.length; idxRewardsType++) {
+        for(let idxPaymentType = 0; idxPaymentType < paymentTypes.length; idxPaymentType++) {
+          for(let idxBrandType = 0; idxBrandType < brandTypes.length; idxBrandType++) {
+            let rewardsType = rewardsTypes[idxRewardsType];
+            let paymentType = paymentTypes[idxPaymentType];
+            let brandType = brandTypes[idxBrandType];
+
+            let settingsCaption = "[rewards:" + rewardsType + "; payment:" + paymentType + "; brand:" + brandType + "]";
+
+            it("must pass 18 tests, expecting different fees for agent", async function() {
+              let obj = await buildTestPaymentObj(rewardsType, paymentType, brandType, settingsCaption);
+              let brandPermissionGranter = null;
+              switch(obj.args.brandAddress) {
+                case brand1:
+                  brandPermissionGranter = accounts[1];
+                  break;
+                case brand2:
+                  brandPermissionGranter = accounts[2];
+                  break;
+              }
+
+              // Set BRAND_SIGN_PAYMENTS to accounts[0] in the brand.
+              if (brandPermissionGranter) {
+                await brandRegistry.brandSetPermission(
+                    obj.args.brandAddress, BRAND_SIGN_PAYMENTS, accounts[0], true, { from: brandPermissionGranter }
+                );
+              }
+
+              // Get the balance of the reward token.
+              let rewardTokenBalance = obj.args.rewardIds.length === 0 ? 0 : (
+                  await realWorldPaymentsPlugin.balances(accounts[0], obj.args.rewardIds[0])
+              );
+
+              // Get the balance(s) of the payment token, and the fee.
+              let targetTokenBalance;
+              let feeReceiverTokenBalance;
+              let agentTokenBalance;
+              let tokenValue = new web3.utils.BN("10000000000000000");
+              let paymentFeeDetails = await realWorldPaymentsPlugin.paymentFee(obj.args.payment.posAddress);
+              let receiverFee = paymentFeeDetails['0'];
+              let agentFee = paymentFeeDetails['1'];
+              let agent = paymentFeeDetails['2'];
+              let absoluteReceiverFee = tokenValue.mul(receiverFee).divn(1000000);
+              let absoluteAgentFee = tokenValue.mul(agentFee).divn(1000000);
+              let absoluteRemainder = tokenValue.sub(absoluteReceiverFee).sub(absoluteAgentFee);
+              switch(paymentType) {
+                case "native":
+                  targetTokenBalance = new web3.utils.BN(await web3.eth.getBalance(obj.args.toAddress));
+                  feeReceiverTokenBalance = new web3.utils.BN(await web3.eth.getBalance(
+                    await realWorldPaymentsPlugin.paymentFeeEarningsReceiver()
+                  ));
+                  if (agent !== constants.ZERO_ADDRESS) {
+                    agentTokenBalance = new web3.utils.BN(await web3.eth.getBalance(agent));
+                  }
+                  break;
+                case "token":
+                  targetTokenBalance = await economy.balanceOf(obj.args.toAddress, obj.id);
+                  feeReceiverTokenBalance = await economy.balanceOf(
+                    await realWorldPaymentsPlugin.paymentFeeEarningsReceiver(), obj.id
+                  );
+                  if (agent !== constants.ZERO_ADDRESS) {
+                    agentTokenBalance = await economy.balanceOf(agent, obj.id);
+                  }
+                  break;
+                case "tokens":
+                  targetTokenBalance = await economy.balanceOf(obj.args.toAddress, obj.ids[0]);
+                  feeReceiverTokenBalance = await economy.balanceOf(
+                    await realWorldPaymentsPlugin.paymentFeeEarningsReceiver(), obj.ids[0]
+                  );
+                  if (agent !== constants.ZERO_ADDRESS) {
+                    agentTokenBalance = await economy.balanceOf(agent, obj.ids[0]);
+                  }
+                  break;
+              }
+
+              // Execute a working transaction.
+              let gasAmount = new web3.utils.BN("250000");
+              let tx = await payments.executePaymentOrderConfirmationCall(
+                obj, web3, accounts[9], economy.address, economy.abi, realWorldPaymentsPlugin.address,
+                realWorldPaymentsPlugin.abi, false, {amount: gasAmount}
+              );
+              console.log(
+                "TX price (USD for " + settingsCaption + "):", tx.gasUsed * GAS_COST / 1000000000000000000 * NATIVE_PRICE
+              );
+
+              // Assert on the rewards being delivered.
+              if (obj.args.rewardIds.length) {
+                let newRewardTokenBalance = await realWorldPaymentsPlugin.balances(accounts[0], obj.args.rewardIds[0]);
+                let expectedNewRewardTokenBalance = rewardTokenBalance.sub(obj.args.rewardValues[0]);
+                assert.isTrue(
+                  newRewardTokenBalance.cmp(expectedNewRewardTokenBalance) === 0,
+                  "The new reward token balance should be " + expectedNewRewardTokenBalance.toString() + " since that " +
+                  "one results of subtracting " + obj.args.rewardValues[0].toString() + " from " +
+                  rewardTokenBalance.toString() + ", but instead it is " + newRewardTokenBalance.toString()
+                );
+              }
+
+              // Get the NEW balance(s) of the payment token, and the fee.
+              let newTargetTokenBalance;
+              let newFeeReceiverTokenBalance;
+              let newAgentTokenBalance;
+              switch(paymentType) {
+                case "native":
+                  newTargetTokenBalance = new web3.utils.BN(await web3.eth.getBalance(obj.args.toAddress));
+                  newFeeReceiverTokenBalance = new web3.utils.BN(await web3.eth.getBalance(
+                    await realWorldPaymentsPlugin.paymentFeeEarningsReceiver()
+                  ));
+                  if (agent !== constants.ZERO_ADDRESS) {
+                    newAgentTokenBalance = new web3.utils.BN(await web3.eth.getBalance(agent));
+                  }
+                  break;
+                case "token":
+                  newTargetTokenBalance = await economy.balanceOf(obj.args.toAddress, obj.id);
+                  newFeeReceiverTokenBalance = await economy.balanceOf(
+                    await realWorldPaymentsPlugin.paymentFeeEarningsReceiver(), obj.id
+                  );
+                  if (agent !== constants.ZERO_ADDRESS) {
+                    newAgentTokenBalance = await economy.balanceOf(agent, obj.id);
+                  }
+                  break;
+                case "tokens":
+                  newTargetTokenBalance = await economy.balanceOf(obj.args.toAddress, obj.ids[0]);
+                  newFeeReceiverTokenBalance = await economy.balanceOf(
+                    await realWorldPaymentsPlugin.paymentFeeEarningsReceiver(), obj.ids[0]
+                  );
+                  if (agent !== constants.ZERO_ADDRESS) {
+                    newAgentTokenBalance = await economy.balanceOf(agent, obj.ids[0]);
+                  }
+                  break;
+              }
+
+              // Assert on the balances & fees.
+              if (brandType === "committed-brand") {
+                assert.isTrue(
+                  newFeeReceiverTokenBalance.cmp(feeReceiverTokenBalance) === 0,
+                  "The new and old fee receiver token balances must be the same, since the commission is 0%. " +
+                  "Expected value: " + feeReceiverTokenBalance.toString() +
+                  ", actual value: " + newFeeReceiverTokenBalance.toString()
+                );
+                if (agent !== constants.ZERO_ADDRESS) {
+                  assert.isTrue(
+                    newAgentTokenBalance.cmp(agentTokenBalance) === 0,
+                    "The new and old agent token balances must be the same, since the commission is 0%. " +
+                    "Expected value: " + agentTokenBalance.toString() +
+                    ", actual value: " + newAgentTokenBalance.toString()
+                  );
+                }
+                assert.isTrue(
+                  newTargetTokenBalance.cmp(targetTokenBalance.add(tokenValue)) === 0,
+                  "The new and old target token balances must be the original plus the full token value, since " +
+                  "the commission is 0%. " +
+                  "Expected value: " + targetTokenBalance.toString() + " + " + tokenValue.toString() +
+                  ", actual value: " + newTargetTokenBalance.toString()
+                );
+              } else {
+                assert.isTrue(
+                  newFeeReceiverTokenBalance.cmp(feeReceiverTokenBalance.add(absoluteReceiverFee)) === 0,
+                  "The new and old fee receiver token balances must be right, since the commission is 3%. " +
+                  "Expected value: " + feeReceiverTokenBalance.toString() + " + " + absoluteReceiverFee.toString() +
+                  ", actual value: " + newFeeReceiverTokenBalance.toString()
+                );
+                if (agent !== constants.ZERO_ADDRESS) {
+                  assert.isTrue(
+                    newAgentTokenBalance.cmp(agentTokenBalance.add(absoluteAgentFee)) === 0,
+                    "The new and old agent token balances must be the right, since the commission is 3%. " +
+                    "Expected value: " + agentTokenBalance.toString() +
+                    ", actual value: " + newAgentTokenBalance.toString()
+                  );
+                }
+                assert.isTrue(
+                  newTargetTokenBalance.cmp(targetTokenBalance.add(absoluteRemainder)) === 0,
+                  "The new and old target token balances must be the original plus the remaining value, since " +
+                  "the commission is 3%. " +
+                  "Expected value: " + targetTokenBalance.toString() + " + " + absoluteRemainder.toString() +
+                  ", actual value: " + newTargetTokenBalance.toString()
+                );
+              }
+            });
+          }
+        }
+      }
+    }
+
+    testAppropriateFees();
 
     it("must have proper PoS settings", async function() {
       let pos1 = await realWorldPaymentsPlugin.posSponsorships(accounts[1]);
@@ -2033,7 +2223,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       );
     });
 
-    // TODO the 18 tests here (second test).
+    testAppropriateFees();
 
     it("must have proper PoS settings", async function() {
       let pos1 = await realWorldPaymentsPlugin.posSponsorships(accounts[1]);
@@ -2097,6 +2287,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
         "(" + result2['0'].toString() + ", " + result2['1'].toString() + ", " + result2['2'] + ")"
       );
     });
+
+    testAppropriateFees();
 
     it("must have proper PoS settings", async function() {
       let pos1 = await realWorldPaymentsPlugin.posSponsorships(accounts[1]);
