@@ -27,12 +27,6 @@ const {
   txGasDetails
 } = require("./test_utils");
 
-const {
-  makePaymentOrderURI,
-  FUND_CALL,
-  FUND_BATCH_CALL
-} = require("../front-end/js/plug-ins/real-world/real-world-payments");
-
 /*
  * uncomment accounts to access the test accounts made available by the
  * Ethereum client
@@ -87,6 +81,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
     await metaverse.addPlugin(definitionPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(mintingPlugin.address, { from: accounts[0] });
+    await definitionPlugin.setMintingPlugin(mintingPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(realWorldPaymentsPlugin.address, { from: accounts[0] });
 
     // Mint some brands (define cost, and mint 2 brands).

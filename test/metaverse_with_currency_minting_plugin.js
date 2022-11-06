@@ -66,18 +66,19 @@ contract("CurrencyMintingPlugin", function (accounts) {
       { from: accounts[0] }
     );
     mintingPlugin = await CurrencyMintingPlugin.new(
-        metaverse.address, definitionPlugin.address, accounts[9], { from: accounts[0] }
+      metaverse.address, definitionPlugin.address, accounts[9], { from: accounts[0] }
     );
     sampleDefinitionPlugin = await SampleSystemCurrencyDefiningPlugin.new(
-        metaverse.address, definitionPlugin.address, { from: accounts[0] }
+      metaverse.address, definitionPlugin.address, { from: accounts[0] }
     );
     sampleMintingPlugin = await SampleSystemCurrencyMintingPlugin.new(
-        metaverse.address, mintingPlugin.address, { from: accounts[0] }
+      metaverse.address, mintingPlugin.address, { from: accounts[0] }
     );
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
     await metaverse.addPlugin(definitionPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(mintingPlugin.address, { from: accounts[0] });
+    await definitionPlugin.setMintingPlugin(mintingPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(sampleDefinitionPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(sampleMintingPlugin.address, { from: accounts[0] });
 

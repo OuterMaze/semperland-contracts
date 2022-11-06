@@ -32,6 +32,11 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     uint256 public currencyDefinitionCost;
 
     /**
+     * A reference to the minting plug-in.
+     */
+    address private mintingPlugin;
+
+    /**
      * The metadata of a currency involves a name and
      * description, some images, and 18 decimals.
      */
@@ -94,6 +99,11 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * The registered currencies' metadata.
      */
     mapping(uint256 => CurrencyMetadata) currencies;
+
+    /**
+     * Permission: To add a plug-in (here: setup plug-in).
+     */
+    bytes32 constant ADD_PLUGIN = keccak256("Metaverse::AddPlugin");
 
     /**
      * This permission allows users to set the definition costs
@@ -460,5 +470,39 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         emitCurrencyUpdate(_id)
     {
         currencies[_id].icon64x64 = _icon64x64;
+    }
+
+    /**
+     * Sets the minting plug-in.
+     */
+    function setMintingPlugin(address _plugIn) external onlyMetaverseAllowed(ADD_PLUGIN) {
+        require(
+            mintingPlugin == address(0),
+            "CurrencyMintingPlugin: minting plug-in already set"
+        );
+        require(
+            _plugIn != address(0),
+            "CurrencyMintingPlugin: cannot set the minting plug-in to address 0"
+        );
+        require(
+            IMetaverse(metaverse).plugins(_plugIn),
+            "CurrencyMintingPlugin: the given minting plug-in is not added to the metaverse"
+        );
+        mintingPlugin = _plugIn;
+    }
+
+    /**
+     * Mints a currency. Only the minting plug-in can invoke this method.
+     */
+    function mintCurrency(address _to, uint256 _id, uint256 _amount, bytes memory _data) external {
+        require(
+            mintingPlugin != address(0),
+            "CurrencyMintingPlugin: the minting plugin is not set"
+        );
+        require(
+            _msgSender() == mintingPlugin,
+            "CurrencyDefinitionPlugin: only the minting plugin is allowed to mint currencies"
+        );
+        _mintFTFor(_to, _id, _amount, _data);
     }
 }

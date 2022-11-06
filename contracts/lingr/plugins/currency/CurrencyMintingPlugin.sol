@@ -181,7 +181,9 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireSystemScope(scope, 0x0);
         require(_bulks != 0, "CurrencyMintingPlugin: minting (system scope) issued with no units");
-        _mintFTFor(_to, _id, _bulks * currencyMintAmount, "system currency mint");
+        CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
+            _to, _id, _bulks * currencyMintAmount, "system currency mint"
+        );
     }
 
     /**
@@ -196,7 +198,9 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireBrandScope(scope, BRAND_MANAGE_CURRENCIES);
         payable(brandCurrencyMintingEarningsReceiver).transfer(msg.value);
-        _mintFTFor(_to, _id, bulks * currencyMintAmount, "paid brand mint");
+        CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
+            _to, _id, bulks * currencyMintAmount, "paid brand mint"
+        );
     }
 
     /**
@@ -211,7 +215,9 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireBrandScope(scope, 0x0);
         require(bulks != 0, "CurrencyMintingPlugin: minting (brand scope) issued with no units");
-        _mintFTFor(_to, _id, bulks * currencyMintAmount, "gifted brand mint");
+        CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
+            _to, _id, bulks * currencyMintAmount, "gifted brand mint"
+        );
     }
 
     /**
@@ -224,7 +230,9 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     {
         require(bulks != 0, "CurrencyMintingPlugin: BEAT minting issued with no units");
         uint256 BEATType = CurrencyDefinitionPlugin(definitionPlugin).BEATType();
-        _mintFTFor(_to, BEATType, bulks * currencyMintAmount, "BEAT mint");
+        CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
+            _to, BEATType, bulks * currencyMintAmount, "BEAT mint"
+        );
     }
 
     /**
@@ -294,6 +302,8 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      */
     receive() external payable onlyWhenInitialized {
         uint256 WMATICType = CurrencyDefinitionPlugin(definitionPlugin).WMATICType();
-        _mintFTFor(_msgSender(), WMATICType, msg.value, "Currency wrapping");
+        CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
+            _msgSender(), WMATICType, msg.value, "Currency wrapping"
+        );
     }
 }

@@ -229,11 +229,15 @@ contract Metaverse is Ownable, IMetaverse {
 
     /**
      * Mints a specific fungible token type, in a certain amount.
-     * Requsts the type id to be in the FT range.
+     * Requests the type id to be in the FT range.
      */
     function _mintFTFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data)
         internal onlyFTRange(_tokenId)
     {
+        require(
+            tokenTypeResolvers[_tokenId] == _msgSender(),
+            "Metaverse: this FT type cannot be minted by this plug-in"
+        );
         IEconomy(economy).mintFor(_to, _tokenId, _amount, _data);
     }
 
@@ -274,6 +278,10 @@ contract Metaverse is Ownable, IMetaverse {
     function _mintNFTFor(address _to, uint256 _tokenType, bytes memory _data)
         internal onlyNFTRange(_tokenType) returns (uint256)
     {
+        require(
+            tokenTypeResolvers[_tokenType] == _msgSender(),
+            "Metaverse: this NFT type cannot be minted by this plug-in"
+        );
         require(_tokenType >= 2, "Metaverse: NFT types 0 (invalid) and 1 (brand) cannot be minted");
         uint256 tokenId = nextNFTIndex;
         uint256 lastNFTId = (1 << 255) - 1;
