@@ -1252,7 +1252,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     }
 
     let messageHash = "";
-    let tokenValue = new web3.utils.BN("10000000000000000");
+    let tokenValue = params.tokenValue || new web3.utils.BN("10000000000000000");
     obj.type = paymentType;
     switch(paymentType) {
       case "native":
@@ -1987,7 +1987,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             let settingsCaption = "[rewards:" + rewardsType + "; payment:" + paymentType + "; brand:" + brandType + "]";
 
             it("must pass 18 tests, expecting different fees for agent", async function() {
-              let obj = await buildTestPaymentObj(rewardsType, paymentType, brandType, settingsCaption);
+              let obj = await buildTestPaymentObj(rewardsType, paymentType, brandType, settingsCaption, {
+                tokenValue: new web3.utils.BN("10")
+              });
               let brandPermissionGranter = null;
               switch(obj.args.brandAddress) {
                 case brand1:
@@ -2014,7 +2016,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
               let targetTokenBalance;
               let feeReceiverTokenBalance;
               let agentTokenBalance;
-              let tokenValue = new web3.utils.BN("10000000000000000");
+              let tokenValue = new web3.utils.BN("10");
               let paymentFeeDetails = await realWorldPaymentsPlugin.paymentFee(obj.args.payment.posAddress);
               let receiverFee = paymentFeeDetails['0'];
               let agentFee = paymentFeeDetails['1'];
