@@ -903,4 +903,13 @@ contract("CurrencyMintingPlugin", function (accounts) {
       revertReason("CurrencyMintingPlugin: cannot receive, from users, non-currency tokens")
     );
   });
+
+  it("must not allow minting currencies directly from the definition plug-in", async function() {
+    await expectRevert(
+      definitionPlugin.mintCurrency(
+        accounts[3], WMATIC, new BN("1000000000000000000"), "0x00", {from: accounts[0]}
+      ),
+      "CurrencyDefinitionPlugin: only the minting plugin is allowed to mint currencies"
+    )
+  });
 });
