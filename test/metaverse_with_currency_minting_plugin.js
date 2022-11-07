@@ -42,9 +42,6 @@ contract("CurrencyMintingPlugin", function (accounts) {
   var WMATIC = null;
   var BEAT = null;
 
-  const SUPERUSER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-  const METAVERSE_MANAGE_CURRENCIES_SETTINGS = web3.utils.soliditySha3("Plugins::Currency::Settings::Manage");
-  const METAVERSE_GIVE_BRAND_CURRENCIES = web3.utils.soliditySha3("Plugins::Currency::Currencies::Brands::Give");
   const BRAND_MANAGE_CURRENCIES = web3.utils.soliditySha3("Plugins::Currency::Brand::Currencies::Manage");
   const METAVERSE_MINT_BEAT = web3.utils.soliditySha3("Plugins::Currency::BEAT::Mint");
 
@@ -66,7 +63,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
       { from: accounts[0] }
     );
     mintingPlugin = await CurrencyMintingPlugin.new(
-      metaverse.address, definitionPlugin.address, accounts[9], { from: accounts[0] }
+      metaverse.address, definitionPlugin.address, { from: accounts[0] }
     );
     sampleDefinitionPlugin = await SampleSystemCurrencyDefiningPlugin.new(
       metaverse.address, definitionPlugin.address, { from: accounts[0] }
@@ -162,234 +159,11 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
-  it("must start with currency mint cost set to 0", async function() {
-    let currencyMintCost = await mintingPlugin.currencyMintCost();
-    assert.isTrue(
-      currencyMintCost.cmp(new BN("0")) === 0,
-      "The initial mint cost must be 0, not " + currencyMintCost.toString()
-    );
-  });
-
-  it("must start with currency mint amount set to 0", async function() {
-    let currencyMintAmount = await mintingPlugin.currencyMintAmount();
-    assert.isTrue(
-      currencyMintAmount.cmp(new BN("0")) === 0,
-      "The initial mint amount must be 0, not " + currencyMintAmount.toString()
-    );
-  });
-
-  it("must start with the earnings receiver to be the 9th accounts", async function() {
-    let earningsReceiver = await mintingPlugin.brandCurrencyMintingEarningsReceiver();
-    assert.isTrue(
-      earningsReceiver === accounts[9],
-      "The initial earnings receiver must be " + accounts[9] + ", not " + earningsReceiver
-    );
-  });
-
-  it("must not allow to set the earnings receiver to 0x000...000", async function() {
-    await expectRevert(
-      mintingPlugin.setBrandCurrencyMintingEarningsReceiver(
-        "0x0000000000000000000000000000000000000000", { from: accounts[0] }
-      ),
-      revertReason(
-        "CurrencyMintingPlugin: the brand currency minting earnings receiver must not be the 0 address"
-      )
-    );
-  });
-
-  it("must allow account 0 to set the receiver to account 8", async function() {
-    await expectEvent(
-      await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[8], { from: accounts[0] }),
-      "BrandCurrencyMintingEarningsReceiverUpdated", {
-        "newReceiver": accounts[8], "updatedBy": accounts[0]
-      }
-    );
-  });
-
-  it("must allow account 0 to set the receiver to account 9, again", async function() {
-    await expectEvent(
-      await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[9], { from: accounts[0] }),
-      "BrandCurrencyMintingEarningsReceiverUpdated", {
-        "newReceiver": accounts[9], "updatedBy": accounts[0]
-      }
-    );
-  });
-
-  it("must not allow account 7 to set the receiver to account 8, since it lacks of permissions", async function() {
-    await expectRevert(
-      mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[8], { from: accounts[7] }),
-      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must not allow account 7 to grant the METAVERSE_MANAGE_CURRENCIES_SETTINGS on itself", async function() {
-    await expectRevert(
-      metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[7] }),
-      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must not allow account 7 to grant the SUPERUSER on itself", async function() {
-    await expectRevert(
-      metaverse.setPermission(SUPERUSER, accounts[7], true, { from: accounts[7] }),
-      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must allow account 0 to grant METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[0] }),
-      "PermissionChanged", {
-        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": true, "sender": accounts[0]
-      }
-    );
-  });
-
-  it("must allow account 7 to set the receiver to account 8", async function() {
-    await expectEvent(
-      await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[8], { from: accounts[7] }),
-      "BrandCurrencyMintingEarningsReceiverUpdated", {
-        "newReceiver": accounts[8], "updatedBy": accounts[7]
-      }
-    );
-  });
-
-  it("must allow account 7 to set the receiver to account 9, again", async function() {
-    await expectEvent(
-      await mintingPlugin.setBrandCurrencyMintingEarningsReceiver(accounts[9], { from: accounts[7] }),
-      "BrandCurrencyMintingEarningsReceiverUpdated", {
-        "newReceiver": accounts[9], "updatedBy": accounts[7]
-      }
-    );
-  });
-
-  it("must allow account 0 to revoke METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], false, { from: accounts[0] }),
-      "PermissionChanged", {
-        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": false, "sender": accounts[0]
-      }
-    );
-  });
-
-  it("must not allow account 1/2 to mint currency 1 of brand 1/2, since the mint amount is not set", async function() {
-    await expectRevert(
-      mintingPlugin.mintBrandCurrency(accounts[1], brand1Currency1, 2, {from: accounts[1]}),
-      revertReason("CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0")
-    );
-
-    await expectRevert(
-      mintingPlugin.mintBrandCurrency(accounts[2], brand2Currency1, 2, {from: accounts[2]}),
-      revertReason("CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0")
-    );
-  });
-
-  it("must not allow account 0 to mint currency 1 of brand 1, since the mint amount is not set", async function() {
-    await expectRevert(
-      mintingPlugin.mintBrandCurrencyFor(accounts[2], brand2Currency1, 2, {from: accounts[0]}),
-      revertReason("CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0")
-    );
-  });
-
-  it("must not allow the sample plug-in to mint sys. currency 1, since the mint amount is not set", async function() {
-    await expectRevert(
-      sampleMintingPlugin.mintSystemCurrency(accounts[0], sysCurrency1, 1, {from: accounts[0]}),
-      revertReason("CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0")
-    );
-  });
-
-  it("must not allow minting BEAT, since the mint amount is not set", async function() {
-    await expectRevert(
-      mintingPlugin.mintBEAT(accounts[0], 1, {from: accounts[0]}),
-      revertReason("CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0")
-    );
-  });
-
-  it("must have the mint amount starting with 0", async function() {
-    let mintAmount = await mintingPlugin.currencyMintAmount();
-    assert.isTrue(
-      mintAmount.cmp(new BN(0)) === 0,
-      "The mint amount must be initially 0"
-    );
-  });
-
-  it("must allow account 0 to set the minting amount to 10 matic", async function() {
-    await expectEvent(
-      await mintingPlugin.setCurrencyMintAmount(new BN("10000000000000000000"), {from: accounts[0]}),
-      "CurrencyMintAmountUpdated", {
-        "newAmount": new BN("10000000000000000000"), "updatedBy": accounts[0]
-      }
-    );
-  });
-
-  it("must not allow account 7 to set the minting amount to 15 matic, since it lacks of permission", async function(){
-    await expectRevert(
-      mintingPlugin.setCurrencyMintAmount(new BN("15000000000000000000"), {from: accounts[7]}),
-      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must not allow account 7 to grant METAVERSE_MANAGE_CURRENCIES_SETTINGS on itself", async function() {
-    await expectRevert(
-      metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[7] }),
-      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must not allow account 7 to grant SUPERUSER on itself", async function() {
-    await expectRevert(
-      metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[7] }),
-      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must allow account 0 to grant METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[0] }),
-        "PermissionChanged", {
-        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": true, "sender": accounts[0]
-      }
-    );
-  });
-
-  it("must allow account 7 to set the minting amount to 15 matic", async function() {
-    await expectEvent(
-      await mintingPlugin.setCurrencyMintAmount(new BN("15000000000000000000"), {from: accounts[7]}),
-      "CurrencyMintAmountUpdated", {
-        "newAmount": new BN("15000000000000000000"), "updatedBy": accounts[7]
-      }
-    );
-  });
-
-  it("must allow account 7 to set the minting amount to 10 matic", async function() {
-    await expectEvent(
-      await mintingPlugin.setCurrencyMintAmount(new BN("10000000000000000000"), {from: accounts[7]}),
-      "CurrencyMintAmountUpdated", {
-        "newAmount": new BN("10000000000000000000"), "updatedBy": accounts[7]
-      }
-    );
-  });
-
-  it("must allow account 0 to revoke METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], false, { from: accounts[0] }),
-      "PermissionChanged", {
-        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": false, "sender": accounts[0]
-      }
-    );
-  });
-
-  it("must not allow account 7 to set the minting amount to 15 matic, since it lacks of permission", async function(){
-    await expectRevert(
-        mintingPlugin.setCurrencyMintAmount(new BN("15000000000000000000"), {from: accounts[7]}),
-        revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
   it("must NOT allow minting SysCurr #1 from any external account, but from a registered plug-in", async function() {
     for(let index = 0; index < 10; index++) {
       await expectRevert(
-        mintingPlugin.mintSystemCurrency(accounts[index], sysCurrency1, 2, {from: accounts[index]}),
+        mintingPlugin.mintSystemCurrency(accounts[index], sysCurrency1, new BN("20000000000000000000"),
+                                         {from: accounts[index]}),
         revertReason("MetaversePlugin: only one of the owning metaverse's plug-ins can invoke this method")
       );
     }
@@ -398,12 +172,12 @@ contract("CurrencyMintingPlugin", function (accounts) {
   it("must not allow account 0 to mint 0 bulks", async function() {
     await expectRevert(
       mintingPlugin.mintBEAT(accounts[4], 0, {from: accounts[0]}),
-      revertReason("CurrencyMintingPlugin: BEAT minting issued with no units")
+      revertReason("CurrencyMintingPlugin: BEAT minting issued with zero amount")
     )
   });
 
   it("must allow minting BEAT to account 0", async function() {
-    await mintingPlugin.mintBEAT(accounts[4], 2, {from: accounts[0]});
+    await mintingPlugin.mintBEAT(accounts[4], new BN("20000000000000000000"), {from: accounts[0]});
   });
 
   it("must not allow account 7 to mint 2 bulks to account 4", async function() {
@@ -430,7 +204,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
   });
 
   it("must allow account 7 to mint BEAT to account 4", async function() {
-    await mintingPlugin.mintBEAT(accounts[4], 2, {from: accounts[7]});
+    await mintingPlugin.mintBEAT(accounts[4], new BN("20000000000000000000"), {from: accounts[7]});
   });
 
   it("must allow account 0 to revoke METAVERSE_MINT_BEAT to account 7", async function() {
@@ -444,7 +218,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
 
   it("must not allow account 7 to mint 2 bulks to account 4", async function() {
     await expectRevert(
-      mintingPlugin.mintBEAT(accounts[4], 2, {from: accounts[7]}),
+      mintingPlugin.mintBEAT(accounts[4], new BN("20000000000000000000"), {from: accounts[7]}),
       revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
     );
   });
@@ -457,19 +231,9 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
-  it("must not allow account 1/2 to mint currency 1 of brand 1/2, since the mint cost is not set", async function() {
-    await expectRevert(
-      mintingPlugin.mintBrandCurrency(accounts[1], brand1Currency1, 1, {from: accounts[1]}),
-      revertReason("CurrencyMintingPlugin: minting (for authorized brand) is currently disabled (no price is set)")
-    )
-    await expectRevert(
-      mintingPlugin.mintBrandCurrency(accounts[2], brand2Currency1, 1, {from: accounts[2]}),
-      revertReason("CurrencyMintingPlugin: minting (for authorized brand) is currently disabled (no price is set)")
-    )
-  });
-
   it("must allow the sample minting plug-in to mint sys. currency 1 to account 3", async function() {
-    await sampleMintingPlugin.mintSystemCurrency(accounts[3], sysCurrency1, 1, {from: accounts[0]});
+    await sampleMintingPlugin.mintSystemCurrency(accounts[3], sysCurrency1, new BN("10000000000000000000"),
+                                                 {from: accounts[0]});
     let balance = await economy.balanceOf(accounts[3], sysCurrency1);
     assert.isTrue(
       balance.cmp(new BN("10000000000000000000")) === 0,
@@ -478,7 +242,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
   });
 
   it("must not allow account 0 to mint 1 bulks to account 2", async function() {
-    await mintingPlugin.mintBEAT(accounts[3], 1, {from: accounts[0]});
+    await mintingPlugin.mintBEAT(accounts[3], new BN("10000000000000000000"), {from: accounts[0]});
     let balance = await economy.balanceOf(accounts[3], BEAT);
     assert.isTrue(
       balance.cmp(new BN("10000000000000000000")) === 0,
@@ -486,217 +250,10 @@ contract("CurrencyMintingPlugin", function (accounts) {
     );
   });
 
-  it("must allow brand 0 to mint brand1Currency1 to account 1, and brand2Currency1 to account 2", async function() {
-    await mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 2, {from: accounts[0]});
-    await mintingPlugin.mintBrandCurrencyFor(accounts[2], brand2Currency1, 2, {from: accounts[0]});
-    let balance1 = await economy.balanceOf(accounts[1], brand1Currency1);
-    assert.isTrue(
-      balance1.cmp(new BN("20000000000000000000")) === 0,
-      "The amount of brand 1 currency 1 tokens in the account 1 must be 20 full tokens"
-    );
-    let balance2 = await economy.balanceOf(accounts[2], brand2Currency1);
-    assert.isTrue(
-      balance2.cmp(new BN("20000000000000000000")) === 0,
-      "The amount of brand 2 currency 1 tokens in the account 2 must be 20 full tokens"
-    );
-  });
-
-  it("must not allow account 7 to mint brandCurrency1 to account 1, due to lack of permissions", async function() {
-    await expectRevert(
-      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 2, {from: accounts[7]}),
-      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must not allow account 7 to grant METAVERSE_GIVE_BRAND_CURRENCIES on itself", async function() {
-    await expectRevert(
-      metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[7], true, { from: accounts[7] }),
-      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must allow account 0 to grant METAVERSE_GIVE_BRAND_CURRENCIES to account 7", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[7], true, { from: accounts[0] }),
-      "PermissionChanged", {
-        "permission": METAVERSE_GIVE_BRAND_CURRENCIES, "user": accounts[7], "set": true, "sender": accounts[0]
-      }
-    );
-  });
-
-  it("must allow account 7 to mint brandCurrency1 to account 1", async function() {
-    await mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 2, {from: accounts[0]});
-    let balance1 = await economy.balanceOf(accounts[1], brand1Currency1);
-    assert.isTrue(
-      balance1.cmp(new BN("40000000000000000000")) === 0,
-      "The amount of brand 1 currency 1 tokens in the account 1 must be 40 full tokens"
-    );
-  });
-
-  it("must allow account 0 to revoke METAVERSE_GIVE_BRAND_CURRENCIES to account 7", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[7], false, { from: accounts[0] }),
-      "PermissionChanged", {
-        "permission": METAVERSE_GIVE_BRAND_CURRENCIES, "user": accounts[7], "set": false, "sender": accounts[0]
-      }
-    );
-  });
-
-  it("must not allow account 7 to mint brandCurrency1 to account 1, due to lack of permissions", async function() {
-    await expectRevert(
-      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 2, {from: accounts[7]}),
-      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must have the mint cost starting with 0", async function() {
-    let mintCost = await mintingPlugin.currencyMintCost();
-    assert.isTrue(
-      mintCost.cmp(new BN(0)) === 0,
-      "The mint cost must be initially 0"
-    );
-  });
-
-  it("must allow account 0 to set the minting cost to 5 matic", async function() {
-    await expectEvent(
-      await mintingPlugin.setCurrencyMintCost(new BN("5000000000000000000"), {from: accounts[0]}),
-      "CurrencyMintCostUpdated", {
-        "newCost": new BN("5000000000000000000"), "updatedBy": accounts[0]
-      }
-    );
-  });
-
-  it("must not allow account 7 to set the minting cost to 6 matic, since it lacks of permission", async function(){
-    await expectRevert(
-      mintingPlugin.setCurrencyMintCost(new BN("6000000000000000000"), {from: accounts[7]}),
-      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must not allow account 7 to grant METAVERSE_MANAGE_CURRENCIES_SETTINGS on itself", async function() {
-    await expectRevert(
-      metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[7] }),
-      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must allow account 0 to grant METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], true, { from: accounts[0] }),
-        "PermissionChanged", {
-        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": true, "sender": accounts[0]
-      }
-    );
-  });
-
-  it("must allow account 7 to set the minting amount to 6 matic", async function() {
-    await expectEvent(
-      await mintingPlugin.setCurrencyMintCost(new BN("6000000000000000000"), {from: accounts[7]}),
-      "CurrencyMintCostUpdated", {
-        "newCost": new BN("6000000000000000000"), "updatedBy": accounts[7]
-      }
-    );
-  });
-
-  it("must allow account 7 to set the minting amount to 5 matic", async function() {
-    await expectEvent(
-      await mintingPlugin.setCurrencyMintCost(new BN("5000000000000000000"), {from: accounts[7]}),
-      "CurrencyMintCostUpdated", {
-        "newCost": new BN("5000000000000000000"), "updatedBy": accounts[7]
-      }
-    );
-  });
-
-  it("must allow account 0 to revoke METAVERSE_MANAGE_CURRENCIES_SETTINGS to account 7", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_MANAGE_CURRENCIES_SETTINGS, accounts[7], false, { from: accounts[0] }),
-        "PermissionChanged", {
-        "permission": METAVERSE_MANAGE_CURRENCIES_SETTINGS, "user": accounts[7], "set": false, "sender": accounts[0]
-      }
-    );
-  });
-
-  it("must not allow account 7 to set the minting cost to 6 matic, since it lacks of permission", async function(){
-    await expectRevert(
-      mintingPlugin.setCurrencyMintCost(new BN("6000000000000000000"), {from: accounts[7]}),
-      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must fail minting brand currency for a brand using non-existing currency token id", async function() {
-    await expectRevert(
-      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1.add(new BN(3)), 1, {from: accounts[0]}),
-      revertReason("CurrencyMintingPlugin: the specified token id is not of a registered currency type")
-    );
-  })
-
-  it("must fail minting brand currency for a brand using empty bulks", async function() {
-    await expectRevert(
-      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 0, {from: accounts[0]}),
-      revertReason("CurrencyMintingPlugin: minting (brand scope) issued with no units")
-    );
-  });
-
-  it("must fail minting brand currency for a brand using 5th account, due to lack of permissions", async function() {
-    await expectRevert(
-      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 1, {from: accounts[5]}),
-      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must not allow 5th account to grant the mint-brand-for permission to itself", async function() {
-    await expectRevert(
-      metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[5], true, { from: accounts[5] }),
-      revertReason("Metaverse: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
-  it("must allow 0th account to grant the mint-brand-for permission to 5th account", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[5], true, { from: accounts[0] }),
-      "PermissionChanged", {
-        "permission": METAVERSE_GIVE_BRAND_CURRENCIES, "user": accounts[5], "set": true, "sender": accounts[0]
-      }
-    );
-  });
-
-  it("must allow minting brand currency for a brand using 5th account", async function() {
-    await mintingPlugin.mintBrandCurrencyFor(accounts[5], brand1Currency1, 2, {from: accounts[5]});
-    let balance = await economy.balanceOf(accounts[5], brand1Currency1);
-    let expected = new BN("20000000000000000000");
-    assert.isTrue(
-      balance.cmp(expected) === 0,
-      "The minted amount of currency 1 of brand 1 must be 20 full tokens"
-    );
-  });
-
-  it("must fail minting brand currency for a brand using an overflowing amount of bulks bulks", async function() {
-    let bulks = new BN("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-    await expectRevert(
-      mintingPlugin.mintBrandCurrencyFor(accounts[5], brand1Currency1, bulks, {from: accounts[5]}),
-      "revert"
-    );
-  });
-
-  it("must allow 1st account to revoke the mint-brand-for permission to 5th account", async function() {
-    await expectEvent(
-      await metaverse.setPermission(METAVERSE_GIVE_BRAND_CURRENCIES, accounts[5], false, { from: accounts[0] }),
-      "PermissionChanged", {
-        "permission": METAVERSE_GIVE_BRAND_CURRENCIES, "user": accounts[5], "set": false, "sender": accounts[0]
-      }
-    );
-  });
-
-  it("must fail minting brand currency for a brand using 5th account, due to lack of permissions", async function() {
-    await expectRevert(
-      mintingPlugin.mintBrandCurrencyFor(accounts[1], brand1Currency1, 1, {from: accounts[5]}),
-      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
-    );
-  });
-
   it("must fail minting a brand currency using a non-existing currency id", async function() {
     await expectRevert(
-      mintingPlugin.mintBrandCurrency(accounts[1], brand1Currency1.add(new BN(2)), 1, {from: accounts[1]}),
+      mintingPlugin.mintBrandCurrency(accounts[1], brand1Currency1.add(new BN(2)), new BN("10000000000000000000"),
+                                      {from: accounts[1]}),
       revertReason("CurrencyMintingPlugin: the specified token id is not of a registered currency type")
     );
   });
@@ -704,25 +261,14 @@ contract("CurrencyMintingPlugin", function (accounts) {
   it("must fail minting a brand currency using empty bulks", async function() {
     await expectRevert(
       mintingPlugin.mintBrandCurrency(accounts[1], brand1Currency1, 0, {from: accounts[1]}),
-      revertReason("CurrencyMintingPlugin: minting (for authorized brand) issued with no units to purchase")
+      revertReason("CurrencyMintingPlugin: brand currency minting issued with zero amount")
     );
   });
 
-  it("must fail minting a brand currency while not affording", async function() {
-    let payment = new BN('5000000000000000000');
-    await expectRevert(
-      mintingPlugin.mintBrandCurrency(accounts[1], brand1Currency1, 1, {from: accounts[1]}),
-      revertReason(
-        "CurrencyMintingPlugin: minting (for authorized brand) requires an exact " +
-        "payment of " + payment.toString() + " but 0 was given"
-      )
-    );
-  });
-
-  it("must succeed minting a brand currency with appropriate parameters and affording the amouunt", async function() {
+  it("must succeed minting a brand currency with appropriate parameters", async function() {
     let balance = await economy.balanceOf(accounts[5], brand1Currency1);
-    let value = new BN("5000000000000000000");
-    await mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, 1, {from: accounts[1], value: value});
+    await mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, new BN("10000000000000000000"),
+                                          {from: accounts[1]});
     let expectedNewBalance = balance.add(new BN("10000000000000000000"));
     let actualNewBalance = await economy.balanceOf(accounts[5], brand1Currency1);
     assert.isTrue(
@@ -734,7 +280,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
   it("must fail minting a brand currency with 5th account in brand 1, due to lack of permissions", async function() {
     let value = new BN("5000000000000000000");
     await expectRevert(
-      mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, 1, {from: accounts[5], value: value}),
+      mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, 1, {from: accounts[5]}),
       "FTTypeCheckingPlugin: caller is not brand owner nor approved, " +
       "and does not have the required permission"
     );
@@ -762,9 +308,9 @@ contract("CurrencyMintingPlugin", function (accounts) {
   });
 
   it("must allow minting a brand currency with 5th account in brand 1", async function() {
-    let value = new BN("5000000000000000000");
     let balance = await economy.balanceOf(accounts[5], brand1Currency1);
-    await mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, 1, {from: accounts[5], value: value});
+    await mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, new BN("10000000000000000000"),
+                                          {from: accounts[5]});
     let expectedNewBalance = balance.add(new BN("10000000000000000000"));
     let actualNewBalance = await economy.balanceOf(accounts[5], brand1Currency1);
     assert.isTrue(
@@ -786,9 +332,8 @@ contract("CurrencyMintingPlugin", function (accounts) {
   });
 
   it("must fail minting a brand currency with 5th account in brand 1, due to lack of permissions", async function() {
-    let value = new BN("5000000000000000000");
     await expectRevert(
-      mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, 1, {from: accounts[5], value: value}),
+      mintingPlugin.mintBrandCurrency(accounts[5], brand1Currency1, 1, {from: accounts[5]}),
       "FTTypeCheckingPlugin: caller is not brand owner nor approved, and does not " +
       "have the required permission"
     );

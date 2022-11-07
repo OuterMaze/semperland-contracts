@@ -21,28 +21,6 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      */
     address public definitionPlugin;
 
-    /**
-     * The address that will receive earnings from currency
-     * mint operations (executed by brand users which are
-     * appropriately allowed by the brand owner).
-     */
-    address public brandCurrencyMintingEarningsReceiver;
-
-    /**
-     * The current price of the mint of a currency for a brand.
-     * The amount that is minted is defined separately. 0 means
-     * the minting is disabled by this mean, until the administration
-     * sets a price.
-     */
-    uint256 public currencyMintCost;
-
-    /**
-     * The current amount that is minted when a mint occurs for
-     * a brand. 0 means the minting is disabled by this mean, until
-     * the administration sets an amount.
-     */
-    uint256 public currencyMintAmount;
-
     // Reentrancy lock.
     bool private wmaticUnwrappingLocked = false;
 
@@ -53,18 +31,6 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     bytes32 constant BRAND_MANAGE_CURRENCIES = keccak256("Plugins::Currency::Brand::Currencies::Manage");
 
     /**
-     * This permission allows users to define the costs and the
-     * mint amount defined in this contract (e.g. to define and
-     * mint currencies being a brand, paying the fees).
-     */
-    bytes32 constant METAVERSE_MANAGE_CURRENCIES_SETTINGS = keccak256("Plugins::Currency::Settings::Manage");
-
-    /**
-     * This permission allows users to mint currencies for free for a brand.
-     */
-    bytes32 constant METAVERSE_GIVE_BRAND_CURRENCIES = keccak256("Plugins::Currency::Currencies::Brands::Give");
-
-    /**
      * This permission allows users to mint BEAT for a given
      * brand (typically, one having committed=true).
      */
@@ -73,9 +39,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     /**
      * This plug-in does not require extra details on construction.
      */
-    constructor(address _metaverse, address _definitionPlugin, address _earningsReceiver) MetaversePlugin(_metaverse) {
-        require(_earningsReceiver != address(0), "CurrencyMintingPlugin: the earnings receiver must not be 0");
-        brandCurrencyMintingEarningsReceiver = _earningsReceiver;
+    constructor(address _metaverse, address _definitionPlugin) MetaversePlugin(_metaverse) {
         definitionPlugin = _definitionPlugin;
     }
 
@@ -98,70 +62,6 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
         return "";
     }
 
-    /**
-     * An event for when the brand currency minting earnings
-     * receiver is changed.
-     */
-    event BrandCurrencyMintingEarningsReceiverUpdated(address indexed updatedBy, address newReceiver);
-
-    /**
-     * Set the new brand currency minting earnings receiver.
-     */
-    function setBrandCurrencyMintingEarningsReceiver(address _newReceiver)
-        public onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
-    {
-        require(
-            _newReceiver != address(0),
-            "CurrencyMintingPlugin: the brand currency minting earnings receiver must not be the 0 address"
-        );
-        brandCurrencyMintingEarningsReceiver = _newReceiver;
-        emit BrandCurrencyMintingEarningsReceiverUpdated(_msgSender(), _newReceiver);
-    }
-
-    /**
-     * An event for when the currency mint cost is updated.
-     * Updating it to 0 disables it completely.
-     */
-    event CurrencyMintCostUpdated(address indexed updatedBy, uint256 newCost);
-
-    /**
-     * Sets the currency mint cost.
-     */
-    function setCurrencyMintCost(uint256 newCost) public
-        onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
-    {
-        currencyMintCost = newCost;
-        emit CurrencyMintCostUpdated(_msgSender(), newCost);
-    }
-
-    /**
-     * An event for when the currency mint amount is updated.
-     * Typically, this value will be something like 1000 eth
-     * (1000 * 10^18). Updating it to 0 disables it completely.
-     */
-    event CurrencyMintAmountUpdated(address indexed updatedBy, uint256 newAmount);
-
-    /**
-     * Sets the currency mint amount.
-     */
-    function setCurrencyMintAmount(uint256 newAmount) public
-        onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
-    {
-        currencyMintAmount = newAmount;
-        emit CurrencyMintAmountUpdated(_msgSender(), newAmount);
-    }
-
-    /**
-     * This modifier requires the mint amount to be nonzero.
-     */
-    modifier nonzeroMintAmount() {
-        require(
-            currencyMintAmount != 0,
-            "CurrencyMintingPlugin: minting is disabled while the mint to amount per bulk is 0"
-        );
-        _;
-    }
-
     modifier definedCurrency(uint256 _tokenId) {
         require(
             CurrencyDefinitionPlugin(definitionPlugin).currencyExists(_tokenId),
@@ -175,15 +75,13 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * system currency. Due to the sensitivity of this feature, only
      * plug-ins in the same metaverse are allowed to use this method.
      */
-    function mintSystemCurrency(address _to, uint256 _id, uint256 _bulks)
-        public onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount onlyPlugin
+    function mintSystemCurrency(address _to, uint256 _id, uint256 _amount)
+        public onlyWhenInitialized definedCurrency(_id) onlyPlugin
     {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireSystemScope(scope, 0x0);
-        require(_bulks != 0, "CurrencyMintingPlugin: minting (system scope) issued with no units");
-        CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
-            _to, _id, _bulks * currencyMintAmount, "system currency mint"
-        );
+        require(_amount != 0, "CurrencyMintingPlugin: minting (system scope) issued with zero amount");
+        CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(_to, _id, _amount, "system currency mint");
     }
 
     /**
@@ -191,47 +89,26 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * defined for the respective brands. This feature can be used at sole
      * discretion of the brand users, and has a fee.
      */
-    function mintBrandCurrency(address _to, uint256 _id, uint256 bulks)
-        public payable onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount
-        hasNativeTokenPrice("CurrencyMintingPlugin: minting (for authorized brand)", currencyMintCost, bulks)
+    function mintBrandCurrency(address _to, uint256 _id, uint256 _amount)
+        public onlyWhenInitialized definedCurrency(_id)
     {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireBrandScope(scope, BRAND_MANAGE_CURRENCIES);
-        payable(brandCurrencyMintingEarningsReceiver).transfer(msg.value);
-        CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
-            _to, _id, bulks * currencyMintAmount, "paid brand mint"
-        );
-    }
-
-    /**
-     * This is a mean granted to metaverse-allowed users to mint any brand
-     * currency to any user. This feature can be used at sole discretion of
-     * the admins, but typically after coordinating with brand-allowed users.
-     */
-    function mintBrandCurrencyFor(address _to, uint256 _id, uint256 bulks)
-        public onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount
-        onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES)
-    {
-        address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
-        _requireBrandScope(scope, 0x0);
-        require(bulks != 0, "CurrencyMintingPlugin: minting (brand scope) issued with no units");
-        CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
-            _to, _id, bulks * currencyMintAmount, "gifted brand mint"
-        );
+        require(_amount != 0, "CurrencyMintingPlugin: brand currency minting issued with zero amount");
+        CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(_to, _id, _amount, "paid brand mint");
     }
 
     /**
      * Mints BEAT for a given address. This address may be a brand,
      * a user, or a contract.
      */
-    function mintBEAT(address _to, uint256 bulks)
-        public onlyWhenInitialized nonzeroMintAmount
-        onlyMetaverseAllowed(METAVERSE_MINT_BEAT)
+    function mintBEAT(address _to, uint256 _amount)
+        public onlyWhenInitialized onlyMetaverseAllowed(METAVERSE_MINT_BEAT)
     {
-        require(bulks != 0, "CurrencyMintingPlugin: BEAT minting issued with no units");
+        require(_amount != 0, "CurrencyMintingPlugin: BEAT minting issued with zero amount");
         uint256 BEATType = CurrencyDefinitionPlugin(definitionPlugin).BEATType();
         CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
-            _to, BEATType, bulks * currencyMintAmount, "BEAT mint"
+            _to, BEATType, _amount, "BEAT mint"
         );
     }
 
