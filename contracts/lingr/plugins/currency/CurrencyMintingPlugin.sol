@@ -138,12 +138,11 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
             // Only plug-ins can burn currencies (and only currencies)
             // by safe-transferring them to this contract.
             if (IMetaverse(metaverse).plugins(_msgSender()) &&
-                CurrencyDefinitionPlugin(definitionPlugin).currencyExists(id) &&
-                CurrencyDefinitionPlugin(definitionPlugin).currencyIsUnbounded(id)) {
+                CurrencyDefinitionPlugin(definitionPlugin).currencyExists(id)) {
                 if (value == 0) return;
                 _burnFT(id, value);
             } else {
-                revert("CurrencyMintingPlugin: cannot receive, from users, non-currency or bounded currency tokens");
+                revert("CurrencyMintingPlugin: cannot receive, from users, non-currency tokens");
             }
         }
     }

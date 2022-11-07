@@ -237,13 +237,6 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     }
 
     /**
-     * Tells whether a token id is registered as an unbounded currency type.
-     */
-    function currencyIsUnbounded(uint256 _tokenId) external view returns (bool) {
-        return currencies[_tokenId].supply == 0;
-    }
-
-    /**
      * This function returns the JSON contents for the asset's URI.
      */
     function _tokenMetadata(uint256 _tokenId) internal view override returns (bytes memory) {
