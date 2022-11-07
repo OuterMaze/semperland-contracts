@@ -445,7 +445,9 @@ contract("CurrencyMintingPlugin", function (accounts) {
         accounts[1], mintingPlugin.address, [BEAT, WMATIC, new BN(brand1)], [amount, amount, one],
         web3.utils.asciiToHex("hello"), {from: accounts[1], gas: new BN("5000000")}
       ),
-      revertReason("CurrencyMintingPlugin: cannot receive, from users, non-currency tokens")
+      revertReason(
+        "CurrencyMintingPlugin: cannot receive, from users, non-currency or bounded currency tokens"
+      )
     );
   });
 
@@ -454,7 +456,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
       definitionPlugin.mintCurrency(
         accounts[3], WMATIC, new BN("1000000000000000000"), "0x00", {from: accounts[0]}
       ),
-      "CurrencyDefinitionPlugin: only the minting plugin is allowed to mint currencies"
+      revertReason("CurrencyDefinitionPlugin: only the minting plugin is allowed to mint currencies")
     )
   });
 });
