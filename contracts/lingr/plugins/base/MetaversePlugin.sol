@@ -90,6 +90,17 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     }
 
     /**
+     * This modifier ensures a given parameter
+     */
+    modifier onlyBrand(address _brandId) {
+        require(
+            IBrandRegistry(IMetaverse(metaverse).brandRegistry()).brandExists(_brandId),
+            "MetaversePlugin: the address must be a brand"
+        );
+        _;
+    }
+
+    /**
      * This modifier requires a specific permission or being the owner of the
      * the brand to perform an action.
      */

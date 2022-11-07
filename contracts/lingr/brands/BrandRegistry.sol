@@ -520,8 +520,8 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
      * This event is triggered when a brand permission is set or revoked
      * for a given user in a given brand.
      */
-    event BrandPermissionChanged(address indexed brandId, bytes32 indexed permission, address indexed user, bool set,
-                                 address sender);
+    event BrandPermissionChanged(address indexed brandId, bytes32 indexed permission, address indexed user,
+                                 bool set, address sender);
 
     /**
      * Grants a permission to a user. This action is reserved to owners,

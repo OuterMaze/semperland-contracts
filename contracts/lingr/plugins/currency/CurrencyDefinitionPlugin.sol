@@ -358,10 +358,12 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * will be used to mint this currency for is provided.
      */
     function _defineBrandCurrency(
-        address _brandId, uint256 _paidPrice, address _definedBy, CurrencyMetadata memory metadata
+        address _brandId, uint256 _paidPrice, address _definedBy, CurrencyMetadata memory _metadata
     ) private returns (uint256) {
         uint256 id = _defineNextFTType(_brandId);
-        _setCurrencyMetadata(id, _brandId, _definedBy, _paidPrice, metadata);
+        _setCurrencyMetadata(id, _brandId, _definedBy, _paidPrice, _metadata);
+        // The currency might have a defined supply. Do the initial mint.
+        if (_metadata.supply != 0) _mintFTFor(_brandId, id, _metadata.supply, "initial full supply");
         return id;
     }
 
@@ -410,7 +412,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         address _brandId, string memory _name, string memory _description,
         string memory _image, string memory _icon16x16, string memory _icon32x32,
         string memory _icon64x64, string memory _color
-    ) public onlyWhenInitialized onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES) {
+    ) public onlyWhenInitialized onlyBrand(_brandId) onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES) {
         CurrencyMetadata memory metadata = CurrencyMetadata({
             registered: true, name: _name, description: _description, color: _color,
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
