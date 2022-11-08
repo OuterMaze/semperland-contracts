@@ -70,7 +70,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       { from: accounts[0] }
     );
     mintingPlugin = await CurrencyMintingPlugin.new(
-      metaverse.address, definitionPlugin.address, { from: accounts[0] }
+      metaverse.address, definitionPlugin.address, accounts[8], { from: accounts[0] }
     );
     realWorldPaymentsPlugin = await RealWorldPaymentsPlugin.new(
       metaverse.address, 30, accounts[8], [
@@ -132,13 +132,16 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     let amount = new BN("20000000000000000000");
     await web3.eth.sendTransaction({from: accounts[9], to: mintingPlugin.address, value: amount});
     // Also: mint some brand1currency1 to account 0 (also brand2currency1).
+    let cost = new BN("1000000000000000000");
     amount = new BN("100000000000000000000");
+    await mintingPlugin.setCurrencyMintAmount(amount, {from: accounts[0]});
     // And grant some BEAT to accounts[9].
-    await mintingPlugin.mintBEAT(accounts[9], amount, {from: accounts[0]});
+    await mintingPlugin.mintBEAT(accounts[9], 1, {from: accounts[0]});
     // And continue minting for accounts[0] (rewards).
-    await mintingPlugin.mintBrandCurrency(accounts[0], brand1Currency1, amount, {from: accounts[1]});
-    await mintingPlugin.mintBrandCurrency(accounts[0], brand2Currency1, amount, {from: accounts[2]});
-    await mintingPlugin.mintBEAT(accounts[0], amount, {from: accounts[0]});
+    await mintingPlugin.setCurrencyMintCost(cost, {from: accounts[0]});
+    await mintingPlugin.mintBrandCurrency(accounts[0], brand1Currency1, 1, {from: accounts[1], value: cost});
+    await mintingPlugin.mintBrandCurrency(accounts[0], brand2Currency1, 1, {from: accounts[2], value: cost});
+    await mintingPlugin.mintBEAT(accounts[0], 1, {from: accounts[0]});
     // Finally: fund the rewards pot.
     await economy.safeTransferFrom(
       accounts[0], realWorldPaymentsPlugin.address, brand1Currency1, amount, payments.FUND_CALL,
