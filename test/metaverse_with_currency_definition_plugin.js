@@ -136,8 +136,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         icon32x32: "http://example.org/images/wmatic-32x32.png",
         icon64x64: "http://example.org/images/wmatic-64x64.png",
         color: "#ffd700",
-        type: "currency",
-        supply: "unbounded"
+        type: "currency"
       }
     });
     assert.isTrue(
@@ -154,8 +153,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         icon32x32: "http://example.org/images/beat-32x32.png",
         icon64x64: "http://example.org/images/beat-64x64.png",
         color: "#87cefa",
-        type: "currency",
-        supply: "unbounded"
+        type: "currency"
       },
     });
     assert.isTrue(
@@ -284,8 +282,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
           icon32x32: "http://example.org/sys-currs/icon32-" + (index + 1) + ".png",
           icon64x64: "http://example.org/sys-currs/icon64-" + (index + 1) + ".png",
           color: "#ddcc00",
-          type: "currency",
-          supply: "unbounded"
+          type: "currency"
         }
       });
       let metadata = await economy.uri(_id);
@@ -363,8 +360,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         icon32x32: "http://example.org/images/brand1-1-icon32x32.png",
         icon64x64: "http://example.org/images/brand1-1-icon64x64.png",
         color: "#001122",
-        type: "currency",
-        supply: "unbounded"
+        type: "currency"
       }
     });
     let len = "data:application/json;base64,".length;
@@ -488,8 +484,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         icon32x32: "http://example.org/images/brand1-1-icon32x32.png",
         icon64x64: "http://example.org/images/brand1-1-icon64x64.png",
         color: "#001122",
-        type: "currency",
-        supply: "unbounded"
+        type: "currency"
       }
     });
     let len = "data:application/json;base64,".length;
@@ -577,8 +572,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         icon32x32: "http://example.org/images/brand1-3-icon32x32.png",
         icon64x64: "http://example.org/images/brand1-3-icon64x64.png",
         color: "#001122",
-        type: "currency",
-        supply: "unbounded"
+        type: "currency"
       }
     });
     let len = "data:application/json;base64,".length;
@@ -615,8 +609,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         icon32x32: "http://example.org/images/brand1-4-icon32x32.png",
         icon64x64: "http://example.org/images/brand1-4-icon64x64.png",
         color: "#001122",
-        type: "currency",
-        supply: "unbounded"
+        type: "currency"
       }
     });
     let len = "data:application/json;base64,".length;
@@ -651,8 +644,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         icon32x32: "http://example.org/images/wmatic-32x32-new.png",
         icon64x64: "http://example.org/images/wmatic-64x64-new.png",
         color: "#112233",
-        type: "currency",
-        supply: "unbounded"
+        type: "currency"
       },
       currentMetadata: {
         name: "WMATIC", description: "Wrapped MATIC in this world",
@@ -663,8 +655,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
           icon32x32: "http://example.org/images/wmatic-32x32.png",
           icon64x64: "http://example.org/images/wmatic-64x64.png",
           color: "#ffd700",
-          type: "currency",
-          supply: "unbounded"
+          type: "currency"
         }
       },
     },
@@ -682,8 +673,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         icon32x32: "http://example.org/images/brand1-1-32x32-new.png",
         icon64x64: "http://example.org/images/brand1-1-64x64-new.png",
         color: "#445566",
-        type: "currency",
-        supply: "unbounded"
+        type: "currency"
       },
       currentMetadata: {
         name: "Brand #1 Curr #1", description: "Currency #1 of Brand #1",
@@ -694,8 +684,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
           icon32x32: "http://example.org/images/brand1-1-icon32x32.png",
           icon64x64: "http://example.org/images/brand1-1-icon64x64.png",
           color: "#001122",
-          type: "currency",
-          supply: "unbounded"
+          type: "currency"
         }
       }
     }
