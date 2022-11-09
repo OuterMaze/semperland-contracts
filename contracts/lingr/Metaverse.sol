@@ -337,11 +337,22 @@ contract Metaverse is Ownable, IMetaverse {
     }
 
     /**
+     * Requires a token id to burn to be a non-brand NFT.
+     */
+    function _requireFTToBurn(uint256 _tokenId) private {
+        require(
+            _tokenId >= (1 << 255),
+            "Metaverse: only FTs can be burned this way"
+        );
+    }
+
+    /**
      * Burns any FT the sender has. This is only allowed for plug-ins, and they will
      * be responsible enough to coordinate themselves when burning tokens (e.g. they
      * will articulate on updating token counts, if needed).
      */
     function burnFT(uint256 _tokenId, uint256 _amount) external onlyPlugin {
+        _requireFTToBurn(_tokenId);
         IEconomy(economy).burn(_msgSender(), _tokenId, _amount);
     }
 
@@ -351,7 +362,21 @@ contract Metaverse is Ownable, IMetaverse {
      * will articulate on updating token counts, if needed).
      */
     function burnFTs(uint256[] memory _tokenIds, uint256[] memory _amounts) external onlyPlugin {
+        uint256 length = _tokenIds.length;
+        for (uint i = 0; i < length; i++) {
+            _requireFTToBurn(_tokenIds[i]);
+        }
         IEconomy(economy).burnBatch(_msgSender(), _tokenIds, _amounts);
+    }
+
+    /**
+     * Requires a token id to burn to be a non-brand NFT.
+     */
+    function _requireNFTToBurn(uint256 _tokenId) private {
+        require(
+            _tokenId >= (1 << 160) && _tokenId < (1 << 255),
+            "Metaverse: only non-brand NFTs can be burned this way"
+        );
     }
 
     /**
@@ -360,6 +385,7 @@ contract Metaverse is Ownable, IMetaverse {
      * will articulate on removing the metadata appropriately).
      */
     function burnNFT(uint256 _tokenId) external onlyPlugin {
+        _requireNFTToBurn(_tokenId);
         IEconomy(economy).burn(_msgSender(), _tokenId, 1);
     }
 
@@ -371,7 +397,10 @@ contract Metaverse is Ownable, IMetaverse {
     function burnNFTs(uint256[] memory _tokenIds) external onlyPlugin {
         uint256 length = _tokenIds.length;
         uint256[] memory amounts = new uint[](length);
-        for (uint i = 0; i < length; i++) amounts[i] = 1;
+        for (uint i = 0; i < length; i++) {
+            _requireNFTToBurn(_tokenIds[i]);
+            amounts[i] = 1;
+        }
         IEconomy(economy).burnBatch(_msgSender(), _tokenIds, amounts);
     }
 
