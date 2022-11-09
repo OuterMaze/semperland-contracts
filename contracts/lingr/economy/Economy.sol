@@ -90,13 +90,15 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
         }
         else
         {
-            // Minting brands will be processed here.
+            // Minting brands will be processed here, but
+            // there is no need of actually sending the
+            // onBrandOwnerChanged() event, since brand
+            // registry will be aware of the creation.
             // Other assets will not be processed here.
             for(uint256 index = 0; index < length; index++) {
                 if (ids[index] < (1 << 160) && amounts[index] != 0) {
                     address brandId = address(uint160(ids[index]));
                     _setApprovalForAll(brandId, to, true);
-                    IMetaverse(metaverse).onBrandOwnerChanged(brandId, to);
                 }
             }
         }
