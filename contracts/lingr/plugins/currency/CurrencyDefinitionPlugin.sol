@@ -320,12 +320,12 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      */
     function _setCurrencyMetadata(
         uint256 _tokenId, address _brandId, address _definedBy, uint256 _paidPrice,
-        CurrencyMetadata memory metadata
+        CurrencyMetadata memory _metadata
     ) private {
-        currencies[_tokenId] = metadata;
+        currencies[_tokenId] = _metadata;
         emit CurrencyDefined(
-            _tokenId, _brandId, _definedBy, _paidPrice, metadata.name,
-            metadata.description
+            _tokenId, _brandId, _definedBy, _paidPrice, _metadata.name,
+            _metadata.description
         );
     }
 
@@ -334,9 +334,9 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * of the account or contract that defines the system currency type is passed
      * to this method.
      */
-    function _defineSystemCurrency(address _definedBy, CurrencyMetadata memory metadata) private returns (uint256) {
+    function _defineSystemCurrency(address _definedBy, CurrencyMetadata memory _metadata) private returns (uint256) {
         uint256 id = _defineNextSystemFTType();
-        _setCurrencyMetadata(id, address(0), _definedBy, 0, metadata);
+        _setCurrencyMetadata(id, address(0), _definedBy, 0, _metadata);
         return id;
     }
 
@@ -347,10 +347,10 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * will be used to mint this currency for is provided.
      */
     function _defineBrandCurrency(
-        address _brandId, uint256 _paidPrice, address _definedBy, CurrencyMetadata memory metadata
+        address _brandId, uint256 _paidPrice, address _definedBy, CurrencyMetadata memory _metadata
     ) private returns (uint256) {
         uint256 id = _defineNextFTType(_brandId);
-        _setCurrencyMetadata(id, _brandId, _definedBy, _paidPrice, metadata);
+        _setCurrencyMetadata(id, _brandId, _definedBy, _paidPrice, _metadata);
         return id;
     }
 

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
-import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "../../IMetaverse.sol";
 import "../../economy/IEconomy.sol";
 import "../base/MetaversePlugin.sol";
@@ -139,7 +138,6 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
         } else {
             uint256 length = paidData.ids.length;
             (uint256 receiverFee, uint256 agentFee, address agent) = paymentFee(paidData.signer);
-            uint256 fee = receiverFee + agentFee;
             if (paidData.matic != 0) {
                 uint256 sentNative = _sendNative(
                     paidData.matic, receiverFee, paymentFeeEarningsReceiver, "the earnings receiver target"
