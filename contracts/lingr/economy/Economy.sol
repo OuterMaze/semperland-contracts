@@ -63,14 +63,17 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
     function _afterTokenTransfer(
         address, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory
     ) internal override {
+        uint256 length = amounts.length;
         if (from != address(0)) {
-            uint256 length = amounts.length;
             // Process transfer:
             if (to != address(0)) {
                 // Brands will be transfer-processed.
                 for(uint256 index = 0; index < length; index++) {
                     if (ids[index] < (1 << 160) && amounts[index] != 0) {
-                        IMetaverse(metaverse).onBrandOwnerChanged(address(uint160(ids[index])), to);
+                        address brandId = address(uint160(ids[index]));
+                        _setApprovalForAll(brandId, from, false);
+                        _setApprovalForAll(brandId, to, true);
+                        IMetaverse(metaverse).onBrandOwnerChanged(brandId, to);
                     }
                 }
             }
@@ -82,6 +85,18 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
                 // metaverse instance they live into.
                 if (ids[index] < (1 << 255) && ids[index] >= (1 << 160)) {
                     IMetaverse(metaverse).onNFTOwnerChanged(ids[index], to);
+                }
+            }
+        }
+        else
+        {
+            // Minting brands will be processed here.
+            // Other assets will not be processed here.
+            for(uint256 index = 0; index < length; index++) {
+                if (ids[index] < (1 << 160) && amounts[index] != 0) {
+                    address brandId = address(uint160(ids[index]));
+                    _setApprovalForAll(brandId, to, true);
+                    IMetaverse(metaverse).onBrandOwnerChanged(brandId, to);
                 }
             }
         }
