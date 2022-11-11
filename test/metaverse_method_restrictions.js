@@ -21,19 +21,19 @@ const {
 contract("Metaverse", function (accounts) {
   var economy = null;
   var metaverse = null;
-  var contract = null;
+  var brandRegistry = null;
 
   before(async function () {
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
-    contract = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
+    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
-    await metaverse.setBrandRegistry(contract.address, { from: accounts[0] });
+    await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
   });
 
   it("must fail when calling Metaverse::onBrandOwnerChanged for common accounts", async function() {
     let brandId1 = "0x" + web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     ).substr(26);
 
     await expectRevert(
@@ -65,18 +65,18 @@ contract("Metaverse", function (accounts) {
 
   it("must fail when calling BrandRegistry::onBrandOwnerChanged for common accounts", async function() {
     let brandId1 = "0x" + web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     ).substr(26);
 
     await expectRevert(
-      contract.onBrandOwnerChanged(brandId1, accounts[0], {from: accounts[0]}),
+      brandRegistry.onBrandOwnerChanged(brandId1, accounts[0], {from: accounts[0]}),
       revertReason("BrandRegistry: the only allowed sender is the metaverse system")
     );
   });
 
   it("must fail when calling Metaverse::defineNextFTType for common accounts", async function() {
     let brandId1 = "0x" + web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 1
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     ).substr(26);
 
     await expectRevert(
