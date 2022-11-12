@@ -490,17 +490,17 @@ contract("CurrencyMintingPlugin", function (accounts) {
     await mintingPlugin.mintBrandCurrencyFor(brand1Currency1, 2, {from: accounts[0]});
     await mintingPlugin.mintBrandCurrencyFor(brand2Currency1, 2, {from: accounts[0]});
     await economy.safeTransferFrom(
-      brand1, accounts[1], brand1Currency1, new BN("20000000000000000000"), "", {from: accounts[1]}
+      brand1, accounts[1], brand1Currency1, new BN("20000000000000000000"), "0x00", {from: accounts[1]}
     );
     await economy.safeTransferFrom(
-      brand2, accounts[2], brand1Currency1, new BN("20000000000000000000"), "", {from: accounts[2]}
+      brand2, accounts[2], brand2Currency1, new BN("20000000000000000000"), "0x00", {from: accounts[2]}
     );
-    let balance1 = await economy.balanceOf(brand1, brand1Currency1);
+    let balance1 = await economy.balanceOf(accounts[1], brand1Currency1);
     assert.isTrue(
       balance1.cmp(new BN("20000000000000000000")) === 0,
       "The amount of brand 1 currency 1 tokens in the account 1 must be 20 full tokens"
     );
-    let balance2 = await economy.balanceOf(brand2, brand2Currency1);
+    let balance2 = await economy.balanceOf(accounts[2], brand2Currency1);
     assert.isTrue(
       balance2.cmp(new BN("20000000000000000000")) === 0,
       "The amount of brand 2 currency 1 tokens in the account 2 must be 20 full tokens"
@@ -533,7 +533,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
   it("must allow account 7 to mint brandCurrency1 to account 1", async function() {
     await mintingPlugin.mintBrandCurrencyFor(brand1Currency1, 2, {from: accounts[7]});
     await economy.safeTransferFrom(
-        brand1, accounts[1], brand1Currency1, new BN("20000000000000000000"), "", {from: accounts[1]}
+        brand1, accounts[1], brand1Currency1, new BN("20000000000000000000"), "0x00", {from: accounts[1]}
     );
     let balance1 = await economy.balanceOf(accounts[1], brand1Currency1);
     assert.isTrue(
@@ -671,7 +671,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
 
   it("must allow minting brand currency for a brand using 5th account", async function() {
     await mintingPlugin.mintBrandCurrencyFor(brand1Currency1, 2, {from: accounts[5]});
-    let balance = await economy.balanceOf(accounts[5], brand1Currency1);
+    let balance = await economy.balanceOf(brand1, brand1Currency1);
     let expected = new BN("20000000000000000000");
     assert.isTrue(
       balance.cmp(expected) === 0,
