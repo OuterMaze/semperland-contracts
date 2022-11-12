@@ -92,13 +92,13 @@ contract Metaverse is Ownable, IMetaverse {
      * Holds the next FT index to try, in the next iteration, for respective
      * brand(s) requesting one. These ids are, at most, 1<<64 - 1.
      */
-    mapping(address => uint64) private nextFTIndex;
+    mapping(address => uint64) public nextFTIndex;
 
     /**
      * Holds the next NFT type to try, in the next iteration. The initial
      * value to try is 2 (0 means "invalid" and 1 means "brand").
      */
-    uint256 private nextNFTTypeIndex = 2;
+    uint256 public nextNFTTypeIndex = 2;
 
     /**
      * Holds the next NFT index to try, in the next iteration. The initial
