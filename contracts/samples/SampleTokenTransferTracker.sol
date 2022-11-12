@@ -8,12 +8,15 @@ import "../lingr/plugins/base/NFTDefiningPlugin.sol";
 import "../lingr/plugins/base/FTMintingPlugin.sol";
 import "../lingr/plugins/base/NFTMintingPlugin.sol";
 import "../lingr/plugins/base/TokenBurningPlugin.sol";
+import "../lingr/plugins/base/NFTTransferWatcherPlugin.sol";
 
 contract SampleTokenTransferTracker is MetaversePlugin, IERC1155Receiver,
-    FTDefiningPlugin, NFTDefiningPlugin, FTMintingPlugin, NFTMintingPlugin, TokenBurningPlugin
+    FTDefiningPlugin, NFTDefiningPlugin, FTMintingPlugin, NFTMintingPlugin, TokenBurningPlugin,
+    NFTTransferWatcherPlugin
 {
     uint256 public sampleNFTType;
     uint256 public sampleFTType;
+    mapping(uint256 => address) public ownerships;
 
     constructor(address _metaverse) MetaversePlugin(_metaverse) {}
 
@@ -30,8 +33,10 @@ contract SampleTokenTransferTracker is MetaversePlugin, IERC1155Receiver,
         sampleNFTType = _defineNextNFTType();
     }
 
-    function mintFT() external {
-        _mintNFTFor(msg.sender, sampleNFTType, "");
+    function mintNFT() external returns (uint256) {
+        uint256 index = _mintNFTFor(msg.sender, sampleNFTType, "");
+        ownerships[index] = msg.sender;
+        return index;
     }
 
     function mintFT(uint256 _amount) external {
@@ -58,5 +63,20 @@ contract SampleTokenTransferTracker is MetaversePlugin, IERC1155Receiver,
     ) external onlyEconomy returns (bytes4) {
         _burnTokens(_ids, _values);
         return IERC1155Receiver.onERC1155BatchReceived.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(
+        MetaversePlugin, NFTTransferWatcherPlugin, IERC165
+    ) returns (bool) {
+        return MetaversePlugin.supportsInterface(interfaceId) ||
+        NFTTransferWatcherPlugin.supportsInterface(interfaceId) ||
+        interfaceId == type(INFTTransferWatcherPlugin).interfaceId;
+    }
+
+    /**
+     * Updates the owner of the NFT.
+     */
+    function onNFTOwnerChanged(uint256 _nftId, address _newOwner) external override onlyMetaverse {
+        ownerships[_nftId] = _newOwner;
     }
 }
