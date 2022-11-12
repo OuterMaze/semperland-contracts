@@ -208,7 +208,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * currency to any user. This feature can be used at sole discretion of
      * the admins, but typically after coordinating with brand-allowed users.
      */
-    function mintBrandCurrencyFor(address _to, uint256 _id, uint256 bulks)
+    function mintBrandCurrencyFor(uint256 _id, uint256 bulks)
         public onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount
         onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES)
     {
@@ -216,7 +216,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
         _requireBrandScope(scope, 0x0);
         require(bulks != 0, "CurrencyMintingPlugin: minting (brand scope) issued with no units");
         CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
-            _to, _id, bulks * currencyMintAmount, "gifted brand mint"
+            scope, _id, bulks * currencyMintAmount, "gifted brand mint"
         );
     }
 
