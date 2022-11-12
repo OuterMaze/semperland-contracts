@@ -6,7 +6,7 @@ import "../base/MetaversePlugin.sol";
 import "../base/FTDefiningPlugin.sol";
 import "../base/FTTypeCheckingPlugin.sol";
 import "../base/FTMintingPlugin.sol";
-import "../base/FTBurningPlugin.sol";
+import "../base/TokenBurningPlugin.sol";
 
 /**
  * This contract is the "definition" part of the Currency feature.
@@ -16,7 +16,7 @@ import "../base/FTBurningPlugin.sol";
  * or allowed user is free of charge).
  */
 contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeCheckingPlugin,
-    FTMintingPlugin, FTBurningPlugin {
+    FTMintingPlugin {
     /**
      * The address that will receive earnings from currency
      * definition operations (executed by brand users which

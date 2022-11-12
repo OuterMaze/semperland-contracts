@@ -6,7 +6,7 @@ import "../../../NativePayable.sol";
 import "../base/MetaversePlugin.sol";
 import "../base/FTTypeCheckingPlugin.sol";
 import "../base/FTMintingPlugin.sol";
-import "../base/FTBurningPlugin.sol";
+import "../base/TokenBurningPlugin.sol";
 import "./CurrencyDefinitionPlugin.sol";
 
 /**
@@ -15,7 +15,7 @@ import "./CurrencyDefinitionPlugin.sol";
  * mint operations for plug-ins, brands or metaverse managers.
  */
 contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckingPlugin,
-    FTMintingPlugin, FTBurningPlugin {
+    FTMintingPlugin, TokenBurningPlugin {
     /**
      * The address of the related currency definition plug-in.
      */
@@ -251,19 +251,19 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
             if (value == 0) return;
             require(!wmaticUnwrappingLocked, "CurrencyMintingPlugin: WMATIC-unwrapping reentrancy is forbidden");
             wmaticUnwrappingLocked = true;
-            _burnFT(WMATICType, value);
+            _burnToken(WMATICType, value);
             payable(from).transfer(value);
             wmaticUnwrappingLocked = false;
         } else if (id == BEATType) {
             if (value == 0) return;
-            _burnFT(BEATType, value);
+            _burnToken(BEATType, value);
         } else {
             // Only plug-ins can burn currencies (and only currencies)
             // by safe-transferring them to this contract.
             if (IMetaverse(metaverse).plugins(_msgSender()) &&
                 CurrencyDefinitionPlugin(definitionPlugin).currencyExists(id)) {
                 if (value == 0) return;
-                _burnFT(id, value);
+                _burnToken(id, value);
             } else {
                 revert("CurrencyMintingPlugin: cannot receive, from users, non-currency tokens");
             }

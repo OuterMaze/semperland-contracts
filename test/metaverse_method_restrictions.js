@@ -106,30 +106,16 @@ contract("Metaverse", function (accounts) {
     );
   });
 
-  it("must fail when calling Metaverse::burnFT for common accounts", async function() {
+  it("must fail when calling Metaverse::burnToken for common accounts", async function() {
     await expectRevert(
-      metaverse.burnFT(1, 1, {from: accounts[0]}),
+      metaverse.burnToken(1, 1, {from: accounts[0]}),
       revertReason("Metaverse: the sender must be a plug-in")
     );
   });
 
-  it("must fail when calling Metaverse::burnFTs for common accounts", async function() {
+  it("must fail when calling Metaverse::burnTokens for common accounts", async function() {
     await expectRevert(
-      metaverse.burnFTs([1], [1], {from: accounts[0]}),
-      revertReason("Metaverse: the sender must be a plug-in")
-    );
-  });
-
-  it("must fail when calling Metaverse::burnNFT for common accounts", async function() {
-    await expectRevert(
-      metaverse.burnNFT(1, {from: accounts[0]}),
-      revertReason("Metaverse: the sender must be a plug-in")
-    );
-  });
-
-  it("must fail when calling Metaverse::burnNFTs for common accounts", async function() {
-    await expectRevert(
-      metaverse.burnNFTs([1], {from: accounts[0]}),
+      metaverse.burnTokens([1], [1], {from: accounts[0]}),
       revertReason("Metaverse: the sender must be a plug-in")
     );
   });

@@ -91,28 +91,16 @@ interface IMetaverse is IERC165 {
     function mintBrandFor(address _to, address _brandId) external;
 
     /**
-     * Burns any FT the sender has, provided the sender is a plugin and also defines
-     * the type of the token being burned.
+     * Burns a token (FT or NFT, except for brands) on a given amounts.
+     * NFT will always use an amount of 1.
      */
-    function burnFT(uint256 _tokenId, uint256 _amount) external;
+    function burnToken(uint256 _id, uint256 _amount) external;
 
     /**
-     * Burns many FT the sender has, provided the sender is a plugin and also defines
-     * the type of the token being burned.
+     * Burns many tokens (FTs or NFTs, expect for brands) on given amounts.
+     * NFTs will always be burned in an amount of 1.
      */
-    function burnFTs(uint256[] memory _tokenIds, uint256[] memory _amounts) external;
-
-    /**
-     * Burns any NFT the sender has, provided the sender is a plugin and also defines
-     * the type of the tokens being burned.
-     */
-    function burnNFT(uint256 _tokenId) external;
-
-    /**
-     * Burns many NFT the sender has, provided the sender is a plugin and also defines
-     * the type of the tokens being burned.
-     */
-    function burnNFTs(uint256[] memory _tokenIds) external;
+    function burnTokens(uint256[] memory _ids, uint256[] memory _amounts) external;
 
     /**
      * Retrieves the metadata uri of a given token. WARNING: This method

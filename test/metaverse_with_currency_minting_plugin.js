@@ -867,7 +867,7 @@ contract("CurrencyMintingPlugin", function (accounts) {
     let initialBalance = new BN(await web3.eth.getBalance(accounts[4]));
     let tx = await economy.safeBatchTransferFrom(
       accounts[4], mintingPlugin.address, [BEAT, WMATIC], [amount, amount], web3.utils.asciiToHex("hello"),
-      {from: accounts[4]}
+      {from: accounts[4], gas: 500000}
     );
     let totalGas = await txTotalGas(web3, tx);
     let finalBalance = new BN(await web3.eth.getBalance(accounts[4]));
