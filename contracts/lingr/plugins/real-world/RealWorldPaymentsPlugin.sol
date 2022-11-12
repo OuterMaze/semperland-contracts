@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "../../IMetaverse.sol";
 import "../../economy/IEconomy.sol";
 import "../base/MetaversePlugin.sol";
@@ -17,6 +18,12 @@ import "./RealWorldPaymentsFeesMixin.sol";
  */
 contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, RealWorldPaymentsReceptionMixin,
     RealWorldPaymentsFeesMixin {
+    /**
+     * Addresses can check for ERC165 comp
+     * embeddable library.
+     */
+    using ERC165Checker for address;
+
     /**
      * This is the tracking of previous payments already
      * being processed in our payment system. This is done
@@ -41,9 +48,16 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
      */
     constructor(
         address _metaverse, uint256 _paymentFeeLimit, address _paymentFeeEarningsReceiver,
-        address[] memory _verifiers
+        address _verifier
     ) RealWorldPaymentsFeesMixin(_metaverse, _paymentFeeLimit, _paymentFeeEarningsReceiver)
-      RealWorldPaymentsSignaturesMixin(_verifiers) {}
+      RealWorldPaymentsSignaturesMixin(_verifier) {
+        require(
+            _verifier.supportsInterface(type(IMetaversePlugin).interfaceId) &&
+            _verifier.supportsInterface(type(ISignatureVerifier).interfaceId) &&
+            MetaversePlugin(_verifier).metaverse() == _metaverse,
+            "RealWorldPaymentsPlugin: invalid verifier contract"
+        );
+    }
 
     /**
      * No initialization is required for this plug-in.

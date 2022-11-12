@@ -90,7 +90,7 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
     function _verifyDueDate(uint256 _dueDate) private {
         require(
             _dueDate >= block.timestamp, "RealWorldPaymentsPlugin: expired payment"
-        )  ;
+        );
     }
 
     /**
@@ -176,9 +176,8 @@ abstract contract RealWorldPaymentsReceptionMixin is Context, RealWorldPaymentsS
      * Checks interface support both in MetaversePlugin and SignatureVerifier.
      */
     function supportsInterface(bytes4 _interfaceId) public view
-        virtual override(IERC165, SignatureVerifier) returns (bool) {
-        return _interfaceId == type(IERC1155Receiver).interfaceId ||
-               SignatureVerifier.supportsInterface(_interfaceId);
+        virtual override(IERC165) returns (bool) {
+        return _interfaceId == type(IERC1155Receiver).interfaceId;
     }
 
     /**

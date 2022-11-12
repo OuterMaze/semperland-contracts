@@ -11,7 +11,13 @@ import "../../../signatures/SignatureVerifierHub.sol";
  * It is, actually, a SignatureVerifierHub on its own (this trait
  * does not define, itself, means to manage the list of verifiers).
  */
-abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
+abstract contract RealWorldPaymentsSignaturesMixin {
+    /**
+     * Addresses can check for ERC165 comp
+     * embeddable library.
+     */
+    using ERC165Checker for address;
+
     /**
      * In each case, the signature will have to refer:
      * - The address to pay this payment to.
@@ -105,10 +111,22 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
     }
 
     /**
-     * The only needed thing for this trait to be instantiated
-     * is the list of verifiers that will be used for validation.
+     * The verifier to use. Will belong to the metaverse, and
+     * will in practice be a Hub.
      */
-    constructor(address[] memory _verifiers) SignatureVerifierHub(_verifiers) {}
+    address private verifier;
+
+    /**
+     * The only needed thing for this trait to be instantiated
+     * is the verifier to use.
+     */
+    constructor(address _verifier) {
+        require(
+            _verifier.supportsInterface(type(ISignatureVerifier).interfaceId),
+            "RealWorldPaymentsSignaturesMixin: invalid verifier"
+        );
+        verifier = _verifier;
+    }
 
     /**
      * Gets the signer of a real-world payment order, given its signature and
@@ -127,7 +145,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
             _paymentData.brandId, _paymentData.rewardIds, _paymentData.rewardValues,
             _tokenId, _tokenAmount
         ));
-        return verifySignature(messageHash, _paymentData.paymentSignature);
+        return ISignatureVerifier(verifier).verifySignature(messageHash, _paymentData.paymentSignature);
     }
 
     /**
@@ -147,7 +165,7 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
             _paymentData.brandId, _paymentData.rewardIds, _paymentData.rewardValues,
             _tokenIds, _tokenAmounts
         ));
-        return verifySignature(messageHash, _paymentData.paymentSignature);
+        return ISignatureVerifier(verifier).verifySignature(messageHash, _paymentData.paymentSignature);
     }
 
     /**
@@ -166,6 +184,6 @@ abstract contract RealWorldPaymentsSignaturesMixin is SignatureVerifierHub {
             _paymentData.brandId, _paymentData.rewardIds, _paymentData.rewardValues,
             _amount
         ));
-        return verifySignature(messageHash, _paymentData.paymentSignature);
+        return ISignatureVerifier(verifier).verifySignature(messageHash, _paymentData.paymentSignature);
     }
 }

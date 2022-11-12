@@ -5,6 +5,7 @@ const SimpleECDSASignatureVerifier = artifacts.require("SimpleECDSASignatureVeri
 const RealWorldPaymentsPlugin = artifacts.require("RealWorldPaymentsPlugin");
 const CurrencyDefinitionPlugin = artifacts.require("CurrencyDefinitionPlugin");
 const CurrencyMintingPlugin = artifacts.require("CurrencyMintingPlugin");
+const SignatureVerifierPlugin = artifacts.require("SignatureVerifierPlugin");
 const payments = require("../front-end/js/plug-ins/real-world/real-world-payments.js");
 const types = require("../front-end/js/utils/types.js");
 const dates = require("../front-end/js/utils/dates.js");
@@ -38,6 +39,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
   var brandRegistry = null;
   var definitionPlugin = null;
   var mintingPlugin = null;
+  var signatureVerifierPlugin = null;
   var realWorldPaymentsPlugin = null;
   var brand1 = null;
   var brand2 = null;
@@ -72,10 +74,14 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     mintingPlugin = await CurrencyMintingPlugin.new(
       metaverse.address, definitionPlugin.address, accounts[8], { from: accounts[0] }
     );
-    realWorldPaymentsPlugin = await RealWorldPaymentsPlugin.new(
-      metaverse.address, 30, accounts[8], [
+    signatureVerifierPlugin = await SignatureVerifierPlugin.new(
+      metaverse.address, ["ECDSA"], [
         (await SimpleECDSASignatureVerifier.new({ from: accounts[0] })).address
       ], { from: accounts[0] }
+    );
+    // Is this right? This call takes gas: 5286902
+    realWorldPaymentsPlugin = await RealWorldPaymentsPlugin.new(
+      metaverse.address, 30, accounts[8], signatureVerifierPlugin.address, { from: accounts[0], gas: 5300000 }
     );
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
@@ -157,6 +163,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     );
     // Also: ensure brand1 is committed.
     await brandRegistry.updateBrandSocialCommitment(brand1, true);
+    // Also: ensure account 0 signs with the method 0.
+    await signatureVerifierPlugin.setSignatureMethodAllowance(0, true, { from: accounts[0] });
   });
 
   it("must have the exected initial reward balances", async function() {
@@ -1186,8 +1194,11 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
       [new web3.utils.BN("2000000000000000000")], function(obj) {
-        obj.args.paymentSignature = "0x1212121212121212121212121212121212121212121212121212121212121212" +
-                                    "121212121212121212121212121212121212121212121212121212121212121212";
+        obj.args.paymentSignature = web3.eth.abi.encodeParameters(["uint16", "bytes"], [
+          0,
+          "0x1212121212121212121212121212121212121212121212121212121212121212" +
+          "121212121212121212121212121212121212121212121212121212121212121212"
+        ]);
       }, economy.address, economy.abi, realWorldPaymentsPlugin.address,
       realWorldPaymentsPlugin.abi, accounts[9]
     )).to.be.rejectedWith(Error, "Signature check failed");
@@ -1307,7 +1318,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
         break;
     }
 
-    obj.args.paymentSignature = await web3.eth.sign(messageHash, accounts[0]);
+    obj.args.paymentSignature = web3.eth.abi.encodeParameters(['uint16', 'bytes'], [
+        0, await web3.eth.sign(messageHash, accounts[0])
+    ]);
 
     return obj;
   }

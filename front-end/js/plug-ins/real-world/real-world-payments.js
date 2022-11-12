@@ -40,12 +40,23 @@ const FUND_BATCH_CALL = '0xce3ee612000000000000000000000000000000000000000000000
  *   must match, in length, to the reward token ids.
  * @param paymentMethod The method to use for payment. One out of 3 methods can be used
  *   in this payment orders mechanism: native, token, or tokens.
+ * @param signMethodIndex The method index being used for the signature process.
+ *   Typically, this value is 0 and will match, in the other side, with the ECDSA
+ *   algorithm (locally: await web3.eth.sign, until this implementation is deprecated
+ *   in favor of a new one, quantum-resistant). On absence, this value will be 0.
+ *   When ECDSA signing becomes risky, the value 0 should not be used anymore, and the
+ *   await web3.eth.sign method should also be avoided, unless the new implementation
+ *   reflects the new signing method(s) being used by default (quantum-resistant).
+ * @param signMethods The method callbacks being used for the signature process. By default,
+ *   an array of [web3.eth.sign] will be used. Be aware of the remarks of the previous
+ *   point, which actually apply to this array as well.
  * @returns {Promise<String>} The payment URL.
  */
 async function makePaymentOrderURI(
     domain, web3, posAddress, now, dueTime,
     toAddress, reference, description, brandAddress,
-    rewardIds, rewardValues, paymentMethod
+    rewardIds, rewardValues, paymentMethod, signMethodIndex,
+    signMethods
 ) {
     types.requireString("domain", domain);
     types.requireType('web3.utils.soliditySha3', Function, attributes.getAttr(web3, 'utils.soliditySha3'));
@@ -58,6 +69,10 @@ async function makePaymentOrderURI(
     types.requireAddress('brandAddress', brandAddress);
     types.requireArray(types.requireUInt256, 'rewardIds', rewardIds);
     types.requireArray(types.requireUInt256, 'rewardValues', rewardValues);
+    signMethodIndex = signMethodIndex || 0;
+    signMethods = signMethods || [function(m, acc) {
+        return web3.eth.sign(m, acc);
+    }]
 
     let dueDate = now.add(dueTime);
     let paymentId = web3.utils.soliditySha3(
@@ -113,7 +128,8 @@ async function makePaymentOrderURI(
         default:
             throw new Error("Invalid payment method type: " + paymentMethod.type);
     }
-    let paymentSignature = await web3.eth.sign(messageHash, posAddress);
+    let paymentSubSignature = await (signMethods[signMethodIndex](messageHash, posAddress));
+    let paymentSignature = web3.eth.abi.encodeParameters(['uint16', 'bytes'], [signMethodIndex, paymentSubSignature]);
 
     let fullObj = {
         type: paymentMethod.type,
@@ -157,9 +173,15 @@ async function makePaymentOrderURI(
  * @param domain The expected domain in the payment URI.
  * @param web3 The web3 client used to parse numbers.
  * @param url The payment URI to parse.
+ * @param recoverMethods A list of method callbacks to use. The index of the signing method
+ *   will be used to grab one element from this array as well. By default, an array with
+ *   a single element [web3.eth.accounts.recover] will be used.
  * @returns object The object describing the payment details.
  */
-function parsePaymentOrderURI(domain, web3, url) {
+function parsePaymentOrderURI(domain, web3, url, recoverMethods) {
+    recoverMethods = recoverMethods || [function(m, s) {
+        return web3.eth.accounts.recover(m, s);
+    }];
     let prefix = "payto://" + domain + "/real-world-payments?data=";
     if (!url.startsWith(prefix)) {
         throw new Error("Invalid url: " + url + ". It does not start with: " + prefix);
@@ -193,6 +215,11 @@ function parsePaymentOrderURI(domain, web3, url) {
     let messageHash;
     let recovered;
 
+    function fullRecover(messageHash, signature) {
+        let args = web3.eth.abi.decodeParameters(['uint16', 'bytes'], signature);
+        return recoverMethods[args['0']](messageHash, args['1']);
+    }
+
     switch(obj.type) {
         case 'native':
             types.requireUIntString('obj.value', obj.value);
@@ -212,7 +239,7 @@ function parsePaymentOrderURI(domain, web3, url) {
                 {type: 'uint256', value: obj.value},
             );
 
-            recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
+            recovered = fullRecover(messageHash, obj.args.paymentSignature);
             if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
                 throw new Error("Signature check failed");
             }
@@ -238,7 +265,7 @@ function parsePaymentOrderURI(domain, web3, url) {
                 {type: 'uint256', value: obj.value},
             );
 
-            recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
+            recovered = fullRecover(messageHash, obj.args.paymentSignature);
             if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
                 throw new Error("Signature check failed");
             }
@@ -267,7 +294,7 @@ function parsePaymentOrderURI(domain, web3, url) {
                 {type: 'uint256[]', value: obj.values},
             );
 
-            recovered = web3.eth.accounts.recover(messageHash, obj.args.paymentSignature);
+            recovered = fullRecover(messageHash, obj.args.paymentSignature);
             if (recovered.toLowerCase() !== obj.args.payment.posAddress.toLowerCase()) {
                 throw new Error("Signature check failed");
             }
