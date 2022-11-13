@@ -116,7 +116,7 @@ contract Metaverse is Ownable, IMetaverse {
     /**
      * Permission: To add a plug-in.
      */
-    bytes32 constant ADD_PLUGIN = keccak256("Metaverse::AddPlugin");
+    bytes32 constant DEPLOY = keccak256("Metaverse::Deploy");
 
     /**
      * Permission: To set a brand registry.
@@ -429,7 +429,7 @@ contract Metaverse is Ownable, IMetaverse {
     /**
      * Adds a plug-in contract to this metaverse.
      */
-    function addPlugin(address _contract) external onlyAllowed(ADD_PLUGIN) {
+    function addPlugin(address _contract) external onlyAllowed(DEPLOY) {
         require(
             _isPluginForThisMetaverse(_contract),
             "Metaverse: the address does not belong to a valid plug-in contract for this metaverse"

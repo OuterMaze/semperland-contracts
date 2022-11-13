@@ -11,7 +11,7 @@ contract SignatureVerifierPlugin is MetaversePlugin, SignatureVerifierHub {
     /**
      * Permission: To add a plug-in (here: setup verifiers).
      */
-    bytes32 constant ADD_PLUGIN = keccak256("Metaverse::AddPlugin");
+    bytes32 constant DEPLOY = keccak256("Metaverse::Deploy");
 
     /**
      * This plug-in MAY make use of initial verifiers. Typically,
@@ -54,7 +54,7 @@ contract SignatureVerifierPlugin is MetaversePlugin, SignatureVerifierHub {
     /**
      * Adds a verifier to this plug-in. Verifiers cannot be removed.
      */
-    function addVerifier(string memory _key, address _verifier) external onlyMetaverseAllowed(ADD_PLUGIN) {
+    function addVerifier(string memory _key, address _verifier) external onlyMetaverseAllowed(DEPLOY) {
         _addVerifier(_key, _verifier);
     }
 }

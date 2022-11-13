@@ -103,7 +103,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Permission: To add a plug-in (here: setup plug-in).
      */
-    bytes32 constant ADD_PLUGIN = keccak256("Metaverse::AddPlugin");
+    bytes32 constant DEPLOY = keccak256("Metaverse::Deploy");
 
     /**
      * This permission allows users to set the definition costs
@@ -475,7 +475,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Sets the minting plug-in.
      */
-    function setMintingPlugin(address _plugIn) external onlyMetaverseAllowed(ADD_PLUGIN) {
+    function setMintingPlugin(address _plugIn) external onlyMetaverseAllowed(DEPLOY) {
         require(
             mintingPlugin == address(0),
             "CurrencyMintingPlugin: minting plug-in already set"
