@@ -40,6 +40,11 @@ interface IMetaverse is IERC165 {
     function sponsorRegistry() external view returns (address);
 
     /**
+     * The linked signature verifier for this metaverse.
+     */
+    function signatureVerifier() external view returns (address);
+
+    /**
      * The linked economy for this metaverse.
      */
     function economy() external view returns (address);

@@ -10,6 +10,7 @@ import "./IMetaverseOwned.sol";
 import "./economy/IEconomy.sol";
 import "./brands/IBrandRegistry.sol";
 import "./sponsoring/ISponsorRegistry.sol";
+import "./signing/IMetaverseSignatureVerifier.sol";
 
 /**
  * A metaverse hub can receive "plugs" (extensions) in the form of
@@ -59,6 +60,11 @@ contract Metaverse is Ownable, IMetaverse {
      * The linked sponsoring registry for this metaverse.
      */
     address public sponsorRegistry;
+
+    /**
+     * The linked signature verifier for this metaverse.
+     */
+    address public signatureVerifier;
 
     /**
      * Types are identified as integer values, and each registered type
@@ -415,6 +421,16 @@ contract Metaverse is Ownable, IMetaverse {
     // ********** Plugin management goes here **********
 
     /**
+     * Tells whether an address is a valid component, for this metaverse
+     * in particular, of a defined type.
+     */
+    function _isComponentForThisMetaverse(address _component, bytes4 _interfaceId) private view returns (bool) {
+        return _component.supportsInterface(type(IMetaverseOwned).interfaceId) &&
+               _component.supportsInterface(_interfaceId) &&
+               IMetaverseOwned(_component).metaverse() == address(this);
+    }
+
+    /**
      * Adds a plug-in contract to this metaverse.
      */
     function addPlugin(address _contract) external onlyAllowed(DEPLOY) {
@@ -443,16 +459,6 @@ contract Metaverse is Ownable, IMetaverse {
     modifier onlyPlugin() {
         require(plugins[_msgSender()], "Metaverse: the sender must be a plug-in");
         _;
-    }
-
-    /**
-     * Tells whether an address is a valid component, for this metaverse
-     * in particular, of a defined type.
-     */
-    function _isComponentForThisMetaverse(address _component, bytes4 _interfaceId) private view returns (bool) {
-        return _component.supportsInterface(type(IMetaverseOwned).interfaceId) &&
-               _component.supportsInterface(_interfaceId) &&
-               IMetaverseOwned(_component).metaverse() == address(this);
     }
 
     /**
@@ -511,6 +517,20 @@ contract Metaverse is Ownable, IMetaverse {
             sponsorRegistry == address(0), "Metaverse: a sponsor registry is already set into this metaverse"
         );
         sponsorRegistry = _contract;
+    }
+
+    /**
+     * Sets the signature verifier contract to this metaverse.
+     */
+    function setSignatureVerifier(address _contract) external onlyAllowed(DEPLOY) {
+        require(
+            _isComponentForThisMetaverse(_contract, type(IMetaverseSignatureVerifier).interfaceId),
+            "Metaverse: the address does not belong to a valid signature verifier for this metaverse"
+        );
+        require(
+            signatureVerifier == address(0), "Metaverse: a signature verifier is already set into this metaverse"
+        );
+        signatureVerifier = _contract;
     }
 
     /**
