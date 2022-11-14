@@ -47,17 +47,8 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
      * instead of per market).
      */
     constructor(
-        address _metaverse, uint256 _paymentFeeLimit, address _paymentFeeEarningsReceiver,
-        address _verifier
-    ) RealWorldPaymentsFeesMixin(_metaverse, _paymentFeeLimit, _paymentFeeEarningsReceiver)
-      RealWorldPaymentsSignaturesMixin(_verifier) {
-        require(
-            _verifier.supportsInterface(type(IMetaversePlugin).interfaceId) &&
-            _verifier.supportsInterface(type(ISignatureVerifier).interfaceId) &&
-            MetaversePlugin(_verifier).metaverse() == _metaverse,
-            "RealWorldPaymentsPlugin: invalid verifier contract"
-        );
-    }
+        address _metaverse, uint256 _paymentFeeLimit, address _paymentFeeEarningsReceiver
+    ) RealWorldPaymentsFeesMixin(_metaverse, _paymentFeeLimit, _paymentFeeEarningsReceiver) {}
 
     /**
      * No initialization is required for this plug-in.
@@ -232,5 +223,12 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
      */
     function _batchFunded(address _from, uint256[] calldata _ids, uint256[] calldata _values) internal override {
         _fundTokens(_from, _ids, _values);
+    }
+
+    /**
+     * The reference to the related signature verifier.
+     */
+    function _verifier() internal override view returns (address) {
+        return IMetaverse(metaverse).signatureVerifier();
     }
 }

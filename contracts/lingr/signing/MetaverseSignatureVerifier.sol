@@ -9,7 +9,7 @@ import "./IMetaverseSignatureVerifier.sol";
 /**
  * This plug-in does not serve purposes for the end users, but just for other plug-ins.
  */
-contract MetaverseSignatureVerifierPlugin is SignatureVerifierHub, IMetaverseSignatureVerifier, IMetaverseOwned {
+contract MetaverseSignatureVerifier is SignatureVerifierHub, IMetaverseSignatureVerifier, IMetaverseOwned {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.

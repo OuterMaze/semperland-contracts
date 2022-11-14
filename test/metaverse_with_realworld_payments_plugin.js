@@ -5,7 +5,7 @@ const SimpleECDSASignatureVerifier = artifacts.require("SimpleECDSASignatureVeri
 const RealWorldPaymentsPlugin = artifacts.require("RealWorldPaymentsPlugin");
 const CurrencyDefinitionPlugin = artifacts.require("CurrencyDefinitionPlugin");
 const CurrencyMintingPlugin = artifacts.require("CurrencyMintingPlugin");
-const SignatureVerifierPlugin = artifacts.require("SignatureVerifierPlugin");
+const MetaverseSignatureVerifier = artifacts.require("MetaverseSignatureVerifier");
 const payments = require("../front-end/js/plug-ins/real-world/real-world-payments.js");
 const types = require("../front-end/js/utils/types.js");
 const dates = require("../front-end/js/utils/dates.js");
@@ -39,7 +39,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
   var brandRegistry = null;
   var definitionPlugin = null;
   var mintingPlugin = null;
-  var signatureVerifierPlugin = null;
+  var signatureVerifier = null;
   var realWorldPaymentsPlugin = null;
   var brand1 = null;
   var brand2 = null;
@@ -74,17 +74,19 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     mintingPlugin = await CurrencyMintingPlugin.new(
       metaverse.address, definitionPlugin.address, accounts[8], { from: accounts[0] }
     );
-    signatureVerifierPlugin = await SignatureVerifierPlugin.new(
+    signatureVerifier = await MetaverseSignatureVerifier.new(
       metaverse.address, ["ECDSA"], [
         (await SimpleECDSASignatureVerifier.new({ from: accounts[0] })).address
       ], { from: accounts[0] }
     );
+
     // Is this right? This call takes gas: 5286902
     realWorldPaymentsPlugin = await RealWorldPaymentsPlugin.new(
-      metaverse.address, 30, accounts[8], signatureVerifierPlugin.address, { from: accounts[0], gas: 5300000 }
+      metaverse.address, 30, accounts[8], { from: accounts[0], gas: 5400000 }
     );
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
+    await metaverse.setSignatureVerifier(signatureVerifier.address, { from: accounts[0] });
     await metaverse.addPlugin(definitionPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(mintingPlugin.address, { from: accounts[0] });
     await definitionPlugin.setMintingPlugin(mintingPlugin.address, { from: accounts[0] });
@@ -164,7 +166,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     // Also: ensure brand1 is committed.
     await brandRegistry.updateBrandSocialCommitment(brand1, true);
     // Also: ensure account 0 signs with the method 0.
-    await signatureVerifierPlugin.setSignatureMethodAllowance(0, true, { from: accounts[0] });
+    await signatureVerifier.setSignatureMethodAllowance(0, true, { from: accounts[0] });
   });
 
   it("must have the exected initial reward balances", async function() {
@@ -1394,7 +1396,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           }
 
           // Execute a working transaction.
-          let gasAmount = new web3.utils.BN("250000");
+          let gasAmount = new web3.utils.BN("300000");
           let tx = await payments.executePaymentOrderConfirmationCall(
             obj, web3, accounts[9], economy.address, economy.abi, realWorldPaymentsPlugin.address,
             realWorldPaymentsPlugin.abi, false, {amount: gasAmount}

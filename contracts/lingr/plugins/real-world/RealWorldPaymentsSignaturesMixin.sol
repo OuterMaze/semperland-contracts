@@ -111,24 +111,6 @@ abstract contract RealWorldPaymentsSignaturesMixin {
     }
 
     /**
-     * The verifier to use. Will belong to the metaverse, and
-     * will in practice be a Hub.
-     */
-    address private verifier;
-
-    /**
-     * The only needed thing for this trait to be instantiated
-     * is the verifier to use.
-     */
-    constructor(address _verifier) {
-        require(
-            _verifier.supportsInterface(type(ISignatureVerifier).interfaceId),
-            "RealWorldPaymentsSignaturesMixin: invalid verifier"
-        );
-        verifier = _verifier;
-    }
-
-    /**
      * Gets the signer of a real-world payment order, given its signature and
      * all the enumerated data and a single-token payment.
      */
@@ -145,7 +127,9 @@ abstract contract RealWorldPaymentsSignaturesMixin {
             _paymentData.brandId, _paymentData.rewardIds, _paymentData.rewardValues,
             _tokenId, _tokenAmount
         ));
-        return ISignatureVerifier(verifier).verifySignature(messageHash, _paymentData.paymentSignature);
+        return ISignatureVerifier(_verifier()).verifySignature(
+            messageHash, _paymentData.paymentSignature
+        );
     }
 
     /**
@@ -165,7 +149,9 @@ abstract contract RealWorldPaymentsSignaturesMixin {
             _paymentData.brandId, _paymentData.rewardIds, _paymentData.rewardValues,
             _tokenIds, _tokenAmounts
         ));
-        return ISignatureVerifier(verifier).verifySignature(messageHash, _paymentData.paymentSignature);
+        return ISignatureVerifier(_verifier()).verifySignature(
+            messageHash, _paymentData.paymentSignature
+        );
     }
 
     /**
@@ -184,6 +170,13 @@ abstract contract RealWorldPaymentsSignaturesMixin {
             _paymentData.brandId, _paymentData.rewardIds, _paymentData.rewardValues,
             _amount
         ));
-        return ISignatureVerifier(verifier).verifySignature(messageHash, _paymentData.paymentSignature);
+        return ISignatureVerifier(_verifier()).verifySignature(
+            messageHash, _paymentData.paymentSignature
+        );
     }
+
+    /**
+     * The reference to the related signature verifier.
+     */
+    function _verifier() internal virtual view returns (address);
 }
