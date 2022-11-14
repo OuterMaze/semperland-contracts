@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IBrandRegistry.sol";
 import "../IMetaverse.sol";
+import "../IMetaverseOwned.sol";
 import "../economy/IEconomy.sol";
 import "../../NativePayable.sol";
 
@@ -15,7 +16,7 @@ import "../../NativePayable.sol";
  * Those brands will hold the metadata, and this trait will hold
  * the mean to register such brand with its metadata.
  */
-contract BrandRegistry is Context, NativePayable, ERC165 {
+contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwned, ERC165 {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -468,7 +469,9 @@ contract BrandRegistry is Context, NativePayable, ERC165 {
      * A brand registry satisfies the IBrandRegistry and IERC165.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IERC165).interfaceId || interfaceId == type(IBrandRegistry).interfaceId;
+        return interfaceId == type(IERC165).interfaceId ||
+               interfaceId == type(IBrandRegistry).interfaceId ||
+               interfaceId == type(IMetaverseOwned).interfaceId;
     }
 
     // Brand permissions management start here.

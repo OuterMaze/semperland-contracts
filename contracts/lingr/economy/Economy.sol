@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IEconomy.sol";
 import "../IMetaverse.sol";
+import "../IMetaverseOwned.sol";
 import "./SafeExchange.sol";
 
 /**
@@ -13,7 +14,7 @@ import "./SafeExchange.sol";
  * not be stated, and also this contract will belong to a
  * particular metaverse.
  */
-contract Economy is ERC1155, IEconomy, SafeExchange {
+contract Economy is ERC1155, IEconomy, IMetaverseOwned, SafeExchange {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -110,7 +111,8 @@ contract Economy is ERC1155, IEconomy, SafeExchange {
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, IERC165) returns (bool) {
         return interfaceId == type(IERC165).interfaceId ||
                interfaceId == type(IEconomy).interfaceId ||
-               interfaceId == type(IERC1155).interfaceId;
+               interfaceId == type(IERC1155).interfaceId ||
+               interfaceId == type(IMetaverseOwned).interfaceId;
     }
 
     /**

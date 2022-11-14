@@ -7,12 +7,7 @@ import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  * A contract satisfying this interface is considered a plug-in
  * for a metaverse.
  */
-interface IMetaversePlugin is IERC165 {
-    /**
-     * The metaverse this plug-in was created for.
-     */
-    function metaverse() external view returns (address);
-
+interface IMetaversePlugin {
     /**
      * The title of this metaverse.
      */

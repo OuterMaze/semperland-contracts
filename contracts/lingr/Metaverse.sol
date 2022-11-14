@@ -6,8 +6,10 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "./plugins/base/IMetaversePlugin.sol";
 import "./plugins/base/INFTTransferWatcherPlugin.sol";
 import "./IMetaverse.sol";
+import "./IMetaverseOwned.sol";
 import "./economy/IEconomy.sol";
 import "./brands/IBrandRegistry.sol";
+import "./sponsoring/ISponsorRegistry.sol";
 
 /**
  * A metaverse hub can receive "plugs" (extensions) in the form of
@@ -52,6 +54,11 @@ contract Metaverse is Ownable, IMetaverse {
      * The linked economy for this metaverse.
      */
     address public economy;
+
+    /**
+     * The linked sponsoring registry for this metaverse.
+     */
+    address public sponsorRegistry;
 
     /**
      * Types are identified as integer values, and each registered type
@@ -117,16 +124,6 @@ contract Metaverse is Ownable, IMetaverse {
      * Permission: To add a plug-in.
      */
     bytes32 constant DEPLOY = keccak256("Metaverse::Deploy");
-
-    /**
-     * Permission: To set a brand registry.
-     */
-    bytes32 constant SET_BRAND_REGISTRY = keccak256("Metaverse::SetBrandRegistry");
-
-    /**
-     * Permission: To set the related economy.
-     */
-    bytes32 constant SET_ECONOMY = keccak256("Metaverse::SetEconomy");
 
     /**
      * Maintains the permissions assigned to this metaverse.
@@ -418,20 +415,11 @@ contract Metaverse is Ownable, IMetaverse {
     // ********** Plugin management goes here **********
 
     /**
-     * Tells whether an address is a valid metaverse plug-in contract for
-     * this metaverse in particular.
-     */
-    function _isPluginForThisMetaverse(address _plugin) private view returns (bool) {
-        return _plugin.supportsInterface(type(IMetaversePlugin).interfaceId) &&
-            IMetaversePlugin(_plugin).metaverse() == address(this);
-    }
-
-    /**
      * Adds a plug-in contract to this metaverse.
      */
     function addPlugin(address _contract) external onlyAllowed(DEPLOY) {
         require(
-            _isPluginForThisMetaverse(_contract),
+            _isComponentForThisMetaverse(_contract, type(IMetaversePlugin).interfaceId),
             "Metaverse: the address does not belong to a valid plug-in contract for this metaverse"
         );
         require(
@@ -458,20 +446,21 @@ contract Metaverse is Ownable, IMetaverse {
     }
 
     /**
-     * Tells whether an address is a valid brand registry contract for
-     * this metaverse in particular.
+     * Tells whether an address is a valid component, for this metaverse
+     * in particular, of a defined type.
      */
-    function _isBrandRegistryForThisMetaverse(address _registry) private view returns (bool) {
-        return _registry.supportsInterface(type(IBrandRegistry).interfaceId) &&
-            IBrandRegistry(_registry).metaverse() == address(this);
+    function _isComponentForThisMetaverse(address _component, bytes4 _interfaceId) private view returns (bool) {
+        return _component.supportsInterface(type(IMetaverseOwned).interfaceId) &&
+               _component.supportsInterface(_interfaceId) &&
+               IMetaverseOwned(_component).metaverse() == address(this);
     }
 
     /**
-     * Adds a plug-in contract to this metaverse.
+     * Sets the brand registry contract to this metaverse.
      */
-    function setBrandRegistry(address _contract) external onlyAllowed(SET_BRAND_REGISTRY) {
+    function setBrandRegistry(address _contract) external onlyAllowed(DEPLOY) {
         require(
-            _isBrandRegistryForThisMetaverse(_contract),
+            _isComponentForThisMetaverse(_contract, type(IBrandRegistry).interfaceId),
             "Metaverse: the address does not belong to a valid brand registry contract for this metaverse"
         );
         require(
@@ -489,20 +478,11 @@ contract Metaverse is Ownable, IMetaverse {
     }
 
     /**
-     * Tells whether an address is a valid economy system contract for
-     * this metaverse in particular.
+     * Sets the economy contract to this metaverse.
      */
-    function _isEconomyForThisMetaverse(address _economy) private view returns (bool) {
-        return _economy.supportsInterface(type(IEconomy).interfaceId) &&
-            IEconomy(_economy).metaverse() == address(this);
-    }
-
-    /**
-     * Set the economy contract to this metaverse.
-     */
-    function setEconomy(address _contract) external onlyAllowed(SET_ECONOMY) {
+    function setEconomy(address _contract) external onlyAllowed(DEPLOY) {
         require(
-            _isEconomyForThisMetaverse(_contract),
+            _isComponentForThisMetaverse(_contract, type(IEconomy).interfaceId),
             "Metaverse: the address does not belong to a valid economy contract for this metaverse"
         );
         require(
@@ -517,6 +497,20 @@ contract Metaverse is Ownable, IMetaverse {
     modifier onlyEconomy() {
         require(_msgSender() == economy, "Metaverse: the only allowed sender is the economy system");
         _;
+    }
+
+    /**
+     * Sets the sponsor registry contract to this metaverse.
+     */
+    function setSponsorRegistry(address _contract) external onlyAllowed(DEPLOY) {
+        require(
+            _isComponentForThisMetaverse(_contract, type(ISponsorRegistry).interfaceId),
+            "Metaverse: the address does not belong to a valid sponsor registry for this metaverse"
+        );
+        require(
+            sponsorRegistry == address(0), "Metaverse: a sponsor registry is already set into this metaverse"
+        );
+        sponsorRegistry = _contract;
     }
 
     /**

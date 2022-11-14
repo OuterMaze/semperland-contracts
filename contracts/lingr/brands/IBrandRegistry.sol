@@ -7,12 +7,7 @@ import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  * A contract satisfying this interface will have capabilities
  * to query the existing brands' existence or metadata.
  */
-interface IBrandRegistry is IERC165 {
-    /**
-     * The metaverse that will own this brand registry.
-     */
-    function metaverse() external view returns (address);
-
+interface IBrandRegistry {
     /**
      * Assembles the whole metadata for a brand. WARNING: This method
      * will consume a lot of gas if invoked inside a transaction, so

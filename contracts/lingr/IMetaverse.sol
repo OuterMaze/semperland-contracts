@@ -35,6 +35,11 @@ interface IMetaverse is IERC165 {
     function brandRegistry() external view returns (address);
 
     /**
+     * The linked sponsor registry for this metaverse.
+     */
+    function sponsorRegistry() external view returns (address);
+
+    /**
      * The linked economy for this metaverse.
      */
     function economy() external view returns (address);

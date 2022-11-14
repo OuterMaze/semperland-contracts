@@ -11,11 +11,6 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
  */
 interface IEconomy is IERC1155 {
     /**
-     * The metaverse this economy system is created for.
-     */
-    function metaverse() external view returns (address);
-
-    /**
      * Mints a token for a particular account.
      */
     function mintFor(address _to, uint256 _tokenId, uint256 _amount, bytes memory _data) external;

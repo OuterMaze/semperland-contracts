@@ -7,12 +7,13 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IMetaversePlugin.sol";
 import "../../IMetaverse.sol";
+import "../../IMetaverseOwned.sol";
 import "../../brands/IBrandRegistry.sol";
 
 /**
  * This is the base class of a metaverse plug-in.
  */
-abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
+abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin, IMetaverseOwned {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -161,7 +162,9 @@ abstract contract MetaversePlugin is Context, ERC165, IMetaversePlugin {
     /**
      * A metaverse plugin satisfies the IMetaversePlugin and IERC165.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-        return interfaceId == type(IERC165).interfaceId || interfaceId == type(IMetaversePlugin).interfaceId;
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == type(IERC165).interfaceId ||
+               interfaceId == type(IMetaversePlugin).interfaceId ||
+               interfaceId == type(IMetaverseOwned).interfaceId;
     }
 }
