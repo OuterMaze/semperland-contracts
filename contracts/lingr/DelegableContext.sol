@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
-import "./MetaversePlugin.sol";
+import "./IMetaverseOwned.sol";
+import "./IMetaverse.sol";
 
 /**
- * A delegable context plug-in has access to the metaverse
+ * A delegable context trait has access to the metaverse
  * and can help methods to take a signature argument that
  * can, when tested, delegate the gas cost on another party
  * (this, be it the sponsoring mechanism or not).
  */
-abstract contract DelegableContextPlugin is MetaversePlugin {
+abstract contract DelegableContext {
     /**
      * The true sender of this transaction. If set, _msgSender()
      * will contain this value, and msg.sender will be the
@@ -42,7 +43,7 @@ abstract contract DelegableContextPlugin is MetaversePlugin {
      */
     modifier delegable(bytes memory _delegation) {
         if (_delegation.length != 0) {
-            (currentHash, trueSender) = IMetaverse(metaverse).checkSignature(_delegation, timeout);
+            (currentHash, trueSender) = IMetaverse(_metaverse()).checkSignature(_delegation, timeout);
         } else {
             currentHash = 0x0;
             trueSender = address(0);
@@ -58,7 +59,7 @@ abstract contract DelegableContextPlugin is MetaversePlugin {
     modifier sponsorOnly(address _brandId) {
         if (trueSender != address(0)) {
             require(_brandId != address(0), "DelegableContextPlugin: when delegated, the brand must be present");
-            IMetaverse(metaverse).checkSponsoring(msg.sender, _brandId);
+            IMetaverse(_metaverse()).checkSponsoring(msg.sender, _brandId);
         }
         _;
     }
@@ -75,4 +76,9 @@ abstract contract DelegableContextPlugin is MetaversePlugin {
         trueSender = address(0);
         _;
     }
+
+    /**
+     * The metaverse this context relates to.
+     */
+    function _metaverse() internal virtual returns (address);
 }
