@@ -145,4 +145,9 @@ interface IMetaverse is IERC165 {
      * and the stamp is checked against the timeout.
      */
     function checkSignature(bytes memory _delegation, uint256 _timeout) external returns (bytes32, address);
+
+    /**
+     * Checks that a brand is sponsored by a certain sponsor.
+     */
+    function checkSponsoring(address _sponsor, address _brandId) external;
 }

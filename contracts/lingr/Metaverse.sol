@@ -612,4 +612,13 @@ contract Metaverse is Ownable, IMetaverse {
         usedHashes[hash] = true;
         return (hash, signer);
     }
+
+    /**
+     * Checks that a brand is sponsored by a certain sponsor.
+     */
+    function checkSponsoring(address _sponsor, address _brandId) external {
+        ISponsorRegistry registry = ISponsorRegistry(sponsorRegistry);
+        require(registry.sponsors(_sponsor), "Metaverse: the payer is not a sponsor");
+        require(registry.sponsored(_sponsor, _brandId), "Metaverse: the brand is not sponsored by the sponsor");
+    }
 }

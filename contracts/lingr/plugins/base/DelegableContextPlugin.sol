@@ -51,6 +51,19 @@ abstract contract DelegableContextPlugin is MetaversePlugin {
     }
 
     /**
+     * This modifier allows a particular method to act as
+     * sponsor-only. It should only be used after delegable
+     * modifier.
+     */
+    modifier sponsorOnly(address _brandId) {
+        if (trueSender != address(0)) {
+            require(_brandId != address(0), "DelegableContextPlugin: when delegated, the brand must be present");
+            IMetaverse(metaverse).checkSponsoring(msg.sender, _brandId);
+        }
+        _;
+    }
+
+    /**
      * This modifier allows a particular method to act as not
      * delegable. Nevertheless, it is recommended to be used
      * since a previous method, delegable and with a delegation
