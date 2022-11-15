@@ -67,6 +67,12 @@ contract Metaverse is Ownable, IMetaverse {
     address public signatureVerifier;
 
     /**
+     * The already used hashes on signature check. Used to
+     * avoid replay attacks.
+     */
+    mapping(bytes32 => bool) usedHashes;
+
+    /**
      * Types are identified as integer values, and each registered type
      * will have a non-zero responsible address (serving to metadata
      * resolution and also to account for the existence of a given type).
@@ -589,7 +595,7 @@ contract Metaverse is Ownable, IMetaverse {
      * The delegation must be a pack of (sender, stamp, hash, signature),
      * and the stamp is checked against the timeout.
      */
-    function checkSignature(bytes memory _delegation, uint256 _timeout) external view returns (bytes32, address) {
+    function checkSignature(bytes memory _delegation, uint256 _timeout) external returns (bytes32, address) {
         (address expectedSigner, uint256 stamp, bytes32 hash, bytes memory signature) = abi.decode(
             _delegation, (address, uint256, bytes32, bytes)
         );
@@ -600,6 +606,10 @@ contract Metaverse is Ownable, IMetaverse {
             block.timestamp >= stamp - _timeout && block.timestamp <= stamp + _timeout,
             "Metaverse: signature out of time"
         );
+        require(
+            !usedHashes[hash], "Metaverse: delegation already used"
+        );
+        usedHashes[hash] = true;
         return (hash, signer);
     }
 }

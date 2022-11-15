@@ -138,4 +138,11 @@ interface IMetaverse is IERC165 {
      * is its owner.
      */
     function isAllowed(bytes32 _permission, address _sender) external view returns (bool);
+
+    /**
+     * Checks a signature. Returns the validated hash and sender address.
+     * The delegation must be a pack of (sender, stamp, hash, signature),
+     * and the stamp is checked against the timeout.
+     */
+    function checkSignature(bytes memory _delegation, uint256 _timeout) external returns (bytes32, address);
 }
