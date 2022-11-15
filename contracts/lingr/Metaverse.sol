@@ -583,4 +583,23 @@ contract Metaverse is Ownable, IMetaverse {
         permissions[_permission][_user] = _allowed;
         emit PermissionChanged(_permission, _user, _allowed, sender);
     }
+
+    /**
+     * Checks a signature. Returns the validated hash and sender address.
+     * The delegation must be a pack of (sender, stamp, hash, signature),
+     * and the stamp is checked against the timeout.
+     */
+    function checkSignature(bytes memory _delegation, uint256 _timeout) external view returns (bytes32, address) {
+        (address expectedSigner, uint256 stamp, bytes32 hash, bytes memory signature) = abi.decode(
+            _delegation, (address, uint256, bytes32, bytes)
+        );
+
+        address signer = ISignatureVerifier(signatureVerifier).verifySignature(hash, signature);
+        require(signer == expectedSigner, "Metaverse: signature verification failed");
+        require(
+            block.timestamp >= stamp - _timeout && block.timestamp <= stamp + _timeout,
+            "Metaverse: signature out of time"
+        );
+        return (hash, signer);
+    }
 }
