@@ -59,7 +59,7 @@ async function makePaymentOrderURI(
     signMethods
 ) {
     types.requireString("domain", domain);
-    types.requireType('web3.utils.soliditySha3', Function, attributes.getAttr(web3, 'utils.soliditySha3'));
+    types.requireType(Function, 'web3.utils.soliditySha3', attributes.getAttr(web3, 'utils.soliditySha3'));
     types.requireAddress('posAddress', posAddress);
     types.requireUInt256('now', now);
     types.requireUInt256('dueTime', dueTime);
@@ -70,9 +70,11 @@ async function makePaymentOrderURI(
     types.requireArray(types.requireUInt256, 'rewardIds', rewardIds);
     types.requireArray(types.requireUInt256, 'rewardValues', rewardValues);
     signMethodIndex = signMethodIndex || 0;
+    types.requireArray(types.requireInt16, 'signMethodIndex', signMethodIndex);
+    types.requireArray(types.requireType.bind(null, Function), 'signMethods', signMethods);
     signMethods = signMethods || [function(m, acc) {
         return web3.eth.sign(m, acc);
-    }]
+    }];
 
     let dueDate = now.add(dueTime);
     let paymentId = web3.utils.soliditySha3(

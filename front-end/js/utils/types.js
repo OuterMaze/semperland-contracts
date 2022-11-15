@@ -97,7 +97,7 @@ function requireBytes32(field, value) {
  * @param type The type to expect.
  * @param value The value to test.
  */
-function requireType(field, type, value) {
+function requireType(type, field, value) {
     if (!(value instanceof type)) {
         throw new TypeError(
             field + ": the value must be of type " + (type.name || ("<anonymous function: " + type.toString() + ">"))
