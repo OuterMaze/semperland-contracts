@@ -2,6 +2,9 @@ const BrandRegistry = artifacts.require("BrandRegistry");
 const Economy = artifacts.require("Economy");
 const Metaverse = artifacts.require("Metaverse");
 const SampleTokenTransferTracker = artifacts.require("SampleTokenTransferTracker");
+const SimpleECDSASignatureVerifier = artifacts.require("SimpleECDSASignatureVerifier");
+const MetaverseSignatureVerifier = artifacts.require("MetaverseSignatureVerifier");
+const delegates = require("../front-end/js/plug-ins/delegates/delegates.js");
 
 const {
   BN,           // Big Number support
@@ -46,6 +49,7 @@ contract("Metaverse", function (accounts) {
 
     await expectEvent(
       await brandRegistry.registerBrand(
+        "0x",
         "My Brand 1", "My awesome brand 1", "http://example.com/brand1.png", "http://example.com/ico16x16.png",
         "http://example.com/ico32x32.png", "http://example.com/ico64x64.png",
         {from: accounts[1], value: new BN("10000000000000000000")}
@@ -69,15 +73,15 @@ contract("Metaverse", function (accounts) {
     brand2 = web3.utils.toChecksumAddress("0x" + brand2.substr(26));
 
     await expectEvent(
-      await brandRegistry.registerBrandFor(
-        accounts[2],
+      await brandRegistry.registerBrand(
+        "0x",
         "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/ico16x16-2.png",
         "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
-        {from: accounts[0]}
+        {from: accounts[2], value: new BN("10000000000000000000")}
       ), "BrandRegistered", {
         "registeredBy": accounts[2], "brandId": brand2, "name": "My Brand 2",
-        "description": "My awesome brand 2", "price": new BN("0"),
-        "mintedBy": accounts[0]
+        "description": "My awesome brand 2", "price": new BN("10000000000000000000"),
+        "mintedBy": constants.ZERO_ADDRESS
       }
     );
 
