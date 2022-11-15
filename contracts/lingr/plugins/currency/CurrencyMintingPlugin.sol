@@ -194,18 +194,19 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      */
     function mintBrandCurrency(
         bytes memory _delegation,
-        address _to, uint256 _id, uint256 bulks
-    ) public payable delegable(_delegation) onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount {
+        address _to, uint256 _id, uint256 _bulks
+    ) public payable onlyWhenInitialized delegable(_delegation, keccak256(abi.encodePacked(_to, _id, _bulks)))
+      definedCurrency(_id) nonzeroMintAmount {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireBrandScope(scope, BRAND_MANAGE_CURRENCIES);
         if (IMetaverse(metaverse).isAllowed(METAVERSE_GIVE_BRAND_CURRENCIES, msg.sender)) {
             _requireNoPrice("CurrencyDefinitionPlugin: brand currency definition");
         } else {
-            _requireNativeTokenPrice("CurrencyDefinitionPlugin: brand currency definition", currencyMintCost, bulks);
+            _requireNativeTokenPrice("CurrencyDefinitionPlugin: brand currency definition", currencyMintCost, _bulks);
             payable(brandCurrencyMintingEarningsReceiver).transfer(msg.value);
         }
         CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
-            _to, _id, bulks * currencyMintAmount, "paid brand mint"
+            _to, _id, _bulks * currencyMintAmount, "paid brand mint"
         );
     }
 

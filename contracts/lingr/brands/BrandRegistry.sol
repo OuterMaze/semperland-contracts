@@ -304,7 +304,7 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
         bytes memory _delegation,
         string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
-    ) public payable delegable(_delegation)  {
+    ) public payable delegable(_delegation, keccak256(abi.encodePacked(_name, _description, _image)))  {
         address sender = msg.sender;
         if (IMetaverse(metaverse).isAllowed(METAVERSE_MINT_BRAND_FOR, msg.sender)) {
             _requireNoPrice("BrandRegistry: brand registration");
@@ -374,7 +374,8 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
     function updateBrandImage(
         bytes memory _delegation,
         address _brandId, string memory _image
-    ) public delegable(_delegation) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION)
+    ) public delegable(_delegation, keccak256(abi.encodePacked(_brandId, _image)))
+      onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION)
     {
         require(bytes(_image).length != 0, "BrandRegistry: use a non-empty image url");
         brands[_brandId].image = _image;
@@ -390,7 +391,8 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
     function updateBrandChallengeUrl(
         bytes memory _delegation,
         address _brandId, string memory _challengeUrl
-    ) public delegable(_delegation) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
+    ) public delegable(_delegation, keccak256(abi.encodePacked(_brandId, _challengeUrl)))
+      onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].challengeUrl = _challengeUrl;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -404,7 +406,7 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
     function updateBrandIcon16x16Url(
         bytes memory _delegation,
         address _brandId, string memory _icon
-    ) public delegable(_delegation) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
+    ) public delegable(_delegation, keccak256(abi.encodePacked(_brandId, _icon))) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].icon16x16 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -418,7 +420,7 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
     function updateBrandIcon32x32Url(
         bytes memory _delegation,
         address _brandId, string memory _icon
-    ) public delegable(_delegation) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
+    ) public delegable(_delegation, keccak256(abi.encodePacked(_brandId, _icon))) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].icon32x32 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -432,7 +434,8 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
     function updateBrandIcon64x64Url(
         bytes memory _delegation,
         address _brandId, string memory _icon
-    ) public delegable(_delegation) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
+    ) public delegable(_delegation, keccak256(abi.encodePacked(_brandId, _icon)))
+      onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].icon64x64 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -534,7 +537,7 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
     function brandSetPermission(
         bytes memory _delegation,
         address _brandId, bytes32 _permission, address _user, bool _allowed
-    ) public delegable(_delegation) onlyBrandAllowed(_brandId, SUPERUSER) {
+    ) public nonDelegable onlyBrandAllowed(_brandId, SUPERUSER) {
         address owner = brands[_brandId].owner;
         address sender = _msgSender();
         require(_user != address(0), "BrandRegistry: cannot grant a permission to address 0");

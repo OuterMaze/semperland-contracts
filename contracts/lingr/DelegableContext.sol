@@ -41,9 +41,9 @@ abstract contract DelegableContext {
      * This modifier allows a particular method to act as
      * delegable.
      */
-    modifier delegable(bytes memory _delegation) {
+    modifier delegable(bytes memory _delegation, bytes32 _hash) {
         if (_delegation.length != 0) {
-            (currentHash, trueSender) = IMetaverse(_metaverse()).checkSignature(_delegation, timeout);
+            (currentHash, trueSender) = IMetaverse(_metaverse()).checkSignature(_delegation, _hash, timeout);
         } else {
             currentHash = 0x0;
             trueSender = address(0);

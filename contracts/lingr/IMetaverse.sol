@@ -144,7 +144,8 @@ interface IMetaverse is IERC165 {
      * The delegation must be a pack of (sender, stamp, hash, signature),
      * and the stamp is checked against the timeout.
      */
-    function checkSignature(bytes memory _delegation, uint256 _timeout) external returns (bytes32, address);
+    function checkSignature(bytes memory _delegation, bytes32 _argsHash, uint256 _timeout)
+        external returns (bytes32, address);
 
     /**
      * Checks that a brand is sponsored by a certain sponsor.

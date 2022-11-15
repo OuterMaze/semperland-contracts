@@ -49,7 +49,7 @@ contract("Metaverse", function (accounts) {
 
     await expectEvent(
       await brandRegistry.registerBrand(
-        "0x",
+        delegates.NO_DELEGATE,
         "My Brand 1", "My awesome brand 1", "http://example.com/brand1.png", "http://example.com/ico16x16.png",
         "http://example.com/ico32x32.png", "http://example.com/ico64x64.png",
         {from: accounts[1], value: new BN("10000000000000000000")}
@@ -74,7 +74,7 @@ contract("Metaverse", function (accounts) {
 
     await expectEvent(
       await brandRegistry.registerBrand(
-        "0x",
+        delegates.NO_DELEGATE,
         "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/ico16x16-2.png",
         "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
         {from: accounts[2], value: new BN("10000000000000000000")}
