@@ -10,13 +10,14 @@ import "../IMetaverse.sol";
 import "../IMetaverseOwned.sol";
 import "../economy/IEconomy.sol";
 import "../../NativePayable.sol";
+import "../DelegableContext.sol";
 
 /**
  * A Brand registry will keep track of the brands being registered.
  * Those brands will hold the metadata, and this trait will hold
  * the mean to register such brand with its metadata.
  */
-contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwned, ERC165 {
+contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwned, ERC165, DelegableContext {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -202,7 +203,7 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
      * Sets the new brand registration cost.
      */
     function setBrandRegistrationCost(uint256 _newCost) public
-        onlyMetaverseAllowed(METAVERSE_MANAGE_REGISTRATION_SETTINGS)
+        nonDelegable onlyMetaverseAllowed(METAVERSE_MANAGE_REGISTRATION_SETTINGS)
     {
         require(
             _newCost == 0 || _newCost >= (1 ether) / 100,
@@ -216,7 +217,7 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
      * Set the new brand registration earnings receiver.
      */
     function setBrandRegistrationEarningsReceiver(address _newReceiver) public
-        onlyMetaverseAllowed(METAVERSE_MANAGE_REGISTRATION_SETTINGS)
+        nonDelegable onlyMetaverseAllowed(METAVERSE_MANAGE_REGISTRATION_SETTINGS)
     {
         require(
             _newReceiver != address(0),
@@ -300,9 +301,12 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
      * inline documentation.
      */
     function registerBrand(
+        bytes memory _delegation,
         string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
-    ) public payable hasNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost, 1) {
+    ) public payable delegable(_delegation)
+      // TODO change this hasNativeTokenPrice, or review if a change is needed.
+      hasNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost, 1) {
         require(
             brandEarningsReceiver != address(0),
             "BrandRegistry: brand registration is disabled since no setup is done for the earnings receiver"
@@ -311,20 +315,6 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
             _msgSender(), address(0), _name, _description, _image, _icon16x16, _icon32x32, _icon64x64, false
         );
         payable(brandEarningsReceiver).transfer(msg.value);
-    }
-
-    /**
-     * Registers a new brand for free, for a specific owner. This requires
-     * a special permission, which is metaverse-wide, and must be used only
-     * in specific given cases.
-     */
-    function registerBrandFor(
-        address owner,
-        string memory _name, string memory _description, string memory _image,
-        string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
-    ) public onlyMetaverseAllowed(METAVERSE_MINT_BRAND_FOR) {
-        require(owner != address(0), "BrandRegistry: a brand cannot be minted for owner address 0");
-        _registerBrand(owner, _msgSender(), _name, _description, _image, _icon16x16, _icon32x32, _icon64x64, false);
     }
 
     /**
@@ -340,7 +330,7 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
      * Updates whether a brand is socially committed or not.
      */
     function updateBrandSocialCommitment(address _brandId, bool _committed) public
-        onlyMetaverseAllowed(METAVERSE_SET_BRAND_COMMITMENT)
+        nonDelegable onlyMetaverseAllowed(METAVERSE_SET_BRAND_COMMITMENT)
     {
         // Require the flag to exist.
         address owner = brands[_brandId].owner;
@@ -377,8 +367,10 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
      * empty or a valid URL, or metadata might fail to be assembled
      * into valid JSON.
      */
-    function updateBrandImage(address _brandId, string memory _image) public
-        onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION)
+    function updateBrandImage(
+        bytes memory _delegation,
+        address _brandId, string memory _image
+    ) public delegable(_delegation) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION)
     {
         require(bytes(_image).length != 0, "BrandRegistry: use a non-empty image url");
         brands[_brandId].image = _image;
@@ -392,8 +384,9 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
      * into valid JSON.
      */
     function updateBrandChallengeUrl(
+        bytes memory _delegation,
         address _brandId, string memory _challengeUrl
-    ) public onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
+    ) public delegable(_delegation) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].challengeUrl = _challengeUrl;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -405,8 +398,9 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
      * into valid JSON.
      */
     function updateBrandIcon16x16Url(
+        bytes memory _delegation,
         address _brandId, string memory _icon
-    ) public onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
+    ) public delegable(_delegation) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].icon16x16 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -418,8 +412,9 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
      * into valid JSON.
      */
     function updateBrandIcon32x32Url(
+        bytes memory _delegation,
         address _brandId, string memory _icon
-    ) public onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
+    ) public delegable(_delegation) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].icon32x32 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -431,8 +426,9 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
      * into valid JSON.
      */
     function updateBrandIcon64x64Url(
+        bytes memory _delegation,
         address _brandId, string memory _icon
-    ) public onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
+    ) public delegable(_delegation) onlyBrandAllowed(_brandId, BRAND_AESTHETICS_EDITION) {
         brands[_brandId].icon64x64 = _icon;
         emit BrandUpdated(_msgSender(), _brandId);
     }
@@ -531,9 +527,10 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
      * approved operators, or allowed superusers. However, superuser cannot
      * set, in particular, the SUPERUSER permission itself.
      */
-    function brandSetPermission(address _brandId, bytes32 _permission, address _user, bool _allowed) public
-        onlyBrandAllowed(_brandId, SUPERUSER)
-    {
+    function brandSetPermission(
+        bytes memory _delegation,
+        address _brandId, bytes32 _permission, address _user, bool _allowed
+    ) public delegable(_delegation) onlyBrandAllowed(_brandId, SUPERUSER) {
         address owner = brands[_brandId].owner;
         address sender = _msgSender();
         require(_user != address(0), "BrandRegistry: cannot grant a permission to address 0");
@@ -543,5 +540,12 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
         );
         brandPermissions[_brandId][_permission][_user] = _allowed;
         emit BrandPermissionChanged(_brandId, _permission, _user, _allowed, sender);
+    }
+
+    /**
+     * Implements the way for the delegable context to return a metaverse.
+     */
+    function _metaverse() internal override returns (address) {
+        return metaverse;
     }
 }
