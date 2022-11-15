@@ -304,9 +304,13 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
         bytes memory _delegation,
         string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
-    ) public payable delegable(_delegation)
-      // TODO change this hasNativeTokenPrice, or review if a change is needed.
-      hasNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost, 1) {
+    ) public payable delegable(_delegation)  {
+        address sender = msg.sender;
+        if (IMetaverse(metaverse).isAllowed(METAVERSE_MINT_BRAND_FOR, msg.sender)) {
+            _requireNoPrice("BrandRegistry: brand registration");
+        } else {
+            _requireNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost, 1);
+        }
         require(
             brandEarningsReceiver != address(0),
             "BrandRegistry: brand registration is disabled since no setup is done for the earnings receiver"
@@ -351,7 +355,7 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
      * internally, when the actual brand transfer is done (brands
      * can only be transferred, but never burnt).
      */
-    function onBrandOwnerChanged(address _brandId, address _newOwner) external onlyMetaverse {
+    function onBrandOwnerChanged(address _brandId, address _newOwner) external nonDelegable onlyMetaverse {
         if (brands[_brandId].owner != address(0)) brands[_brandId].owner = _newOwner;
     }
 
@@ -545,7 +549,7 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
     /**
      * Implements the way for the delegable context to return a metaverse.
      */
-    function _metaverse() internal override returns (address) {
+    function _metaverse() internal view override returns (address) {
         return metaverse;
     }
 }

@@ -8,6 +8,7 @@ import "../base/FTTypeCheckingPlugin.sol";
 import "../base/FTMintingPlugin.sol";
 import "../base/TokenBurningPlugin.sol";
 import "./CurrencyDefinitionPlugin.sol";
+import "../../DelegableContext.sol";
 
 /**
  * This contract is the "minting" part of the Currency feature.
@@ -15,7 +16,7 @@ import "./CurrencyDefinitionPlugin.sol";
  * mint operations for plug-ins, brands or metaverse managers.
  */
 contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckingPlugin,
-    FTMintingPlugin, TokenBurningPlugin {
+    FTMintingPlugin, TokenBurningPlugin, DelegableContext {
     /**
      * The address of the related currency definition plug-in.
      */
@@ -107,8 +108,8 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     /**
      * Set the new brand currency minting earnings receiver.
      */
-    function setBrandCurrencyMintingEarningsReceiver(address _newReceiver)
-        public onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+    function setBrandCurrencyMintingEarningsReceiver(address _newReceiver) public
+        nonDelegable onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         require(
             _newReceiver != address(0),
@@ -128,7 +129,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * Sets the currency mint cost.
      */
     function setCurrencyMintCost(uint256 newCost) public
-        onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+        nonDelegable onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         currencyMintCost = newCost;
         emit CurrencyMintCostUpdated(_msgSender(), newCost);
@@ -145,7 +146,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * Sets the currency mint amount.
      */
     function setCurrencyMintAmount(uint256 newAmount) public
-        onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+        nonDelegable onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         currencyMintAmount = newAmount;
         emit CurrencyMintAmountUpdated(_msgSender(), newAmount);
@@ -176,7 +177,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * plug-ins in the same metaverse are allowed to use this method.
      */
     function mintSystemCurrency(address _to, uint256 _id, uint256 _bulks)
-        public onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount onlyPlugin
+        public onlyWhenInitialized nonDelegable definedCurrency(_id) nonzeroMintAmount onlyPlugin
     {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireSystemScope(scope, 0x0);
@@ -191,32 +192,20 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * defined for the respective brands. This feature can be used at sole
      * discretion of the brand users, and has a fee.
      */
-    function mintBrandCurrency(address _to, uint256 _id, uint256 bulks)
-        public payable onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount
-        hasNativeTokenPrice("CurrencyMintingPlugin: minting (for authorized brand)", currencyMintCost, bulks)
-    {
+    function mintBrandCurrency(
+        bytes memory _delegation,
+        address _to, uint256 _id, uint256 bulks
+    ) public payable delegable(_delegation) onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireBrandScope(scope, BRAND_MANAGE_CURRENCIES);
-        payable(brandCurrencyMintingEarningsReceiver).transfer(msg.value);
+        if (IMetaverse(metaverse).isAllowed(METAVERSE_GIVE_BRAND_CURRENCIES, msg.sender)) {
+            _requireNoPrice("CurrencyDefinitionPlugin: brand currency definition");
+        } else {
+            _requireNativeTokenPrice("CurrencyDefinitionPlugin: brand currency definition", currencyMintCost, bulks);
+            payable(brandCurrencyMintingEarningsReceiver).transfer(msg.value);
+        }
         CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
             _to, _id, bulks * currencyMintAmount, "paid brand mint"
-        );
-    }
-
-    /**
-     * This is a mean granted to metaverse-allowed users to mint any brand
-     * currency to any user. This feature can be used at sole discretion of
-     * the admins, but typically after coordinating with brand-allowed users.
-     */
-    function mintBrandCurrencyFor(uint256 _id, uint256 bulks)
-        public onlyWhenInitialized definedCurrency(_id) nonzeroMintAmount
-        onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES)
-    {
-        address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
-        _requireBrandScope(scope, 0x0);
-        require(bulks != 0, "CurrencyMintingPlugin: minting (brand scope) issued with no units");
-        CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
-            scope, _id, bulks * currencyMintAmount, "gifted brand mint"
         );
     }
 
@@ -226,7 +215,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      */
     function mintBEAT(address _to, uint256 bulks)
         public onlyWhenInitialized nonzeroMintAmount
-        onlyMetaverseAllowed(METAVERSE_MINT_BEAT)
+        nonDelegable onlyMetaverseAllowed(METAVERSE_MINT_BEAT)
     {
         require(bulks != 0, "CurrencyMintingPlugin: BEAT minting issued with no units");
         uint256 BEATType = CurrencyDefinitionPlugin(definitionPlugin).BEATType();
@@ -276,7 +265,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      */
     function onERC1155Received(
         address operator, address from, uint256 id, uint256 value, bytes calldata
-    ) external onlyEconomy returns (bytes4) {
+    ) external nonDelegable onlyEconomy returns (bytes4) {
         _receiveToken(operator, from, id, value);
         return 0xf23a6e61;
     }
@@ -288,7 +277,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     function onERC1155BatchReceived(
         address operator, address from, uint256[] calldata ids, uint256[] calldata values,
         bytes calldata
-    ) external onlyEconomy returns (bytes4) {
+    ) external nonDelegable onlyEconomy returns (bytes4) {
         uint256 length = ids.length;
         for(uint256 index = 0; index < length; index++) {
             _receiveToken(operator, from, ids[index], values[index]);
@@ -305,5 +294,12 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
         CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
             _msgSender(), WMATICType, msg.value, "Currency wrapping"
         );
+    }
+
+    /**
+     * Implements the way for the delegable context to return a metaverse.
+     */
+    function _metaverse() internal view override returns (address) {
+        return metaverse;
     }
 }

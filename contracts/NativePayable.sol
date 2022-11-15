@@ -8,17 +8,30 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  */
 abstract contract NativePayable {
     /**
-     * Requires an exact payment on the underlying method.
+     * Requires a certain native token price.
      */
-    modifier hasNativeTokenPrice(string memory concept, uint256 price, uint256 factor) {
-        require(price != 0, string(abi.encodePacked(concept, " is currently disabled (no price is set)")));
-        require(factor != 0, string(abi.encodePacked(concept, " issued with no units to purchase")));
-        price = price * factor;
+    function _requireNativeTokenPrice(string memory _concept, uint256 _price, uint256 _factor) internal {
+        if (_price == 0) {
+            revert(string(abi.encodePacked(_concept, " is currently disabled (no price is set)")));
+        }
+        if (_factor == 0) {
+            revert(string(abi.encodePacked(_concept, " issued with no units to purchase")));
+        }
+        uint256 total = _price * _factor;
         uint256 value = msg.value;
-        require(value == price, string(abi.encodePacked(
-            concept, " requires an exact payment of ", Strings.toString(price), " but ",
-            Strings.toString(value), " was given"
-        )));
-        _;
+        if (value != total) {
+            revert(string(abi.encodePacked(
+                _concept, " requires an exact payment of ", Strings.toString(total), " but ",
+                Strings.toString(value), " was given"
+            )));
+        }
+    }
+
+    function _requireNoPrice(string memory _concept) internal {
+        if (msg.value != 0) {
+            revert(string(abi.encodePacked(
+                _concept, " requires no payment in this context"
+            )));
+        }
     }
 }

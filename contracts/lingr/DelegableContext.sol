@@ -80,5 +80,5 @@ abstract contract DelegableContext {
     /**
      * The metaverse this context relates to.
      */
-    function _metaverse() internal virtual returns (address);
+    function _metaverse() internal view virtual returns (address);
 }

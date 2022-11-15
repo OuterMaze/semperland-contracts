@@ -7,6 +7,7 @@ import "../base/FTDefiningPlugin.sol";
 import "../base/FTTypeCheckingPlugin.sol";
 import "../base/FTMintingPlugin.sol";
 import "../base/TokenBurningPlugin.sol";
+import "../../DelegableContext.sol";
 
 /**
  * This contract is the "definition" part of the Currency feature.
@@ -16,7 +17,7 @@ import "../base/TokenBurningPlugin.sol";
  * or allowed user is free of charge).
  */
 contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeCheckingPlugin,
-    FTMintingPlugin {
+    FTMintingPlugin, DelegableContext {
     /**
      * The address that will receive earnings from currency
      * definition operations (executed by brand users which
@@ -254,7 +255,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Sets the currency definition cost.
      */
     function setCurrencyDefinitionCost(uint256 newCost) public
-        onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+        nonDelegable onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         currencyDefinitionCost = newCost;
         emit CurrencyDefinitionCostUpdated(_msgSender(), newCost);
@@ -270,7 +271,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Set the new brand currency actions earnings receiver.
      */
     function setBrandCurrencyDefinitionEarningsReceiver(address _newReceiver) public
-        onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
+        nonDelegable onlyMetaverseAllowed(METAVERSE_MANAGE_CURRENCIES_SETTINGS)
     {
         require(
             _newReceiver != address(0),
@@ -376,36 +377,20 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * that are authorized inside a brand, and has an associated cost.
      */
     function defineBrandCurrency(
-        address _brandId, string memory _name, string memory _description,
-        string memory _image, string memory _icon16x16, string memory _icon32x32,
-        string memory _icon64x64, string memory _color
-    ) public payable onlyWhenInitialized onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES)
-      hasNativeTokenPrice("CurrencyDefinitionPlugin: brand currency definition", currencyDefinitionCost, 1) {
+        bytes memory _delegation,
+        address _brandId, string memory _name, string memory _description, string memory _image
+    ) public payable onlyWhenInitialized delegable(_delegation) onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES) {
+        if (IMetaverse(metaverse).isAllowed(METAVERSE_GIVE_BRAND_CURRENCIES, msg.sender)) {
+            _requireNoPrice("CurrencyDefinitionPlugin: brand currency definition");
+        } else {
+            _requireNativeTokenPrice("CurrencyDefinitionPlugin: brand currency definition", currencyDefinitionCost, 1);
+            payable(brandCurrencyDefinitionEarningsReceiver).transfer(msg.value);
+        }
         CurrencyMetadata memory metadata = CurrencyMetadata({
-            registered: true, name: _name, description: _description, color: _color,
-            image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
-            icon64x64: _icon64x64
+            registered: true, name: _name, description: _description, color: "#ffd700",
+            image: _image, icon16x16: "", icon32x32: "", icon64x64: ""
         });
         _defineBrandCurrency(_brandId, msg.value, msg.sender, metadata);
-        payable(brandCurrencyDefinitionEarningsReceiver).transfer(msg.value);
-    }
-
-    /**
-     * Defines a new brand currency. This is meant to be called by users
-     * that are authorized by the metaverse (defining brand currencies
-     * for an arbitrary brand), and this operation has no cost.
-     */
-    function defineBrandCurrencyFor(
-        address _brandId, string memory _name, string memory _description,
-        string memory _image, string memory _icon16x16, string memory _icon32x32,
-        string memory _icon64x64, string memory _color
-    ) public onlyWhenInitialized onlyMetaverseAllowed(METAVERSE_GIVE_BRAND_CURRENCIES) {
-        CurrencyMetadata memory metadata = CurrencyMetadata({
-            registered: true, name: _name, description: _description, color: _color,
-            image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
-            icon64x64: _icon64x64
-        });
-        _defineBrandCurrency(_brandId, 0, msg.sender, metadata);
     }
 
     /**
@@ -425,8 +410,9 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Updates the image in a system / brand currency.
      */
-    function setCurrencyImage(uint256 _id, string memory _image)
-        public onlyWhenInitialized definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
+    function setCurrencyImage(bytes memory _delegation, uint256 _id, string memory _image)
+        public onlyWhenInitialized delegable(_delegation)
+        definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
         currencies[_id].image = _image;
@@ -435,8 +421,9 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Updates the color in a system / brand currency.
      */
-    function setCurrencyColor(uint256 _id, string memory _color)
-        public onlyWhenInitialized definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
+    function setCurrencyColor(bytes memory _delegation, uint256 _id, string memory _color)
+        public onlyWhenInitialized delegable(_delegation)
+        definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
         currencies[_id].color = _color;
@@ -445,8 +432,9 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Updates the 16x16 icon in a system / brand currency.
      */
-    function setCurrencyIcon16x16(uint256 _id, string memory _icon16x16)
-        public onlyWhenInitialized definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
+    function setCurrencyIcon16x16(bytes memory _delegation, uint256 _id, string memory _icon16x16)
+        public onlyWhenInitialized delegable(_delegation)
+        definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
         currencies[_id].icon16x16 = _icon16x16;
@@ -455,8 +443,9 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Updates the 32x32 icon in a system / brand currency.
      */
-    function setCurrencyIcon32x32(uint256 _id, string memory _icon32x32)
-        public onlyWhenInitialized definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
+    function setCurrencyIcon32x32(bytes memory _delegation, uint256 _id, string memory _icon32x32)
+        public onlyWhenInitialized delegable(_delegation)
+        definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
         currencies[_id].icon32x32 = _icon32x32;
@@ -465,8 +454,9 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Updates the 64x64 icon in a brand currency.
      */
-    function setCurrencyIcon64x64(uint256 _id, string memory _icon64x64)
-        public onlyWhenInitialized definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
+    function setCurrencyIcon64x64(bytes memory _delegation, uint256 _id, string memory _icon64x64)
+        public onlyWhenInitialized delegable(_delegation)
+        definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
         currencies[_id].icon64x64 = _icon64x64;
@@ -475,7 +465,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Sets the minting plug-in.
      */
-    function setMintingPlugin(address _plugIn) external onlyMetaverseAllowed(DEPLOY) {
+    function setMintingPlugin(address _plugIn) external nonDelegable onlyMetaverseAllowed(DEPLOY) {
         require(
             mintingPlugin == address(0),
             "CurrencyMintingPlugin: minting plug-in already set"
@@ -494,7 +484,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Mints a currency. Only the minting plug-in can invoke this method.
      */
-    function mintCurrency(address _to, uint256 _id, uint256 _amount, bytes memory _data) external {
+    function mintCurrency(address _to, uint256 _id, uint256 _amount, bytes memory _data) nonDelegable external {
         require(
             mintingPlugin != address(0),
             "CurrencyMintingPlugin: the minting plugin is not set"
@@ -504,5 +494,12 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
             "CurrencyDefinitionPlugin: only the minting plugin is allowed to mint currencies"
         );
         _mintFTFor(_to, _id, _amount, _data);
+    }
+
+    /**
+     * Implements the way for the delegable context to return a metaverse.
+     */
+    function _metaverse() internal view override returns (address) {
+        return metaverse;
     }
 }
