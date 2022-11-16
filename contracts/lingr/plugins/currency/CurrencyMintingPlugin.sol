@@ -195,7 +195,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     function mintBrandCurrency(
         bytes memory _delegation,
         address _to, uint256 _id, uint256 _bulks
-    ) public payable onlyWhenInitialized delegable(_delegation, keccak256(abi.encodePacked(_to, _id, _bulks)))
+    ) public payable onlyWhenInitialized delegable(_delegation, _delegation.length == 0 ? bytes32(0) : keccak256(abi.encodePacked(_to, _id, _bulks)))
       definedCurrency(_id) nonzeroMintAmount {
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireBrandScope(scope, BRAND_MANAGE_CURRENCIES);

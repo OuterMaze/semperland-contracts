@@ -380,7 +380,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         bytes memory _delegation,
         address _brandId, string memory _name, string memory _description, string memory _image
     ) public payable onlyWhenInitialized
-      delegable(_delegation, keccak256(abi.encodePacked(_brandId, _name, _description, _image)))
+      delegable(_delegation, _delegation.length == 0 ? bytes32(0) : keccak256(abi.encodePacked(_brandId, _name, _description, _image)))
       onlyBrandAllowed(_brandId, BRAND_MANAGE_CURRENCIES) {
         if (IMetaverse(metaverse).isAllowed(METAVERSE_GIVE_BRAND_CURRENCIES, msg.sender)) {
             _requireNoPrice("CurrencyDefinitionPlugin: brand currency definition");
@@ -413,7 +413,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Updates the image in a system / brand currency.
      */
     function setCurrencyImage(bytes memory _delegation, uint256 _id, string memory _image)
-        public onlyWhenInitialized delegable(_delegation, keccak256(abi.encodePacked(_id, _image)))
+        public onlyWhenInitialized delegable(_delegation, _delegation.length == 0 ? bytes32(0) : keccak256(abi.encodePacked(_id, _image)))
         definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
@@ -424,7 +424,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Updates the color in a system / brand currency.
      */
     function setCurrencyColor(bytes memory _delegation, uint256 _id, string memory _color)
-        public onlyWhenInitialized delegable(_delegation, keccak256(abi.encodePacked(_id, _color)))
+        public onlyWhenInitialized delegable(_delegation, _delegation.length == 0 ? bytes32(0) : keccak256(abi.encodePacked(_id, _color)))
         definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
@@ -435,7 +435,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Updates the 16x16 icon in a system / brand currency.
      */
     function setCurrencyIcon16x16(bytes memory _delegation, uint256 _id, string memory _icon16x16)
-        public onlyWhenInitialized delegable(_delegation, keccak256(abi.encodePacked(_id, _icon16x16)))
+        public onlyWhenInitialized delegable(_delegation, _delegation.length == 0 ? bytes32(0) : keccak256(abi.encodePacked(_id, _icon16x16)))
         definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
@@ -446,7 +446,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Updates the 32x32 icon in a system / brand currency.
      */
     function setCurrencyIcon32x32(bytes memory _delegation, uint256 _id, string memory _icon32x32)
-        public onlyWhenInitialized delegable(_delegation, keccak256(abi.encodePacked(_id, _icon32x32)))
+        public onlyWhenInitialized delegable(_delegation, _delegation.length == 0 ? bytes32(0) : keccak256(abi.encodePacked(_id, _icon32x32)))
         definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
@@ -457,7 +457,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      * Updates the 64x64 icon in a brand currency.
      */
     function setCurrencyIcon64x64(bytes memory _delegation, uint256 _id, string memory _icon64x64)
-        public onlyWhenInitialized delegable(_delegation, keccak256(abi.encodePacked(_id, _icon64x64)))
+        public onlyWhenInitialized delegable(_delegation, _delegation.length == 0 ? bytes32(0) : keccak256(abi.encodePacked(_id, _icon64x64)))
         definedCurrency(_id, METAVERSE_MANAGE_CURRENCIES_SETTINGS, BRAND_MANAGE_CURRENCIES)
         emitCurrencyUpdate(_id)
     {
