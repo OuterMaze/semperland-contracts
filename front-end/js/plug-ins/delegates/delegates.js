@@ -31,12 +31,12 @@ async function makeDelegate(web3, signer, args, signMethodIndex, signMethods) {
     types.requireType(Function, 'web3.utils.soliditySha3', attributes.getAttr(web3, 'utils.soliditySha3'));
     types.requireAddress('signer', signer);
     types.requireArray(() => {}, 'args', args);
-    types.requireArray(types.requireInt16, 'signMethodIndex', signMethodIndex);
+    types.requireInt16('signMethodIndex', signMethodIndex);
     types.requireArray(types.requireType.bind(null, Function), 'signMethods', signMethods);
 
     let now = dates.timestamp();
     let messageHash = web3.utils.soliditySha3(
-        {type: 'bytes32', value: web3.utils.soliditySha3(args)},
+        {type: 'bytes32', value: web3.utils.soliditySha3.apply(null, args)},
         {type: 'uint256', value: now},
     );
 
