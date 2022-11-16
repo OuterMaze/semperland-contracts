@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
+import "@openzeppelin/contracts/utils/Context.sol";
 import "./IMetaverseOwned.sol";
 import "./IMetaverse.sol";
 
@@ -10,7 +11,7 @@ import "./IMetaverse.sol";
  * can, when tested, delegate the gas cost on another party
  * (this, be it the sponsoring mechanism or not).
  */
-abstract contract DelegableContext {
+abstract contract DelegableContext is Context {
     /**
      * The true sender of this transaction. If set, _msgSender()
      * will contain this value, and msg.sender will be the
@@ -75,6 +76,13 @@ abstract contract DelegableContext {
         currentHash = 0x0;
         trueSender = address(0);
         _;
+    }
+
+    /**
+     * Returns either the trueSender or the base msg.sender.
+     */
+    function _msgSender() internal virtual override view returns (address) {
+        return trueSender != address(0) ? trueSender : msg.sender;
     }
 
     /**

@@ -23,22 +23,32 @@ const {
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 contract("Metaverse", function (accounts) {
-  var economy = null;
-  var metaverse = null;
-  var brandRegistry = null;
-  var sampleTokenTransferTracker = null;
-  var brand1 = null;
-  var brand2 = null;
+  let economy = null;
+  let metaverse = null;
+  let brandRegistry = null;
+  let sampleTokenTransferTracker = null;
+  let simpleSignatureVerifier = null;
+  let signatureVerifier = null;
+  let brand1 = null;
+  let brand2 = null;
 
   before(async function () {
     metaverse = await Metaverse.new({from: accounts[0]});
     economy = await Economy.new(metaverse.address, {from: accounts[0]})
     brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], {from: accounts[0]});
     sampleTokenTransferTracker = await SampleTokenTransferTracker.new(metaverse.address, {from: accounts[0]});
+    simpleSignatureVerifier = await SimpleECDSASignatureVerifier.new({from: accounts[0]});
+    signatureVerifier = await MetaverseSignatureVerifier.new(
+      metaverse.address, ["ECDSA"], [
+        (await SimpleECDSASignatureVerifier.new({ from: accounts[0] })).address
+      ], {from: accounts[0]}
+    );
     await metaverse.setEconomy(economy.address, {from: accounts[0]});
     await metaverse.setBrandRegistry(brandRegistry.address, {from: accounts[0]});
+    await metaverse.setSignatureVerifier(signatureVerifier.address, {from: accounts[0]});
     await brandRegistry.setBrandRegistrationCost(new BN("10000000000000000000"), {from: accounts[0]});
     await metaverse.addPlugin(sampleTokenTransferTracker.address, {from: accounts[0]});
+    await signatureVerifier.setSignatureMethodAllowance(0, true, {from: accounts[2]});
   });
 
   it("must successfully create a brand (account 1 will be operator of brand 1)", async function () {
@@ -74,14 +84,18 @@ contract("Metaverse", function (accounts) {
 
     await expectEvent(
       await brandRegistry.registerBrand(
-        delegates.NO_DELEGATE,
+        await delegates.makeDelegate(web3, accounts[2], [
+          {type: "string", value: "My Brand 2"},
+          {type: "string", value: "My awesome brand 2"},
+          {type: "string", value: "http://example.com/brand2.png"}
+        ]),
         "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/ico16x16-2.png",
         "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
-        {from: accounts[2], value: new BN("10000000000000000000")}
+        {from: accounts[0]}
       ), "BrandRegistered", {
         "registeredBy": accounts[2], "brandId": brand2, "name": "My Brand 2",
-        "description": "My awesome brand 2", "price": new BN("10000000000000000000"),
-        "mintedBy": constants.ZERO_ADDRESS
+        "description": "My awesome brand 2", "price": new BN("0"),
+        "mintedBy": accounts[0]
       }
     );
 

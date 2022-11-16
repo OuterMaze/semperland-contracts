@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
-import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
@@ -17,7 +16,7 @@ import "../DelegableContext.sol";
  * Those brands will hold the metadata, and this trait will hold
  * the mean to register such brand with its metadata.
  */
-contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwned, ERC165, DelegableContext {
+contract BrandRegistry is DelegableContext, NativePayable, IBrandRegistry, IMetaverseOwned, ERC165 {
     /**
      * Addresses can check for ERC165 compliance by using this
      * embeddable library.
@@ -188,6 +187,7 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
             "BrandRegistry: the owner contract must implement IMetaverse"
         );
         metaverse = _metaverse;
+        timeout = 120;
         brandEarningsReceiver = _brandEarningsReceiver;
     }
 
@@ -277,7 +277,7 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
             )
         ))));
         require(
-            brandId != address(0),
+            brandId != address(0) && brands[brandId].owner == address(0),
             "BrandRegistry: this brand cannot be minted now - try again later"
         );
 
@@ -305,7 +305,6 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
         string memory _name, string memory _description, string memory _image,
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
     ) public payable delegable(_delegation, _delegation.length == 0 ? bytes32(0) : keccak256(abi.encodePacked(_name, _description, _image)))  {
-        address sender = msg.sender;
         if (IMetaverse(metaverse).isAllowed(METAVERSE_MINT_BRAND_FOR, msg.sender)) {
             _requireNoPrice("BrandRegistry: brand registration");
         } else {
@@ -316,7 +315,8 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
             "BrandRegistry: brand registration is disabled since no setup is done for the earnings receiver"
         );
         _registerBrand(
-            _msgSender(), address(0), _name, _description, _image, _icon16x16, _icon32x32, _icon64x64, false
+            _msgSender(), msg.sender == _msgSender() ? address(0) : msg.sender, _name, _description, _image,
+            _icon16x16, _icon32x32, _icon64x64, false
         );
         payable(brandEarningsReceiver).transfer(msg.value);
     }
@@ -537,7 +537,8 @@ contract BrandRegistry is Context, NativePayable, IBrandRegistry, IMetaverseOwne
     function brandSetPermission(
         bytes memory _delegation,
         address _brandId, bytes32 _permission, address _user, bool _allowed
-    ) public nonDelegable onlyBrandAllowed(_brandId, SUPERUSER) {
+    ) public delegable(_delegation, _delegation.length == 0 ? bytes32(0) : keccak256(abi.encodePacked(_brandId, _permission, _user, _allowed)))
+      onlyBrandAllowed(_brandId, SUPERUSER) {
         address owner = brands[_brandId].owner;
         address sender = _msgSender();
         require(_user != address(0), "BrandRegistry: cannot grant a permission to address 0");

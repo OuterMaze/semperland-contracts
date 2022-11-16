@@ -303,4 +303,11 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     function _metaverse() internal view override returns (address) {
         return metaverse;
     }
+
+    /**
+     * The implementation of _msgSender() is the one from DelegableContext.
+     */
+    function _msgSender() internal view virtual override(DelegableContext, Context) returns (address) {
+        return DelegableContext._msgSender();
+    }
 }
