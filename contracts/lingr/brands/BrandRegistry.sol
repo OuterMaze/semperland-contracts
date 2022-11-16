@@ -309,16 +309,16 @@ contract BrandRegistry is DelegableContext, NativePayable, IBrandRegistry, IMeta
             _requireNoPrice("BrandRegistry: brand registration");
         } else {
             _requireNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost, 1);
+            require(
+                brandEarningsReceiver != address(0),
+                "BrandRegistry: brand registration is disabled since no setup is done for the earnings receiver"
+            );
+            payable(brandEarningsReceiver).transfer(msg.value);
         }
-        require(
-            brandEarningsReceiver != address(0),
-            "BrandRegistry: brand registration is disabled since no setup is done for the earnings receiver"
-        );
         _registerBrand(
             _msgSender(), msg.sender == _msgSender() ? address(0) : msg.sender, _name, _description, _image,
             _icon16x16, _icon32x32, _icon64x64, false
         );
-        payable(brandEarningsReceiver).transfer(msg.value);
     }
 
     /**

@@ -1,6 +1,9 @@
 const BrandRegistry = artifacts.require("BrandRegistry");
 const Economy = artifacts.require("Economy");
 const Metaverse = artifacts.require("Metaverse");
+const SimpleECDSASignatureVerifier = artifacts.require("SimpleECDSASignatureVerifier");
+const MetaverseSignatureVerifier = artifacts.require("MetaverseSignatureVerifier");
+const delegates = require("../front-end/js/plug-ins/delegates/delegates.js");
 
 const {
   BN,           // Big Number support
@@ -22,9 +25,10 @@ const {
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 contract("Metaverse", function (accounts) {
-  var economy = null;
-  var metaverse = null;
-  var contract = null;
+  let economy = null;
+  let metaverse = null;
+  let brandRegistry = null;
+  let signatureVerifier = null;
 
   const SUPERUSER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
   const BRAND_EDITOR = web3.utils.soliditySha3("BrandRegistry::Brand::Edit");
@@ -35,9 +39,17 @@ contract("Metaverse", function (accounts) {
   before(async function () {
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
-    contract = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
+    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
+    signatureVerifier = await MetaverseSignatureVerifier.new(
+        metaverse.address, ["ECDSA"], [
+          (await SimpleECDSASignatureVerifier.new({ from: accounts[0] })).address
+        ], {from: accounts[0]}
+    );
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
-    await metaverse.setBrandRegistry(contract.address, { from: accounts[0] });
+    await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
+    await metaverse.setSignatureVerifier(signatureVerifier.address, { from: accounts[0] });
+    await signatureVerifier.setSignatureMethodAllowance(0, true, {from: accounts[1]});
+    await signatureVerifier.setSignatureMethodAllowance(0, true, {from: accounts[2]});
   });
 
   // Tests I need:
@@ -45,7 +57,7 @@ contract("Metaverse", function (accounts) {
   //    Expect the appropriate event.
   it("must allow the account 0 to set the price to 10 ether", async function () {
     await expectEvent(
-      await contract.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[0] }),
+      await brandRegistry.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[0] }),
       "BrandRegistrationCostUpdated", {
         "newCost": new BN("10000000000000000000"), "updatedBy": accounts[0]
       }
@@ -54,7 +66,7 @@ contract("Metaverse", function (accounts) {
 
   // 2. Test the price to be 10 ether.
   it("must have a price of 10 ether", async function() {
-    let cost = await contract.brandRegistrationCost();
+    let cost = await brandRegistry.brandRegistrationCost();
     assert.isTrue(
       cost.cmp(new BN("10000000000000000000")) === 0,
       "The brand registration cost should be 10 ether, but it is: " + cost.toString()
@@ -65,7 +77,7 @@ contract("Metaverse", function (accounts) {
   //    Expect the appropriate event.
   it("must allow the account 0 to set the brand registration price to 2 ether", async function () {
     await expectEvent(
-      await contract.setBrandRegistrationCost(new BN("2000000000000000000"), { from: accounts[0] }),
+      await brandRegistry.setBrandRegistrationCost(new BN("2000000000000000000"), { from: accounts[0] }),
       "BrandRegistrationCostUpdated", {
         "newCost": new BN("2000000000000000000"), "updatedBy": accounts[0]
       }
@@ -74,7 +86,7 @@ contract("Metaverse", function (accounts) {
 
   // 4. Test the price to be 2 ether.
   it("must have a brand registration price of 2 ether", async function() {
-    let cost = await contract.brandRegistrationCost();
+    let cost = await brandRegistry.brandRegistrationCost();
     assert.isTrue(
       cost.cmp(new BN("2000000000000000000")) === 0,
       "The brand registration cost should be 2 ether, but it is: " + cost.toString()
@@ -84,7 +96,7 @@ contract("Metaverse", function (accounts) {
   // 5. This should revert: set a new price of 3 ether, using account 1.
   it("must not allow a brand registration price to account 1", async function () {
     await expectRevert(
-      contract.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[1] }),
+      brandRegistry.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[1] }),
       revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
     )
   });
@@ -92,7 +104,7 @@ contract("Metaverse", function (accounts) {
   // 6. This should revert: set a new price of 0.009 ether, using account 0.
   it("must not allow the brand registration price to be lower than 1", async function () {
     await expectRevert(
-      contract.setBrandRegistrationCost(new BN("9000000000000000"), { from: accounts[0] }),
+      brandRegistry.setBrandRegistrationCost(new BN("9000000000000000"), { from: accounts[0] }),
       revertReason("BrandRegistry: the brand registry cost must not be less than 0.01 native tokens")
     )
   });
@@ -101,12 +113,13 @@ contract("Metaverse", function (accounts) {
   //    Also expect the appropriate events.
   it("must successfully create a brand (account 9 will receive 2 eth)", async function () {
     let hash = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     hash = web3.utils.toChecksumAddress("0x" + hash.substr(26));
 
     await expectEvent(
-      await contract.registerBrand(
+      await brandRegistry.registerBrand(
+        delegates.NO_DELEGATE,
         "My Brand 1", "My awesome brand 1", "http://example.com/brand1.png", "http://example.com/ico16x16.png",
         "http://example.com/ico32x32.png", "http://example.com/ico64x64.png",
         {from: accounts[1], value: new BN("2000000000000000000")}
@@ -129,7 +142,7 @@ contract("Metaverse", function (accounts) {
 
   it("must not allow account 1 to set the earnings receiver", async function() {
     await expectRevert(
-      contract.setBrandRegistrationEarningsReceiver(accounts[8], { from: accounts[1] }),
+      brandRegistry.setBrandRegistrationEarningsReceiver(accounts[8], { from: accounts[1] }),
       revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
     );
   });
@@ -145,7 +158,7 @@ contract("Metaverse", function (accounts) {
 
   it("must allow the account 0 to set the brand registration price to 4 ether", async function () {
     await expectEvent(
-      await contract.setBrandRegistrationEarningsReceiver(accounts[8], { from: accounts[1] }),
+      await brandRegistry.setBrandRegistrationEarningsReceiver(accounts[8], { from: accounts[1] }),
       "BrandRegistrationEarningsReceiverUpdated", {
         "newReceiver": accounts[8], "updatedBy": accounts[1]
       }
@@ -163,7 +176,7 @@ contract("Metaverse", function (accounts) {
 
   it("must not allow account 1 to set the earnings receiver", async function() {
     await expectRevert(
-      contract.setBrandRegistrationEarningsReceiver(accounts[8], { from: accounts[1] }),
+      brandRegistry.setBrandRegistrationEarningsReceiver(accounts[8], { from: accounts[1] }),
       revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
     );
   });
@@ -172,10 +185,11 @@ contract("Metaverse", function (accounts) {
   //    Also another test: Create a new brand (a happy case), using account 1 and spending 1.9 ether.
   it("must not allow to create a brand using another price but 2", async function() {
     await expectRevert(
-      contract.registerBrand(
+      brandRegistry.registerBrand(
+        delegates.NO_DELEGATE,
         "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/ico16x16-2.png",
         "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
-        {from: accounts[1], value: new BN("2000000000000000001")}
+        {from: accounts[1], value: new BN("2000000000000000001"), gas: 500000}
       ),
       revertReason(
         "BrandRegistry: brand registration requires an exact payment of " +
@@ -184,10 +198,11 @@ contract("Metaverse", function (accounts) {
     );
 
     await expectRevert(
-      contract.registerBrand(
+      brandRegistry.registerBrand(
+        delegates.NO_DELEGATE,
         "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/ico16x16-2.png",
         "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
-        {from: accounts[1], value: new BN("1999999999999999999")}
+        {from: accounts[1], value: new BN("1999999999999999999"), gas: 500000}
       ),
       revertReason(
         "BrandRegistry: brand registration requires an exact payment of " +
@@ -198,7 +213,7 @@ contract("Metaverse", function (accounts) {
   // 9. Set a new price o 4 ether, using account 0.
   it("must allow the account 0 to set the brand registration price to 4 ether", async function () {
     await expectEvent(
-      await contract.setBrandRegistrationCost(new BN("4000000000000000000"), { from: accounts[0] }),
+      await brandRegistry.setBrandRegistrationCost(new BN("4000000000000000000"), { from: accounts[0] }),
       "BrandRegistrationCostUpdated", {
         "newCost": new BN("4000000000000000000"), "updatedBy": accounts[0]
       }
@@ -209,12 +224,13 @@ contract("Metaverse", function (accounts) {
   //     Also expect the appropriate events.
   it("must successfully create a brand (account 8 will receive 4 eth)", async function () {
     let hash = web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 2
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 2
     );
     hash = web3.utils.toChecksumAddress("0x" + hash.substr(26));
 
     await expectEvent(
-      await contract.registerBrand(
+      await brandRegistry.registerBrand(
+        delegates.NO_DELEGATE,
         "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/ico16x16-2.png",
         "http://example.com/ico32x32-2.png", "http://example.com/ico64x64-2.png",
         {from: accounts[1], value: new BN("4000000000000000000")}
@@ -239,10 +255,11 @@ contract("Metaverse", function (accounts) {
   //     Also another test: Create a new brand (a happy case), using account 1 and spending 3.9 ether.
   it("must not allow to create a brand using another price but 2", async function() {
     await expectRevert(
-      contract.registerBrand(
+      brandRegistry.registerBrand(
+        delegates.NO_DELEGATE,
         "My Brand 3", "My awesome brand 3", "http://example.com/brand3.png", "http://example.com/ico16x16-3.png",
         "http://example.com/ico32x32-3.png", "http://example.com/ico64x64-3.png",
-        {from: accounts[1], value: new BN("4000000000000000001")}
+        {from: accounts[1], value: new BN("4000000000000000001"), gas: 500000}
       ),
       revertReason(
         "BrandRegistry: brand registration requires an exact payment of " +
@@ -251,10 +268,11 @@ contract("Metaverse", function (accounts) {
     );
 
     await expectRevert(
-      contract.registerBrand(
+      brandRegistry.registerBrand(
+        delegates.NO_DELEGATE,
         "My Brand 3", "My awesome brand 3", "http://example.com/brand3.png", "http://example.com/ico16x16-3.png",
         "http://example.com/ico32x32-3.png", "http://example.com/ico64x64-3.png",
-        {from: accounts[1], value: new BN("3999999999999999999")}
+        {from: accounts[1], value: new BN("3999999999999999999"), gas: 500000}
       ),
       revertReason(
         "BrandRegistry: brand registration requires an exact payment of " +
@@ -266,7 +284,7 @@ contract("Metaverse", function (accounts) {
   // **** Now, let's focus only on the brands (creation and update) validation *****
 
   async function expectMetadata(brandId, payload) {
-    let metadataURI = await contract.brandMetadataURI(brandId);
+    let metadataURI = await brandRegistry.brandMetadataURI(brandId);
     let payloadJSON = JSON.stringify(payload);
     assert.isTrue(
       metadataURI === jsonUrl(payload),
@@ -278,7 +296,7 @@ contract("Metaverse", function (accounts) {
   // 12. Test the JSON metadata for brand 1.
   it("must have the appropriate metadata for brand with id for brand 1", async function() {
     let brandId1 = web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 1
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
 
@@ -317,12 +335,14 @@ contract("Metaverse", function (accounts) {
   // 16. Test the JSON metadata for brand 1 (it must be the same as 14.).
   it("must change the image URL appropriately and reflect it in the metadata", async function() {
     let brandId1 = web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 1
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
 
     await changeAndTest(async function(brandId, user) {
-      return await contract.updateBrandImage(brandId, "http://example.com/brand1-bazinga.png", {from: user});
+      return await brandRegistry.updateBrandImage(
+          delegates.NO_DELEGATE, brandId, "http://example.com/brand1-bazinga.png", {from: user}
+      );
     }, accounts[1], accounts[0], brandId1, {
       "name":"My Brand 1",
       "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
@@ -343,12 +363,15 @@ contract("Metaverse", function (accounts) {
   // 20. Test the JSON metadata for brand 1 (it must be the same as 18.).
   it("must change the challenge URL appropriately and reflect it in the metadata", async function() {
     let brandId1 = web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 1
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
 
     await changeAndTest(async function(brandId, user) {
-      return await contract.updateBrandChallengeUrl(brandId, "http://example.com/challenge-bazinga.json", {from: user});
+      return await brandRegistry.updateBrandChallengeUrl(
+          delegates.NO_DELEGATE, brandId, "http://example.com/challenge-bazinga.json",
+          {from: user}
+      );
     }, accounts[1], accounts[0], brandId1, {
       "name":"My Brand 1",
       "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
@@ -369,12 +392,14 @@ contract("Metaverse", function (accounts) {
   // 24. Test the JSON metadata for brand 1 (it must be the same as 22.).
   it("must change the 16x16 icon URL appropriately and reflect it in the metadata", async function() {
     let brandId1 = web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 1
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
 
     await changeAndTest(async function(brandId, user) {
-      return  await contract.updateBrandIcon16x16Url(brandId, "http://example.com/ico16x16-bazinga.png", {from: user});
+      return  await brandRegistry.updateBrandIcon16x16Url(
+          delegates.NO_DELEGATE, brandId, "http://example.com/ico16x16-bazinga.png", {from: user}
+      );
     }, accounts[1], accounts[0], brandId1, {
       "name":"My Brand 1",
       "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
@@ -395,12 +420,14 @@ contract("Metaverse", function (accounts) {
   // 28. Test the JSON metadata for brand 1 (it must be the same as 26.).
   it("must change the 32x32 icon URL appropriately and reflect it in the metadata", async function() {
     let brandId1 = web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 1
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
 
     await changeAndTest(async function(brandId, user) {
-      return await contract.updateBrandIcon32x32Url(brandId, "http://example.com/ico32x32-bazinga.png", {from: user});
+      return await brandRegistry.updateBrandIcon32x32Url(
+          delegates.NO_DELEGATE, brandId, "http://example.com/ico32x32-bazinga.png", {from: user}
+      );
     }, accounts[1], accounts[0], brandId1, {
       "name":"My Brand 1",
       "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
@@ -421,12 +448,14 @@ contract("Metaverse", function (accounts) {
   // 32. Test the JSON metadata for brand 1 (it must be the same as 30.).
   it("must change the 64x64 icon URL appropriately and reflect it in the metadata", async function() {
     let brandId1 = web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 1
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
 
     await changeAndTest(async function(brandId, user) {
-      return await contract.updateBrandIcon64x64Url(brandId, "http://example.com/ico64x64-bazinga.png", {from: user});
+      return await brandRegistry.updateBrandIcon64x64Url(
+          delegates.NO_DELEGATE, brandId, "http://example.com/ico64x64-bazinga.png", {from: user}
+      );
     }, accounts[1], accounts[0], brandId1, {
       "name":"My Brand 1",
       "description":"My awesome brand 1","image":"http://example.com/brand1-bazinga.png",
@@ -443,40 +472,40 @@ contract("Metaverse", function (accounts) {
 
   it("must consider My Brand 1 as existing", async function() {
     let brandId1 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
     assert.isTrue(
-      await contract.brandExists(brandId1),
+      await brandRegistry.brandExists(brandId1),
       "The brand " + brandId1 + " must exist"
     );
   });
 
   it("must consider My Brand 2 as existing", async function() {
     let brandId2 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 2
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 2
     );
     brandId2 = web3.utils.toChecksumAddress("0x" + brandId2.substr(26));
     assert.isTrue(
-      await contract.brandExists(brandId2),
+      await brandRegistry.brandExists(brandId2),
       "The brand " + brandId2 + " must exist"
     );
   });
 
   it("must consider My Brand 3 as NOT existing", async function() {
     let brandId3 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 3
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 3
     );
     brandId3 = web3.utils.toChecksumAddress("0x" + brandId3.substr(26));
     assert.isTrue(
-      !await contract.brandExists(brandId3),
+      !await brandRegistry.brandExists(brandId3),
       "The brand " + brandId3 + " must NOT exist"
     );
   });
 
   it("must transfer the brand, and only validate the new owner", async function () {
     let brandId1 = "0x" + web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     ).substr(26);
     // A transfer is done, with this brand, to brand 0.
     await economy.safeTransferFrom(
@@ -484,37 +513,41 @@ contract("Metaverse", function (accounts) {
     );
     // The old owner (1) must fail.
     await expectRevert(
-      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[1]}),
+      brandRegistry.updateBrandImage(
+          delegates.NO_DELEGATE, brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[1]}
+      ),
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
     );
     // And the new owner (0) must succeed.
-    await contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[0]});
+    await brandRegistry.updateBrandImage(
+        delegates.NO_DELEGATE, brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[0]}
+    );
   });
 
   it("must not allow the address 1 to set brand social commitment, or to an invalid brand", async function () {
     let brandId1 = "0x" + web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 1
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     ).substr(26);
     let brandId3 = "0x" + web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 3
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 3
     ).substr(26);
 
     await expectRevert(
-      contract.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]}),
+      brandRegistry.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]}),
       revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
     );
     await expectRevert(
-      contract.updateBrandSocialCommitment(brandId3, true, {from: accounts[0]}),
+      brandRegistry.updateBrandSocialCommitment(brandId3, true, {from: accounts[0]}),
       revertReason("BrandRegistry: non-existing brand")
     );
   });
 
   it("must allow the address 0 to set the brand social commitment of 1st brand to true", async function() {
     let brandId1 = "0x" + web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 1
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     ).substr(26);
 
-    await contract.updateBrandSocialCommitment(brandId1, true, {from: accounts[0]});
+    await brandRegistry.updateBrandSocialCommitment(brandId1, true, {from: accounts[0]});
 
     await expectMetadata(brandId1, {
       "name":"My Brand 1",
@@ -532,10 +565,10 @@ contract("Metaverse", function (accounts) {
 
   it("must allow the address 0 to set the brand social commitment of 1st brand to false", async function() {
     let brandId1 = "0x" + web3.utils.soliditySha3(
-        "0xd6", "0x94", contract.address, accounts[1], 1
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     ).substr(26);
 
-    await contract.updateBrandSocialCommitment(brandId1, false, {from: accounts[0]});
+    await brandRegistry.updateBrandSocialCommitment(brandId1, false, {from: accounts[0]});
 
     await expectMetadata(brandId1, {
       "name":"My Brand 1",
@@ -553,11 +586,11 @@ contract("Metaverse", function (accounts) {
 
   it("must not allow account 1 to set the brand commitment", async function() {
     let brandId1 = "0x" + web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     ).substr(26);
 
     await expectRevert(
-      contract.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]}),
+      brandRegistry.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]}),
       revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
     );
   });
@@ -580,10 +613,10 @@ contract("Metaverse", function (accounts) {
 
   it("must allow the account 1 to set the brand commitment on brand 1", async function() {
     let brandId1 = "0x" + web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     ).substr(26);
 
-    await contract.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]});
+    await brandRegistry.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]});
 
     await expectMetadata(brandId1, {
       "name":"My Brand 1",
@@ -610,84 +643,104 @@ contract("Metaverse", function (accounts) {
 
   it("must not allow the account 1 to set the brand commitment to brand 1", async function() {
     let brandId1 = "0x" + web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     ).substr(26);
 
     await expectRevert(
-      contract.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]}),
+      brandRegistry.updateBrandSocialCommitment(brandId1, true, {from: accounts[1]}),
       revertReason("BrandRegistry: caller is not metaverse owner, and does not have the required permission")
     );
   });
 
   it("must not allow 2 and 3 to set the brand image, since they don't have permissions", async function() {
     let brandId1 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
     await expectRevert(
-      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[2]}),
+      brandRegistry.updateBrandImage(
+        delegates.NO_DELEGATE, brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[2]}
+      ),
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
     );
     await expectRevert(
-      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]}),
+      brandRegistry.updateBrandImage(
+        delegates.NO_DELEGATE, brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]}
+      ),
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
     );
   });
 
   it("must not allow 2 to grant brand editor to 3, since they don't have permissions", async function() {
     let brandId1 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
     await expectRevert(
-      contract.brandSetPermission(brandId1, BRAND_EDITOR, accounts[3], true, {from: accounts[2]}),
+      brandRegistry.brandSetPermission(
+        delegates.NO_DELEGATE, brandId1, BRAND_EDITOR, accounts[3], true, {from: accounts[2]}
+      ),
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
     );
   });
 
   it("must allow 0 to grant superuser to 2, but must now allow 2 to grant superuser to 3", async function() {
     let brandId1 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
     await expectEvent(
-      await contract.brandSetPermission(brandId1, SUPERUSER, accounts[2], true, {from: accounts[0]}),
+      await brandRegistry.brandSetPermission(
+        delegates.NO_DELEGATE, brandId1, SUPERUSER, accounts[2], true, {from: accounts[0]}
+      ),
       "BrandPermissionChanged", {
         "brandId": brandId1, "permission": SUPERUSER, "user": accounts[2],
         "set": true, "sender": accounts[0]
       }
     );
     await expectRevert(
-      contract.brandSetPermission(brandId1, SUPERUSER, accounts[3], true, {from: accounts[2]}),
+      brandRegistry.brandSetPermission(
+        delegates.NO_DELEGATE, brandId1, SUPERUSER, accounts[3], true, {from: accounts[2]}
+      ),
       revertReason("BrandRegistry: SUPERUSER permission cannot be added by this user")
     )
   });
 
   it("must allow both 0 and 2 to grant brand editor to 3", async function() {
     let brandId1 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
-    await contract.brandSetPermission(brandId1, BRAND_EDITOR, accounts[3], true, {from: accounts[0]});
-    await contract.brandSetPermission(brandId1, BRAND_EDITOR, accounts[3], true, {from: accounts[2]});
+    await brandRegistry.brandSetPermission(
+      delegates.NO_DELEGATE, brandId1, BRAND_EDITOR, accounts[3], true, {from: accounts[0]}
+    );
+    await brandRegistry.brandSetPermission(
+      delegates.NO_DELEGATE, brandId1, BRAND_EDITOR, accounts[3], true, {from: accounts[2]}
+    );
   });
 
   it("must allow 0, 2 and 3 to set the brand 0 image", async function() {
     let brandId1 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
-    await contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[2]});
-    await contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]});
+    await brandRegistry.updateBrandImage(
+      delegates.NO_DELEGATE, brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[2]}
+    );
+    await brandRegistry.updateBrandImage(
+      delegates.NO_DELEGATE, brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]}
+    );
   });
 
   it("must allow 2 to revoke brand editor to 3", async function() {
     let brandId1 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
     await expectEvent(
-      await contract.brandSetPermission(brandId1, BRAND_EDITOR, accounts[3], false, {from: accounts[2]}),
+      await brandRegistry.brandSetPermission(
+        delegates.NO_DELEGATE, brandId1, BRAND_EDITOR, accounts[3], false, {from: accounts[2]}
+      ),
       "BrandPermissionChanged", {
         "brandId": brandId1, "permission": BRAND_EDITOR, "user": accounts[3],
         "set": false, "sender": accounts[2]
@@ -697,26 +750,32 @@ contract("Metaverse", function (accounts) {
 
   it("must not allow 3 to revoke any permission to 2, or set the brand image", async function() {
     let brandId1 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
     await expectRevert(
-      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]}),
+      brandRegistry.updateBrandImage(
+        delegates.NO_DELEGATE, brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]}
+      ),
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
     );
     await expectRevert(
-      contract.brandSetPermission(brandId1, SUPERUSER, accounts[2], true, {from: accounts[3]}),
+      brandRegistry.brandSetPermission(
+        delegates.NO_DELEGATE, brandId1, SUPERUSER, accounts[2], true, {from: accounts[3]}
+      ),
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
     );
   });
 
   it("must allow 0 to revoke superuser to 2", async function() {
     let brandId1 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
     await expectEvent(
-      await contract.brandSetPermission(brandId1, SUPERUSER, accounts[2], false, {from: accounts[0]}),
+      await brandRegistry.brandSetPermission(
+        delegates.NO_DELEGATE, brandId1, SUPERUSER, accounts[2], false, {from: accounts[0]}
+      ),
       "BrandPermissionChanged", {
         "brandId": brandId1, "permission": SUPERUSER, "user": accounts[2],
         "set": false, "sender": accounts[0]
@@ -726,25 +785,26 @@ contract("Metaverse", function (accounts) {
 
   it("must not allow 2 and 3 to set the brand image, since they don't have permissions, again", async function() {
     let brandId1 = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[1], 1
+      "0xd6", "0x94", brandRegistry.address, accounts[1], 1
     );
     brandId1 = web3.utils.toChecksumAddress("0x" + brandId1.substr(26));
     await expectRevert(
-      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[2]}),
+      brandRegistry.updateBrandImage(
+        delegates.NO_DELEGATE, brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[2]}
+      ),
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
     );
     await expectRevert(
-      contract.updateBrandImage(brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]}),
+      brandRegistry.updateBrandImage(
+        delegates.NO_DELEGATE, brandId1, "http://example.com/brand1-bazinga.png", {from: accounts[3]}
+      ),
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
     );
   });
 
-  // TODO (when implemented) Test user groups (with relevant permissions) in Metaverse (for BrandRegistry actions).
-  // TODO (when implemented) Test user groups (with relevant permissions) in a Brand (for BrandRegistry actions).
-
   it("must allow an appropriate user to set the brand registration cost to 0", async function() {
     await expectEvent(
-      await contract.setBrandRegistrationCost(new BN("0"), { from: accounts[0] }),
+      await brandRegistry.setBrandRegistrationCost(new BN("0"), { from: accounts[0] }),
       "BrandRegistrationCostUpdated", {
         "newCost": new BN("0"), "updatedBy": accounts[0]
       }
@@ -753,7 +813,8 @@ contract("Metaverse", function (accounts) {
 
   it("must not allow brand registration to be done while the cost is 0", async function() {
     await expectRevert(
-      contract.registerBrand(
+      brandRegistry.registerBrand(
+        delegates.NO_DELEGATE,
         "My Brand 4", "My awesome brand 4", "http://example.com/brand4.png", "http://example.com/ico16x16-4.png",
         "http://example.com/ico32x32-4.png", "http://example.com/ico64x64-4.png",
         {from: accounts[1], value: new BN("2000000000000000001")}
@@ -764,18 +825,53 @@ contract("Metaverse", function (accounts) {
     );
   });
 
-  it("must not allow regular users to mint brand 'for'", async function() {
+  it("must allow an appropriate user to set the brand registration cost to 2 MATIC", async function() {
+    await expectEvent(
+      await brandRegistry.setBrandRegistrationCost(new BN("2000000000000000000"), { from: accounts[0] }),
+      "BrandRegistrationCostUpdated", {
+        "newCost": new BN("2000000000000000000"), "updatedBy": accounts[0]
+      }
+    );
+  });
+
+  it("must not allow regular users to mint brand 'for' for free", async function() {
     await expectRevert(
-      contract.registerBrandFor(
-        accounts[1],
+      brandRegistry.registerBrand(
+        await delegates.makeDelegate(web3, accounts[1], [
+          {type: "string", value: "My Brand 5"},
+          {type: "string", value: "My awesome brand 5"},
+          {type: "string", value: "http://example.com/brand5.png"}
+        ]),
         "My Brand 5", "My awesome brand 5", "http://example.com/brand5.png", "http://example.com/ico16x16-5.png",
         "http://example.com/ico32x32-5.png", "http://example.com/ico64x64-5.png",
-        {from: accounts[1]}
+        {from: accounts[3], gas: 500000}
       ),
       revertReason(
-        "BrandRegistry: caller is not metaverse owner, and does not have the required permission"
+        "BrandRegistry: brand registration requires an exact payment of 2000000000000000000 but 0 was given"
       )
     );
+
+    let hash = web3.utils.soliditySha3(
+        "0xd6", "0x94", brandRegistry.address, accounts[1], 3
+    );
+    hash = web3.utils.toChecksumAddress("0x" + hash.substr(26));
+
+    await expectEvent(
+      await brandRegistry.registerBrand(
+        await delegates.makeDelegate(web3, accounts[1], [
+          {type: "string", value: "My Brand 5"},
+          {type: "string", value: "My awesome brand 5"},
+          {type: "string", value: "http://example.com/brand5.png"}
+        ]),
+        "My Brand 5", "My awesome brand 5", "http://example.com/brand5.png", "http://example.com/ico16x16-5.png",
+        "http://example.com/ico32x32-5.png", "http://example.com/ico64x64-5.png",
+        {from: accounts[3], gas: 600000, value: new BN("2000000000000000000")}
+      ), "BrandRegistered", {
+        "registeredBy": accounts[1], "brandId": hash, "name": "My Brand 5",
+        "description": "My awesome brand 5", "price": new BN("2000000000000000000"),
+        "mintedBy": accounts[3]
+      }
+    )
   });
 
   it("must allow the metaverse owner to grant the free brand minting permission to another user", async function() {
@@ -789,19 +885,23 @@ contract("Metaverse", function (accounts) {
 
   it("must allow the permitted user to mint brand 'for'", async function() {
     let hash = web3.utils.soliditySha3(
-      "0xd6", "0x94", contract.address, accounts[2], 3
+      "0xd6", "0x94", brandRegistry.address, accounts[2], 4
     );
     hash = web3.utils.toChecksumAddress("0x" + hash.substr(26));
 
     await expectEvent(
-      await contract.registerBrandFor(
-        accounts[2],
-        "My Brand 5", "My awesome brand 5", "http://example.com/brand5.png", "http://example.com/ico16x16-5.png",
-        "http://example.com/ico32x32-5.png", "http://example.com/ico64x64-5.png",
-        {from: accounts[1]},
+      await brandRegistry.registerBrand(
+          await delegates.makeDelegate(web3, accounts[2], [
+            {type: "string", value: "My Brand 6"},
+            {type: "string", value: "My awesome brand 6"},
+            {type: "string", value: "http://example.com/brand6.png"}
+          ]),
+        "My Brand 6", "My awesome brand 6", "http://example.com/brand6.png", "http://example.com/ico16x16-6.png",
+        "http://example.com/ico32x32-6.png", "http://example.com/ico64x64-6.png",
+        {from: accounts[1], gas: 600000},
       ), "BrandRegistered", {
-        "registeredBy": accounts[2], "brandId": hash, "name": "My Brand 5",
-        "description": "My awesome brand 5", "price": new BN("0"),
+        "registeredBy": accounts[2], "brandId": hash, "name": "My Brand 6",
+        "description": "My awesome brand 6", "price": new BN("0"),
         "mintedBy": accounts[1]
       }
     );
@@ -816,26 +916,21 @@ contract("Metaverse", function (accounts) {
     );
   });
 
-  it("must not allow regular users to mint brand 'for', again", async function() {
+  it("must not allow regular users to mint brand 'for', again, for free", async function() {
     await expectRevert(
-      contract.registerBrandFor(
-        accounts[1],
-        "My Brand 6", "My awesome brand 6", "http://example.com/brand6.png", "http://example.com/ico16x16-6.png",
-        "http://example.com/ico32x32-6.png", "http://example.com/ico64x64-6.png",
-        {from: accounts[1]}
+      brandRegistry.registerBrand(
+        await delegates.makeDelegate(web3, accounts[2], [
+          {type: "string", value: "My Brand 7"},
+          {type: "string", value: "My awesome brand 7"},
+          {type: "string", value: "http://example.com/brand7.png"}
+        ]),
+        "My Brand 7", "My awesome brand 7", "http://example.com/brand7.png", "http://example.com/ico16x16-7.png",
+        "http://example.com/ico32x32-7.png", "http://example.com/ico64x64-7.png",
+        {from: accounts[1], gas: 500000}
       ),
       revertReason(
-        "BrandRegistry: caller is not metaverse owner, and does not have the required permission"
+        "BrandRegistry: brand registration requires an exact payment of 2000000000000000000 but 0 was given"
       )
-    );
-  });
-
-  it("must allow an appropriate user to set the brand registration cost to 2 MATIC", async function() {
-    await expectEvent(
-      await contract.setBrandRegistrationCost(new BN("2000000000000000000"), { from: accounts[0] }),
-      "BrandRegistrationCostUpdated", {
-        "newCost": new BN("2000000000000000000"), "updatedBy": accounts[0]
-      }
     );
   });
 });
