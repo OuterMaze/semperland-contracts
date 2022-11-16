@@ -183,7 +183,8 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         string memory _wmaticImage, string memory _wmaticIcon16x16,
         string memory _wmaticIcon32x32, string memory _wmaticIcon64x64,
         string memory _beatImage, string memory _beatIcon16x16,
-        string memory _beatIcon32x32, string memory _beatIcon64x64
+        string memory _beatIcon32x32, string memory _beatIcon64x64,
+        uint256 _timeout
     ) MetaversePlugin(_metaverse) {
         require(_earningsReceiver != address(0), "CurrencyDefinitionPlugin: the earnings receiver must not be 0");
         wmaticImage = _wmaticImage;
@@ -194,6 +195,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         beatIcon16x16 = _beatIcon16x16;
         beatIcon32x32 = _beatIcon32x32;
         beatIcon64x64 = _beatIcon64x64;
+        timeout = _timeout == 0 ? 300 : _timeout;
         brandCurrencyDefinitionEarningsReceiver = _earningsReceiver;
     }
 

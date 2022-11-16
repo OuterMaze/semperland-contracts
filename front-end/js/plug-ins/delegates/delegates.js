@@ -31,7 +31,7 @@ async function makeDelegate(web3, signer, args, signMethodIndex, signMethods) {
     types.requireType(Function, 'web3.utils.soliditySha3', attributes.getAttr(web3, 'utils.soliditySha3'));
     types.requireAddress('signer', signer);
     types.requireArray(() => {}, 'args', args);
-    types.requireInt16('signMethodIndex', signMethodIndex);
+    types.requireUInt16('signMethodIndex', signMethodIndex);
     types.requireArray(types.requireType.bind(null, Function), 'signMethods', signMethods);
 
     let now = dates.timestamp();

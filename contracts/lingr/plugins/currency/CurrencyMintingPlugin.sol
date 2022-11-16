@@ -74,10 +74,12 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
     /**
      * This plug-in does not require extra details on construction.
      */
-    constructor(address _metaverse, address _definitionPlugin, address _earningsReceiver) MetaversePlugin(_metaverse) {
+    constructor(address _metaverse, address _definitionPlugin, address _earningsReceiver, uint256 _timeout)
+        MetaversePlugin(_metaverse) {
         require(_earningsReceiver != address(0), "CurrencyMintingPlugin: the earnings receiver must not be 0");
         brandCurrencyMintingEarningsReceiver = _earningsReceiver;
         definitionPlugin = _definitionPlugin;
+        timeout = _timeout == 0 ? 300 : _timeout;
     }
 
     /**

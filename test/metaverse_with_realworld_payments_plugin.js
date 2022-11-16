@@ -70,10 +70,11 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "http://example.org/images/beat-16x16.png",
       "http://example.org/images/beat-32x32.png",
       "http://example.org/images/beat-64x64.png",
+      300,
       { from: accounts[0] }
     );
     mintingPlugin = await CurrencyMintingPlugin.new(
-      metaverse.address, definitionPlugin.address, accounts[8], { from: accounts[0] }
+      metaverse.address, definitionPlugin.address, accounts[8], 300, { from: accounts[0] }
     );
     signatureVerifier = await MetaverseSignatureVerifier.new(
       metaverse.address, ["ECDSA"], [
@@ -162,8 +163,12 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     await mintingPlugin.mintBEAT(accounts[9], 1, {from: accounts[0]});
     // And continue minting for accounts[0] (rewards).
     await mintingPlugin.setCurrencyMintCost(cost, {from: accounts[0]});
-    await mintingPlugin.mintBrandCurrency(accounts[0], brand1Currency1, 1, {from: accounts[1], value: cost});
-    await mintingPlugin.mintBrandCurrency(accounts[0], brand2Currency1, 1, {from: accounts[2], value: cost});
+    await mintingPlugin.mintBrandCurrency(
+      delegates.NO_DELEGATE, accounts[0], brand1Currency1, 1, {from: accounts[1], value: cost}
+    );
+    await mintingPlugin.mintBrandCurrency(
+      delegates.NO_DELEGATE, accounts[0], brand2Currency1, 1, {from: accounts[2], value: cost}
+    );
     await mintingPlugin.mintBEAT(accounts[0], 1, {from: accounts[0]});
     // Finally: fund the rewards pot.
     await economy.safeTransferFrom(
@@ -1368,7 +1373,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           // Set BRAND_SIGN_PAYMENTS to accounts[0] in the brand.
           if (brandPermissionGranter) {
             await brandRegistry.brandSetPermission(
-              obj.args.brandAddress, BRAND_SIGN_PAYMENTS, accounts[0], true, { from: brandPermissionGranter }
+              delegates.NO_DELEGATE, obj.args.brandAddress, BRAND_SIGN_PAYMENTS, accounts[0], true,
+              { from: brandPermissionGranter }
             );
           }
 
@@ -1499,7 +1505,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
           // Unset BRAND_SIGN_PAYMENTS to accounts[0] in the brand.
           if (brandPermissionGranter) {
             await brandRegistry.brandSetPermission(
-              obj.args.brandAddress, BRAND_SIGN_PAYMENTS, accounts[0], false, {from: brandPermissionGranter}
+              delegates.NO_DELEGATE, obj.args.brandAddress, BRAND_SIGN_PAYMENTS, accounts[0], false,
+              {from: brandPermissionGranter}
             );
 
             // Now try executing a different request, but the brand does not
@@ -1518,7 +1525,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             );
 
             await brandRegistry.brandSetPermission(
-              obj.args.brandAddress, BRAND_SIGN_PAYMENTS, accounts[0], true, {from: brandPermissionGranter}
+              delegates.NO_DELEGATE, obj.args.brandAddress, BRAND_SIGN_PAYMENTS, accounts[0], true,
+              {from: brandPermissionGranter}
             );
           }
         });
@@ -2028,7 +2036,8 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
               // Set BRAND_SIGN_PAYMENTS to accounts[0] in the brand.
               if (brandPermissionGranter) {
                 await brandRegistry.brandSetPermission(
-                    obj.args.brandAddress, BRAND_SIGN_PAYMENTS, accounts[0], true, { from: brandPermissionGranter }
+                  delegates.NO_DELEGATE, obj.args.brandAddress, BRAND_SIGN_PAYMENTS, accounts[0], true,
+                  { from: brandPermissionGranter }
                 );
               }
 

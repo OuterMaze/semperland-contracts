@@ -70,11 +70,11 @@ async function makePaymentOrderURI(
     types.requireArray(types.requireUInt256, 'rewardIds', rewardIds);
     types.requireArray(types.requireUInt256, 'rewardValues', rewardValues);
     signMethodIndex = signMethodIndex || 0;
-    types.requireArray(types.requireInt16, 'signMethodIndex', signMethodIndex);
-    types.requireArray(types.requireType.bind(null, Function), 'signMethods', signMethods);
+    types.requireUInt16('signMethodIndex', signMethodIndex);
     signMethods = signMethods || [function(m, acc) {
         return web3.eth.sign(m, acc);
     }];
+    types.requireArray(types.requireType.bind(null, Function), 'signMethods', signMethods);
 
     let dueDate = now.add(dueTime);
     let paymentId = web3.utils.soliditySha3(
