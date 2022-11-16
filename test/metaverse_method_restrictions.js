@@ -19,9 +19,9 @@ const {
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 contract("Metaverse", function (accounts) {
-  var economy = null;
-  var metaverse = null;
-  var brandRegistry = null;
+  let economy = null;
+  let metaverse = null;
+  let brandRegistry = null;
 
   before(async function () {
     metaverse = await Metaverse.new({ from: accounts[0] });
