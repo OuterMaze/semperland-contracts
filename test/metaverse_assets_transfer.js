@@ -35,7 +35,7 @@ contract("Metaverse", function (accounts) {
   before(async function () {
     metaverse = await Metaverse.new({from: accounts[0]});
     economy = await Economy.new(metaverse.address, {from: accounts[0]})
-    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], {from: accounts[0]});
+    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], 300, {from: accounts[0]});
     sampleTokenTransferTracker = await SampleTokenTransferTracker.new(metaverse.address, {from: accounts[0]});
     simpleSignatureVerifier = await SimpleECDSASignatureVerifier.new({from: accounts[0]});
     signatureVerifier = await MetaverseSignatureVerifier.new(

@@ -9,6 +9,7 @@ const MetaverseSignatureVerifier = artifacts.require("MetaverseSignatureVerifier
 const payments = require("../front-end/js/plug-ins/real-world/real-world-payments.js");
 const types = require("../front-end/js/utils/types.js");
 const dates = require("../front-end/js/utils/dates.js");
+const delegates = require("../front-end/js/plug-ins/delegates/delegates.js");
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const expect = chai.expect;
@@ -58,7 +59,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     // Set up the metaverse and two plug-ins.
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] });
-    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[8], { from: accounts[0] });
+    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[8], 300, { from: accounts[0] });
     definitionPlugin = await CurrencyDefinitionPlugin.new(
       metaverse.address, accounts[8],
       "http://example.org/images/wmatic-image.png",
@@ -91,11 +92,14 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     await metaverse.addPlugin(mintingPlugin.address, { from: accounts[0] });
     await definitionPlugin.setMintingPlugin(mintingPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(realWorldPaymentsPlugin.address, { from: accounts[0] });
+    await signatureVerifier.setSignatureMethodAllowance(0, true, {from: accounts[1]});
+    await signatureVerifier.setSignatureMethodAllowance(0, true, {from: accounts[2]});
 
     // Mint some brands (define cost, and mint 2 brands).
     await brandRegistry.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[0] });
 
     await brandRegistry.registerBrand(
+      delegates.NO_DELEGATE,
       "My Brand 1", "My awesome brand 1", "http://example.com/brand1.png", "http://example.com/icon1-16x16.png",
       "http://example.com/icon1-32x32.png", "http://example.com/icon1-64x64.png",
       {from: accounts[1], value: new BN("10000000000000000000")}
@@ -105,6 +109,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     ).substr(26));
 
     await brandRegistry.registerBrand(
+      delegates.NO_DELEGATE,
       "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/icon2-16x16.png",
       "http://example.com/icon2-32x32.png", "http://example.com/icon2-64x64.png",
       {from: accounts[2], value: new BN("10000000000000000000")}
@@ -114,17 +119,27 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     ).substr(26));
 
     // Define 1 brand currency (in brand #1).
-    await definitionPlugin.defineBrandCurrencyFor(
-      brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
-      "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
-      "http://example.org/images/brand1-1-icon64x64.png", "#001111", { from: accounts[0] }
+    await definitionPlugin.defineBrandCurrency(
+      await delegates.makeDelegate(web3, accounts[1], [
+        {type: "address", value: brand1},
+        {type: "string", value: "Brand #1 Curr #1"},
+        {type: "string", value: "Currency #1 of Brand #1"},
+        {type: "string", value: "http://example.org/images/brand1-1-image.png"},
+      ]),
+      brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1",
+      "http://example.org/images/brand1-1-image.png", { from: accounts[0] }
     );
 
     // Define 1 brand currency (in brand #2).
-    await definitionPlugin.defineBrandCurrencyFor(
-      brand2, "Brand #2 Curr #1", "Currency #1 of Brand #2", "http://example.org/images/brand2-1-image.png",
-      "http://example.org/images/brand2-1-icon16x16.png", "http://example.org/images/brand2-1-icon32x32.png",
-      "http://example.org/images/brand2-1-icon64x64.png", "#002211", { from: accounts[0] }
+    await definitionPlugin.defineBrandCurrency(
+      await delegates.makeDelegate(web3, accounts[2], [
+        {type: "address", value: brand2},
+        {type: "string", value: "Brand #2 Curr #1"},
+        {type: "string", value: "Currency #1 of Brand #2"},
+        {type: "string", value: "http://example.org/images/brand2-1-image.png"},
+      ]),
+      brand2, "Brand #2 Curr #1", "Currency #1 of Brand #2",
+      "http://example.org/images/brand2-1-image.png", { from: accounts[0] }
     );
 
     // Foresee the brand ids and currency ids.

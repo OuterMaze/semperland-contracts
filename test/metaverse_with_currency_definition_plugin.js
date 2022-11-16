@@ -40,7 +40,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     // Set up the metaverse and two plug-ins.
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
-    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], { from: accounts[0] });
+    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], 300, { from: accounts[0] });
     definitionPlugin = await CurrencyDefinitionPlugin.new(
       metaverse.address, accounts[9],
       "http://example.org/images/wmatic-image.png",

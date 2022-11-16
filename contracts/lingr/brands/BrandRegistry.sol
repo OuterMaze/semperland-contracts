@@ -179,7 +179,7 @@ contract BrandRegistry is DelegableContext, NativePayable, IBrandRegistry, IMeta
      * Creating a brand registry requires a valid metaverse
      * registrar as its owner.
      */
-    constructor(address _metaverse, address _brandEarningsReceiver) {
+    constructor(address _metaverse, address _brandEarningsReceiver, uint256 _timeout) {
         require(_brandEarningsReceiver != address(0), "BrandRegistry: the earnings receiver must not be 0");
         require(_metaverse != address(0), "BrandRegistry: the owner contract must not be 0");
         require(
@@ -187,7 +187,7 @@ contract BrandRegistry is DelegableContext, NativePayable, IBrandRegistry, IMeta
             "BrandRegistry: the owner contract must implement IMetaverse"
         );
         metaverse = _metaverse;
-        timeout = 120;
+        timeout = _timeout == 0 ? 300 : _timeout;
         brandEarningsReceiver = _brandEarningsReceiver;
     }
 
