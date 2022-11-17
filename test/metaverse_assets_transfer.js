@@ -39,9 +39,7 @@ contract("Metaverse", function (accounts) {
     sampleTokenTransferTracker = await SampleTokenTransferTracker.new(metaverse.address, {from: accounts[0]});
     simpleSignatureVerifier = await SimpleECDSASignatureVerifier.new({from: accounts[0]});
     signatureVerifier = await MetaverseSignatureVerifier.new(
-      metaverse.address, ["ECDSA"], [
-        (await SimpleECDSASignatureVerifier.new({ from: accounts[0] })).address
-      ], {from: accounts[0]}
+      metaverse.address, ["ECDSA"], [simpleSignatureVerifier.address], {from: accounts[0]}
     );
     await metaverse.setEconomy(economy.address, {from: accounts[0]});
     await metaverse.setBrandRegistry(brandRegistry.address, {from: accounts[0]});
