@@ -365,7 +365,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
         address _definedBy, string memory _name, string memory _description,
         string memory _image, string memory _icon16x16, string memory _icon32x32,
         string memory _icon64x64, string memory _color
-    ) public onlyWhenInitialized onlyPlugin {
+    ) public onlyWhenInitialized nonDelegable onlyPlugin {
         CurrencyMetadata memory metadata = CurrencyMetadata({
             registered: true, name: _name, description: _description, color: _color,
             image: _image, icon16x16: _icon16x16, icon32x32: _icon32x32,
@@ -488,7 +488,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
     /**
      * Mints a currency. Only the minting plug-in can invoke this method.
      */
-    function mintCurrency(address _to, uint256 _id, uint256 _amount, bytes memory _data) nonDelegable external {
+    function mintCurrency(address _to, uint256 _id, uint256 _amount, bytes memory _data) external nonDelegable {
         require(
             mintingPlugin != address(0),
             "CurrencyMintingPlugin: the minting plugin is not set"
