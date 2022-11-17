@@ -292,7 +292,7 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
      * Receiving MATIC involves automatically wrapping it into WMATIC tokens
      * for the exact address sender.
      */
-    receive() external payable onlyWhenInitialized {
+    receive() external payable onlyWhenInitialized nonDelegable {
         uint256 WMATICType = CurrencyDefinitionPlugin(definitionPlugin).WMATICType();
         CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
             _msgSender(), WMATICType, msg.value, "Currency wrapping"
