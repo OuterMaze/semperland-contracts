@@ -5,7 +5,6 @@ const CurrencyDefinitionPlugin = artifacts.require("CurrencyDefinitionPlugin");
 const SampleSystemCurrencyDefiningPlugin = artifacts.require("SampleSystemCurrencyDefiningPlugin");
 const SimpleECDSASignatureVerifier = artifacts.require("SimpleECDSASignatureVerifier");
 const MetaverseSignatureVerifier = artifacts.require("MetaverseSignatureVerifier");
-const dates = require("../front-end/js/utils/dates.js");
 const delegates = require("../front-end/js/plug-ins/delegates/delegates.js");
 
 
