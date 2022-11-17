@@ -3,12 +3,17 @@ const Economy = artifacts.require("Economy");
 const Metaverse = artifacts.require("Metaverse");
 const CurrencyDefinitionPlugin = artifacts.require("CurrencyDefinitionPlugin");
 const SampleSystemCurrencyDefiningPlugin = artifacts.require("SampleSystemCurrencyDefiningPlugin");
+const SimpleECDSASignatureVerifier = artifacts.require("SimpleECDSASignatureVerifier");
+const MetaverseSignatureVerifier = artifacts.require("MetaverseSignatureVerifier");
+const dates = require("../front-end/js/utils/dates.js");
+const delegates = require("../front-end/js/plug-ins/delegates/delegates.js");
+
 
 const {
-    BN,           // Big Number support
-    constants,    // Common constants, like the zero address and largest integers
-    expectEvent,  // Assertions for emitted events
-    expectRevert, // Assertions for transactions that should fail
+  BN,           // Big Number support
+  constants,    // Common constants, like the zero address and largest integers
+  expectEvent,  // Assertions for emitted events
+  expectRevert, // Assertions for transactions that should fail
 } = require('@openzeppelin/test-helpers');
 
 const {
@@ -23,13 +28,15 @@ const {
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 contract("CurrencyDefinitionPlugin", function (accounts) {
-  var economy = null;
-  var metaverse = null;
-  var brandRegistry = null;
-  var definitionPlugin = null;
-  var sampleDefinitionPlugin = null;
-  var brand1 = null;
-  var brand2 = null;
+  let economy = null;
+  let metaverse = null;
+  let brandRegistry = null;
+  let simpleSignatureVerifier = null;
+  let signatureVerifier = null;
+  let definitionPlugin = null;
+  let sampleDefinitionPlugin = null;
+  let brand1 = null;
+  let brand2 = null;
 
   const SUPERUSER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
   const METAVERSE_MANAGE_CURRENCIES_SETTINGS = web3.utils.soliditySha3("Plugins::Currency::Settings::Manage");
@@ -41,6 +48,10 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     metaverse = await Metaverse.new({ from: accounts[0] });
     economy = await Economy.new(metaverse.address, { from: accounts[0] })
     brandRegistry = await BrandRegistry.new(metaverse.address, accounts[9], 300, { from: accounts[0] });
+    simpleSignatureVerifier = await SimpleECDSASignatureVerifier.new({from: accounts[0]});
+    signatureVerifier = await MetaverseSignatureVerifier.new(
+      metaverse.address, ["ECDSA"], [simpleSignatureVerifier.address], {from: accounts[0]}
+    );
     definitionPlugin = await CurrencyDefinitionPlugin.new(
       metaverse.address, accounts[9],
       "http://example.org/images/wmatic-image.png",
@@ -51,6 +62,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
       "http://example.org/images/beat-16x16.png",
       "http://example.org/images/beat-32x32.png",
       "http://example.org/images/beat-64x64.png",
+      300,
       { from: accounts[0] }
     );
     sampleDefinitionPlugin = await SampleSystemCurrencyDefiningPlugin.new(
@@ -58,12 +70,14 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     );
     await metaverse.setEconomy(economy.address, { from: accounts[0] });
     await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
+    await metaverse.setSignatureVerifier(signatureVerifier.address, { from: accounts[0] });
     await metaverse.addPlugin(definitionPlugin.address, { from: accounts[0] });
     await metaverse.addPlugin(sampleDefinitionPlugin.address, { from: accounts[0] });
 
     // Mint some brands.
     await brandRegistry.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[0] });
     await brandRegistry.registerBrand(
+      delegates.NO_DELEGATE,
       "My Brand 1", "My awesome brand 1", "http://example.com/brand1.png", "http://example.com/icon1-16x16.png",
       "http://example.com/icon1-32x32.png", "http://example.com/icon1-64x64.png",
       {from: accounts[1], value: new BN("10000000000000000000")}
@@ -73,6 +87,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     ).substr(26));
 
     await brandRegistry.registerBrand(
+      delegates.NO_DELEGATE,
       "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/icon2-16x16.png",
       "http://example.com/icon2-32x32.png", "http://example.com/icon2-64x64.png",
       {from: accounts[2], value: new BN("10000000000000000000")}
@@ -80,6 +95,9 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     brand2 = web3.utils.toChecksumAddress('0x' + web3.utils.soliditySha3(
         "0xd6", "0x94", brandRegistry.address, accounts[2], 2
     ).substr(26));
+
+    await signatureVerifier.setSignatureMethodAllowance(0, true, { from: accounts[1] });
+    await signatureVerifier.setSignatureMethodAllowance(0, true, { from: accounts[2] });
   });
 
   it("must have the expected titles", async function() {
@@ -299,22 +317,47 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
   it("must not allow the owner of brand #1 to define a currency, since the cost is 0", async function() {
     await expectRevert(
       definitionPlugin.defineBrandCurrency(
+        delegates.NO_DELEGATE,
         brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
-        "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
-        "http://example.org/images/brand1-1-icon64x64.png", "#001122", { from: accounts[1] }
+        { from: accounts[1] }
       ),
       revertReason("CurrencyDefinitionPlugin: brand currency definition is currently disabled (no price is set)")
     );
   });
 
-  it("must not allow the 7th account to define a currency for brand 1, due to lacking of permission", async function() {
+  it("must not allow the 7th account to define a currency for brand 1, since it is disabled", async function() {
     await expectRevert(
-      definitionPlugin.defineBrandCurrencyFor(
+      definitionPlugin.defineBrandCurrency(
+        await delegates.makeDelegate(web3, accounts[1], [
+          {type: "address", value: brand1},
+          {type: "string", value: "Brand #1 Curr #1"},
+          {type: "string", value: "Currency #1 of Brand #1"},
+          {type: "string", value: "http://example.org/images/brand1-1-image.png"},
+        ]),
         brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
-        "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
-        "http://example.org/images/brand1-1-icon64x64.png", "#001122", { from: accounts[7] }
+        { from: accounts[7], gas: 500000 }
       ),
-      revertReason("MetaversePlugin: caller is not metaverse owner, and does not have the required permission")
+      revertReason(
+        "CurrencyDefinitionPlugin: brand currency definition is currently disabled (no price is set)"
+      )
+    );
+  });
+
+  it("must not allow the 7th account to define a currency for brand 1, since it is signed by another user", async function() {
+    await expectRevert(
+      definitionPlugin.defineBrandCurrency(
+        await delegates.makeDelegate(web3, accounts[2], [
+          {type: "address", value: brand1},
+          {type: "string", value: "Brand #1 Curr #1"},
+          {type: "string", value: "Currency #1 of Brand #1"},
+          {type: "string", value: "http://example.org/images/brand1-1-image.png"},
+        ]),
+        brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
+        { from: accounts[7], gas: 500000 }
+      ),
+      revertReason(
+        "MetaversePlugin: caller is not brand owner nor approved, and does not have the required permission"
+      )
     );
   });
 
@@ -340,10 +383,15 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     let id = new BN("0x80000000" + brandPart + index);
 
     await expectEvent(
-      await definitionPlugin.defineBrandCurrencyFor(
+      await definitionPlugin.defineBrandCurrency(
+        await delegates.makeDelegate(web3, accounts[1], [
+          {type: "address", value: brand1},
+          {type: "string", value: "Brand #1 Curr #1"},
+          {type: "string", value: "Currency #1 of Brand #1"},
+          {type: "string", value: "http://example.org/images/brand1-1-image.png"},
+        ]),
         brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
-        "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
-        "http://example.org/images/brand1-1-icon64x64.png", "#001122", { from: accounts[7] }
+        { from: accounts[7] }
       ),
       "CurrencyDefined", {
         "tokenId": id, "brandId": brand1, "definedBy": accounts[7], "paidPrice": new BN('0'),
@@ -356,10 +404,10 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
       image: "http://example.org/images/brand1-1-image.png",
       decimals: 18,
       properties: {
-        icon16x16: "http://example.org/images/brand1-1-icon16x16.png",
-        icon32x32: "http://example.org/images/brand1-1-icon32x32.png",
-        icon64x64: "http://example.org/images/brand1-1-icon64x64.png",
-        color: "#001122",
+        icon16x16: "",
+        icon32x32: "",
+        icon64x64: "",
+        color: "#ffd700",
         type: "currency"
       }
     });
@@ -447,9 +495,8 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
   it("must not allow the owner of brand #1 to define a currency, since it paid a wrong cost", async function() {
     await expectRevert(
       definitionPlugin.defineBrandCurrency(
+        delegates.NO_DELEGATE,
         brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
-        "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
-        "http://example.org/images/brand1-1-icon64x64.png", "#001122",
         { from: accounts[1], value: new BN("11000000000000000000"), gas: new BN("5000000") }
       ),
       revertReason("CurrencyDefinitionPlugin: brand currency definition requires an exact payment of 10000000000000000000 " +
@@ -464,9 +511,8 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
 
     await expectEvent(
       await definitionPlugin.defineBrandCurrency(
+        delegates.NO_DELEGATE,
         brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1", "http://example.org/images/brand1-1-image.png",
-        "http://example.org/images/brand1-1-icon16x16.png", "http://example.org/images/brand1-1-icon32x32.png",
-        "http://example.org/images/brand1-1-icon64x64.png", "#001122",
         { from: accounts[1], value: new BN("10000000000000000000") }
       ),
       "CurrencyDefined", {
@@ -480,10 +526,10 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
       image: "http://example.org/images/brand1-1-image.png",
       decimals: 18,
       properties: {
-        icon16x16: "http://example.org/images/brand1-1-icon16x16.png",
-        icon32x32: "http://example.org/images/brand1-1-icon32x32.png",
-        icon64x64: "http://example.org/images/brand1-1-icon64x64.png",
-        color: "#001122",
+        icon16x16: "",
+        icon32x32: "",
+        icon64x64: "",
+        color: "#ffd700",
         type: "currency"
       }
     });
@@ -498,9 +544,9 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
   it("must not allow 3rd account to define a currency in brand 1, since it lacks of permission", async function() {
     await expectRevert(
       definitionPlugin.defineBrandCurrency(
+        delegates.NO_DELEGATE,
         brand1, "Brand #1 Curr #2", "Currency #2 of Brand #1", "http://example.org/images/brand1-2-image.png",
-        "http://example.org/images/brand1-2-icon16x16.png", "http://example.org/images/brand1-2-icon32x32.png",
-        "http://example.org/images/brand1-2-icon64x64.png", "#001122", { from: accounts[3] }
+        { from: accounts[3] }
       ),
       revertReason("MetaversePlugin: caller is not brand owner nor approved, and does not have the required permission")
     );
@@ -509,6 +555,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
   it("must not allow account 3 to grant the BRAND_MANAGE_CURRENCIES of brand #1 on itself", async function() {
     await expectRevert(
       brandRegistry.brandSetPermission(
+        delegates.NO_DELEGATE,
         brand1, BRAND_MANAGE_CURRENCIES, accounts[3], true, { from: accounts[3] }
       ),
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
@@ -518,6 +565,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
   it("must not allow account 3 to grant the SUPERUSER of brand #1 on itself", async function() {
     await expectRevert(
       brandRegistry.brandSetPermission(
+        delegates.NO_DELEGATE,
         brand1, SUPERUSER, accounts[3], true, { from: accounts[3] }
       ),
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
@@ -527,6 +575,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
   it("must not allow account 0 to grant the BRAND_MANAGE_CURRENCIES of brand #1 on account 3", async function() {
     await expectRevert(
       brandRegistry.brandSetPermission(
+        delegates.NO_DELEGATE,
         brand1, BRAND_MANAGE_CURRENCIES, accounts[3], true, { from: accounts[0] }
       ),
       revertReason("BrandRegistry: caller is not brand owner nor approved, and does not have the required permission")
@@ -536,6 +585,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
   it("must allow account 1 to grant the BRAND_MANAGE_CURRENCIES of brand #1 on account 3", async function() {
     await expectEvent(
       await brandRegistry.brandSetPermission(
+        delegates.NO_DELEGATE,
         brand1, BRAND_MANAGE_CURRENCIES, accounts[3], true, { from: accounts[1] }
       ),
       "BrandPermissionChanged", {
@@ -552,9 +602,8 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
 
     await expectEvent(
       await definitionPlugin.defineBrandCurrency(
+        delegates.NO_DELEGATE,
         brand1, "Brand #1 Curr #3", "Currency #3 of Brand #1", "http://example.org/images/brand1-3-image.png",
-        "http://example.org/images/brand1-3-icon16x16.png", "http://example.org/images/brand1-3-icon32x32.png",
-        "http://example.org/images/brand1-3-icon64x64.png", "#001122",
         { from: accounts[3], value: new BN("10000000000000000000") }
       ),
       "CurrencyDefined", {
@@ -568,10 +617,10 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
       image: "http://example.org/images/brand1-3-image.png",
       decimals: 18,
       properties: {
-        icon16x16: "http://example.org/images/brand1-3-icon16x16.png",
-        icon32x32: "http://example.org/images/brand1-3-icon32x32.png",
-        icon64x64: "http://example.org/images/brand1-3-icon64x64.png",
-        color: "#001122",
+        icon16x16: "",
+        icon32x32: "",
+        icon64x64: "",
+        color: "#ffd700",
         type: "currency"
       }
     });
@@ -589,10 +638,15 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     let id = new BN("0x80000000" + brandPart + index);
 
     await expectEvent(
-      await definitionPlugin.defineBrandCurrencyFor(
+      await definitionPlugin.defineBrandCurrency(
+        await delegates.makeDelegate(web3, accounts[1], [
+          {type: "address", value: brand1},
+          {type: "string", value: "Brand #1 Curr #4"},
+          {type: "string", value: "Currency #4 of Brand #1"},
+          {type: "string", value: "http://example.org/images/brand1-4-image.png"},
+        ]),
         brand1, "Brand #1 Curr #4", "Currency #4 of Brand #1", "http://example.org/images/brand1-4-image.png",
-        "http://example.org/images/brand1-4-icon16x16.png", "http://example.org/images/brand1-4-icon32x32.png",
-        "http://example.org/images/brand1-4-icon64x64.png", "#001122", { from: accounts[7] }
+        { from: accounts[7] }
       ),
       "CurrencyDefined", {
         "tokenId": id, "brandId": brand1, "definedBy": accounts[7], "paidPrice": new BN('0'),
@@ -605,10 +659,10 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
       image: "http://example.org/images/brand1-4-image.png",
       decimals: 18,
       properties: {
-        icon16x16: "http://example.org/images/brand1-4-icon16x16.png",
-        icon32x32: "http://example.org/images/brand1-4-icon32x32.png",
-        icon64x64: "http://example.org/images/brand1-4-icon64x64.png",
-        color: "#001122",
+        icon16x16: "",
+        icon32x32: "",
+        icon64x64: "",
+        color: "#ffd700",
         type: "currency"
       }
     });
@@ -680,10 +734,10 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         image: "http://example.org/images/brand1-1-image.png",
         decimals: 18,
         properties: {
-          icon16x16: "http://example.org/images/brand1-1-icon16x16.png",
-          icon32x32: "http://example.org/images/brand1-1-icon32x32.png",
-          icon64x64: "http://example.org/images/brand1-1-icon64x64.png",
-          color: "#001122",
+          icon16x16: "",
+          icon32x32: "",
+          icon64x64: "",
+          color: "#ffd700",
           type: "currency"
         }
       }
@@ -695,7 +749,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
       caption: "main image",
       newValue: function() { return this.newValues.image; },
       method: async function(id, image, sender) {
-        let value = await definitionPlugin.setCurrencyImage(id, image, { from: sender });
+        let value = await definitionPlugin.setCurrencyImage(delegates.NO_DELEGATE, id, image, { from: sender });
         this.currentMetadata.image = image;
         return value;
       }
@@ -704,7 +758,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
       caption: "16x16 icon",
       newValue: function() { return this.newValues.icon16x16; },
       method: async function(id, image, sender) {
-        let value = await definitionPlugin.setCurrencyIcon16x16(id, image, { from: sender });
+        let value = await definitionPlugin.setCurrencyIcon16x16(delegates.NO_DELEGATE, id, image, { from: sender });
         this.currentMetadata.properties.icon16x16 = image;
         return value;
       }
@@ -713,7 +767,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
       caption: "32x32 icon",
       newValue: function() { return this.newValues.icon32x32; },
       method: async function(id, image, sender) {
-        let value = await definitionPlugin.setCurrencyIcon32x32(id, image, { from: sender });
+        let value = await definitionPlugin.setCurrencyIcon32x32(delegates.NO_DELEGATE, id, image, { from: sender });
         this.currentMetadata.properties.icon32x32 = image;
         return value;
       }
@@ -722,7 +776,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
       caption: "64x64 icon",
       newValue: function() { return this.newValues.icon64x64; },
       method: async function(id, image, sender) {
-        let value = await definitionPlugin.setCurrencyIcon64x64(id, image, { from: sender });
+        let value = await definitionPlugin.setCurrencyIcon64x64(delegates.NO_DELEGATE, id, image, { from: sender });
         this.currentMetadata.properties.icon64x64 = image;
         return value;
       }
@@ -731,7 +785,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
       caption: "color",
       newValue: function() { return this.newValues.color; },
       method: async function(id, color, sender) {
-        let value = await definitionPlugin.setCurrencyColor(id, color, { from: sender });
+        let value = await definitionPlugin.setCurrencyColor(delegates.NO_DELEGATE, id, color, { from: sender });
         this.currentMetadata.properties.color = color;
         return value;
       }
