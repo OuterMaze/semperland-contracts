@@ -27,10 +27,6 @@ contract("SimpleECDSASignatureVerifier", function(accounts) {
   }
 
   it("must have proper settings", async function() {
-    console.log(
-      await hub.verifiersKeys(0),
-      await hub.verifiersLength()
-    )
     assert.isTrue(
       "ECDSA" === await hub.verifiersKeys(0) && (await hub.verifiersLength()).cmp(new BN(1)) === 0,
       "The only registered key must be ECDSA"

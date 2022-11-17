@@ -202,9 +202,10 @@ contract CurrencyMintingPlugin is NativePayable, IERC1155Receiver, FTTypeCheckin
         address scope = address(uint160((_id >> 64) & ((1 << 160) - 1)));
         _requireBrandScope(scope, BRAND_MANAGE_CURRENCIES);
         if (IMetaverse(metaverse).isAllowed(METAVERSE_GIVE_BRAND_CURRENCIES, msg.sender)) {
-            _requireNoPrice("CurrencyDefinitionPlugin: brand currency definition");
+            require(_bulks != 0, "CurrencyMintingPlugin: minting (brand scope) issued with no units");
+            _requireNoPrice("CurrencyMintingPlugin: brand currency minting");
         } else {
-            _requireNativeTokenPrice("CurrencyDefinitionPlugin: brand currency definition", currencyMintCost, _bulks);
+            _requireNativeTokenPrice("CurrencyMintingPlugin: brand currency minting", currencyMintCost, _bulks);
             payable(brandCurrencyMintingEarningsReceiver).transfer(msg.value);
         }
         CurrencyDefinitionPlugin(definitionPlugin).mintCurrency(
