@@ -24,4 +24,34 @@ contract SampleERC1155WithSafeExchange is ERC1155, SafeExchange
     function _isApproved(address _party, address _sender) internal override view returns (bool) {
         return isApprovedForAll(_party, _sender);
     }
+
+    /**
+     * Requires only FTs.
+     */
+    function _requireFTsOnly(uint256[] memory _tokenIds) private {
+        for(uint256 i = 0; i < _tokenIds.length; i++) {
+            require(
+                _tokenIds[i] > 0 && _tokenIds[i] < 4,
+                "SampleERC1155WithSafeExchange: only ids 1, 2, 3 are allowed in deal exchanges"
+            );
+        }
+    }
+
+    /**
+     * Deal start: checks whether the ids are of FTs only.
+     */
+    function _checkDealStart(
+        address _emitter, address _receiver, uint256[] memory _tokenIds, uint256[] memory _tokenAmounts
+    ) internal override {
+        _requireFTsOnly(_tokenIds);
+    }
+
+    /**
+     * Deal acceptance: checks whether the ids are of FTs only.
+     */
+    function _checkDealAccept(
+        uint256 _dealIndex, uint256[] memory _tokenIds, uint256[] memory _tokenAmounts
+    ) internal override {
+        _requireFTsOnly(_tokenIds);
+    }
 }

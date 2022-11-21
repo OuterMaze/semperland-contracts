@@ -61,6 +61,13 @@ abstract contract SafeExchange is Context {
     mapping(uint256 => Deal) public deals;
 
     /**
+     * Checks whether a deal can be started with some data.
+     */
+    function _checkDealStart(
+        address _emitter, address _receiver, uint256[] memory _tokenIds, uint256[] memory _tokenAmounts
+    ) internal virtual {}
+
+    /**
      * Starting a deal requires the sender to be the _emitter address
      * or an address the sender can operate on their behalf. Also, the
      * objects data must be non-empty, and no element must be 0.
@@ -88,6 +95,7 @@ abstract contract SafeExchange is Context {
                 ))
             );
         }
+        _checkDealStart(_emitter, _receiver, _tokenIds, _tokenAmounts);
 
         // Increment the deal counter and create the new instance.
         currentDealIndex += 1;
@@ -98,6 +106,13 @@ abstract contract SafeExchange is Context {
         // Then, emit the event.
         emit DealStarted(currentDealIndex, _emitter, _receiver);
     }
+
+    /**
+     * Checks whether a deal can be accepted with some data.
+     */
+    function _checkDealAccept(
+        uint256 _dealIndex, uint256[] memory _tokenIds, uint256[] memory _tokenAmounts
+    ) internal virtual {}
 
     /**
      * Accepting a deal requires the deal to be valid, the sender to
@@ -134,6 +149,7 @@ abstract contract SafeExchange is Context {
                 ))
             );
         }
+        _checkDealAccept(_dealIndex, _tokenIds, _tokenAmounts);
 
         // Set the receiver acceptance and offer.
         deal.state = DealState.ACCEPTED;

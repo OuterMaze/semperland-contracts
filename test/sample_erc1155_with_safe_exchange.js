@@ -63,6 +63,14 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
   it("must start a deal from account 0, directly (and capture the event)", async function () {
     // 0. Direct usage.
     console.log("0. Direct usage");
+    await expectRevert(
+      contract.dealStart(
+        accounts[0], accounts[1], [new BN("4")],
+        [new BN("50000000000000000")],
+        {from: accounts[0]}
+      ),
+      revertReason("SampleERC1155WithSafeExchange: only ids 1, 2, 3 are allowed in deal exchanges")
+    )
     let tx = await contract.dealStart(
       accounts[0], accounts[1], [new BN("1"), new BN("2")],
       [new BN("50000000000000000"), new BN("100000000000000000")],
@@ -96,6 +104,12 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
     );
     // 4. Then, the deal must be accepted by the receiver.
     console.log("4. Then, the deal must be accepted by the receiver");
+    await expectRevert(
+      contract.dealAccept(
+        new BN("1"), [new BN("4")], [new BN("150000000000000000")], {from: accounts[1]}
+      ),
+      revertReason("SampleERC1155WithSafeExchange: only ids 1, 2, 3 are allowed in deal exchanges")
+    )
     tx = await contract.dealAccept(new BN("1"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[1]});
     // 5. The balances must be unchanged, on both accounts.
     console.log("5. The balances must be unchanged, on both accounts");
