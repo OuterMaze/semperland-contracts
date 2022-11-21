@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8 <0.9.0;
 
-import "../lingr/plugins/base/MetaversePlugin.sol";
+import "../semperland/plugins/base/MetaversePlugin.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "../lingr/plugins/currency/CurrencyMintingPlugin.sol";
+import "../semperland/plugins/currency/CurrencyMintingPlugin.sol";
 
 /**
  * This sample contract makes use of a related currency minting plug-in.

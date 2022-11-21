@@ -374,7 +374,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must validate: good payment, native, no rewards", async function() {
     await makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -386,7 +386,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must validate: good payment, token, no rewards", async function() {
     await makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", WMATIC,
@@ -398,7 +398,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must validate: good payment, tokens, no rewards", async function() {
     await makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
@@ -410,7 +410,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must validate: good payment, native, with rewards", async function() {
     await makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
@@ -422,7 +422,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must validate: good payment, token, with rewards", async function() {
     await makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
@@ -434,7 +434,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must validate: good payment, tokens, with rewards", async function() {
     await makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
@@ -446,7 +446,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: the domain used for payment making is anything else", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, 1, "lingr.com",
+      web3, 1, "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
@@ -458,19 +458,19 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: the domains not matching on make vs. parse", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.con", "lingr.com",
+      web3, "semperland.con", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
       "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")],
       null, economy.address, economy.abi, realWorldPaymentsPlugin.address,
       realWorldPaymentsPlugin.abi, accounts[9]
-    )).to.be.rejectedWith(Error, "It does not start with: payto://lingr.com/real-world-payments?data=");
+    )).to.be.rejectedWith(Error, "It does not start with: payto://semperland.app/real-world-payments?data=");
   });
 
   it("must fail: the signer not being a valid address for this web3 client", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       "0xacb7def96172617299ab987c8bb8e90c0098aedc", dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
@@ -482,7 +482,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: the toAddress is not an address", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, "0xinvalidaddress",
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("500000000000000000")],
@@ -494,7 +494,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: the reference is not a string", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       1, "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -506,7 +506,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: the description is not a string", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", 1, constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -518,7 +518,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: the brandAddress is not an address", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", "0xinvalidaddress",
       [], [], "native", null,
@@ -530,7 +530,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: reward ids and values have different length", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [new BN("1")], [], "native", null,
@@ -542,7 +542,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: reward ids is not an array of BNs", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       "", [], "native", null,
@@ -552,7 +552,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "rewardIds: the values must be an array");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [""], [new web3.utils.BN("1")], "native", null,
@@ -564,7 +564,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: reward values is not an array of BNs", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], "", "native", null,
@@ -574,7 +574,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "rewardValues: the values must be an array");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [new web3.utils.BN("1")], [""], "native", null,
@@ -586,7 +586,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: invalid payment type", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "invalid", null,
@@ -598,7 +598,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: invalid token id for method 'token'", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", "badtokenid",
@@ -610,7 +610,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: invalid token ids for method 'tokens'", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", "badtokenid",
@@ -622,7 +622,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: invalid token value for method 'native'", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -633,7 +633,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: invalid token value for method 'token'", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", WMATIC,
@@ -644,7 +644,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: invalid token values for method 'tokens'", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
@@ -657,7 +657,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid or non-matching PoS address", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -668,7 +668,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.payment.posAddress: the value must be a valid address");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -681,7 +681,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid or non-matching target address", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -692,7 +692,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.toAddress: the value must be a valid address");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -705,7 +705,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid or non-matching reference", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -716,7 +716,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.payment.reference: the value must be of string type");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -729,7 +729,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid or non-matching description", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -740,7 +740,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.payment.description: the value must be of string type");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -753,7 +753,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid or non-matching stamp", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -764,7 +764,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.payment.now: the value must be of string type");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -775,7 +775,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.payment.now: the value must satisfy pattern: unsigned integer");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -788,7 +788,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid or non-matching due date", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -799,7 +799,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.dueDate: the value must be of string type");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -810,7 +810,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.dueDate: the value must satisfy pattern: unsigned integer");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -823,7 +823,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid or non-matching brand address", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -834,7 +834,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.brandAddress: the value must be a valid address");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -847,7 +847,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid or non-matching rewards ids", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -858,7 +858,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.rewardIds: the values must be an array");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -869,7 +869,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.rewardIds.0: the value must be of string type");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -880,7 +880,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.rewardIds.0: the value must satisfy pattern: unsigned integer");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -893,7 +893,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid or non-matching rewards values", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -904,7 +904,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.rewardValues: the values must be an array");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -915,7 +915,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.rewardValues.0: the value must be of string type");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -926,7 +926,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.args.rewardValues.0: the value must satisfy pattern: unsigned integer");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -939,7 +939,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- rewards signature check failure", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("1000000000000000000")],
@@ -951,7 +951,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(Error, "Signature check failed");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("1000000000000000000")],
@@ -963,7 +963,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(Error, "Signature check failed");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [brand1Currency1], [new web3.utils.BN("1000000000000000000")],
@@ -978,7 +978,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid native payment value", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -989,7 +989,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.value: the value must be of string type");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -1000,7 +1000,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.value: the value must satisfy pattern: unsigned integer");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "native", null,
@@ -1013,7 +1013,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid token payment id", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", WMATIC,
@@ -1024,7 +1024,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.id: the value must be of string type");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", WMATIC,
@@ -1035,7 +1035,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.id: the value must satisfy pattern: unsigned integer");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", WMATIC,
@@ -1048,7 +1048,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid token payment value", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", WMATIC,
@@ -1059,7 +1059,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.value: the value must be of string type");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", WMATIC,
@@ -1070,7 +1070,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.value: the value must satisfy pattern: unsigned integer");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "token", WMATIC,
@@ -1083,7 +1083,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid or non-matching tokens payment ids", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
@@ -1094,7 +1094,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.ids: the values must be an array");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
@@ -1105,7 +1105,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.ids.0: the value must be of string type");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
@@ -1116,7 +1116,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.ids.0: the value must satisfy pattern: unsigned integer");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
@@ -1129,7 +1129,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- invalid or non-matching tokens payment values", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [brand1Currency1],
@@ -1140,7 +1140,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.values: the values must be an array");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [brand1Currency1],
@@ -1151,7 +1151,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.values.0: the value must be of string type");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [brand1Currency1],
@@ -1162,7 +1162,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(TypeError, "obj.values.0: the value must satisfy pattern: unsigned integer");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [brand1Currency1],
@@ -1175,7 +1175,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- tokens signature check failure", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
@@ -1186,7 +1186,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(Error, "Signature check failed");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
@@ -1197,7 +1197,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     )).to.be.rejectedWith(Error, "Signature check failed");
 
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],
@@ -1211,7 +1211,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   it("must fail: tamper -- signature check", async function() {
     await expect(makePaymentAndThenParseIt(
-      web3, "lingr.com", "lingr.com",
+      web3, "semperland.app", "semperland.app",
       accounts[0], dates.timestamp(), 300, accounts[1],
       "PAY:000000001-001-001", "My payment", constants.ZERO_ADDRESS,
       [], [], "tokens", [WMATIC],

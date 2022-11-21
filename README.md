@@ -1,2 +1,2 @@
-# lingr-contracts
-Underlying contracts for the lingr.app application.
+# semperland-contracts
+Underlying contracts for the semperland.app application.

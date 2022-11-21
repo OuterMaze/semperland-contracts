@@ -10,7 +10,7 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8 <0.9.0;\n\nimport \"@openzeppelin/contracts/utils/Strings.sol\";\n\n/**\n * A mixin for classes which have natively payable methods.\n */\nabstract contract NativePayable {\n    /**\n     * Requires a certain native token price.\n     */\n    function _requireNativeTokenPrice(string memory _concept, uint256 _price, uint256 _factor) internal {\n        if (_price == 0) {\n            revert(string(abi.encodePacked(_concept, \" is currently disabled (no price is set)\")));\n        }\n        if (_factor == 0) {\n            revert(string(abi.encodePacked(_concept, \" issued with no units to purchase\")));\n        }\n        uint256 total = _price * _factor;\n        uint256 value = msg.value;\n        if (value != total) {\n            revert(string(abi.encodePacked(\n                _concept, \" requires an exact payment of \", Strings.toString(total), \" but \",\n                Strings.toString(value), \" was given\"\n            )));\n        }\n    }\n\n    function _requireNoPrice(string memory _concept) internal {\n        if (msg.value != 0) {\n            revert(string(abi.encodePacked(\n                _concept, \" requires no payment in this context\"\n            )));\n        }\n    }\n}\n",
-  "sourcePath": "/home/luismasuelli/Projects/OuterMaze/lingr-contracts/contracts/NativePayable.sol",
+  "sourcePath": "/home/luismasuelli/Projects/OuterMaze/semperland-contracts/contracts/NativePayable.sol",
   "ast": {
     "absolutePath": "project:/contracts/NativePayable.sol",
     "exportedSymbols": {

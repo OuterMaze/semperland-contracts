@@ -2,13 +2,13 @@
 pragma solidity >=0.8 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import "../lingr/plugins/base/MetaversePlugin.sol";
-import "../lingr/plugins/base/FTDefiningPlugin.sol";
-import "../lingr/plugins/base/NFTDefiningPlugin.sol";
-import "../lingr/plugins/base/FTMintingPlugin.sol";
-import "../lingr/plugins/base/NFTMintingPlugin.sol";
-import "../lingr/plugins/base/TokenBurningPlugin.sol";
-import "../lingr/plugins/base/NFTTransferWatcherPlugin.sol";
+import "../semperland/plugins/base/MetaversePlugin.sol";
+import "../semperland/plugins/base/FTDefiningPlugin.sol";
+import "../semperland/plugins/base/NFTDefiningPlugin.sol";
+import "../semperland/plugins/base/FTMintingPlugin.sol";
+import "../semperland/plugins/base/NFTMintingPlugin.sol";
+import "../semperland/plugins/base/TokenBurningPlugin.sol";
+import "../semperland/plugins/base/NFTTransferWatcherPlugin.sol";
 
 contract SampleTokenTransferTracker is MetaversePlugin, IERC1155Receiver,
     FTDefiningPlugin, NFTDefiningPlugin, FTMintingPlugin, NFTMintingPlugin, TokenBurningPlugin,
