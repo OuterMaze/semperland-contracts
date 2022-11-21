@@ -346,21 +346,10 @@ contract Metaverse is Ownable, IMetaverse {
     }
 
     /**
-     * Any token ID may be burned, except brands.
-     */
-    function _requireNonBrandTokenToBurn(uint256 _id) private {
-        require(
-            _id >= (1 << 160),
-            "Metaverse: only non-brand tokens can be burned this way"
-        );
-    }
-
-    /**
      * Burns a token (FT or NFT, except for brands) on a given amounts.
      * NFT will always use an amount of 1.
      */
     function burnToken(uint256 _id, uint256 _amount) external onlyPlugin {
-        _requireNonBrandTokenToBurn(_id);
         IEconomy(economy).burn(_msgSender(), _id, _amount);
     }
 
@@ -369,9 +358,6 @@ contract Metaverse is Ownable, IMetaverse {
      * NFTs will always be burned in an amount of 1.
      */
     function burnTokens(uint256[] memory _ids, uint256[] memory _amounts) external onlyPlugin {
-        for (uint i = 0; i < _ids.length; i++) {
-            _requireNonBrandTokenToBurn(_ids[i]);
-        }
         IEconomy(economy).burnBatch(_msgSender(), _ids, _amounts);
     }
 

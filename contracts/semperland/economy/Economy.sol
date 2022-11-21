@@ -130,9 +130,20 @@ contract Economy is ERC1155, IEconomy, IMetaverseOwned, SafeExchange {
     }
 
     /**
+     * Any token ID may be burned, except brands.
+     */
+    function _requireNonBrandTokenToBurn(uint256 _id) private {
+        require(
+            _id >= (1 << 160),
+            "Economy: only non-brand tokens can be burned this way"
+        );
+    }
+
+    /**
      * Burns any token from the metaverse (actually: from plugins).
      */
     function burn(address _from, uint256 _tokenId, uint256 _amount) external onlyMetaverse {
+        _requireNonBrandTokenToBurn(_tokenId);
         _burn(_from, _tokenId, _amount);
     }
 
@@ -140,6 +151,9 @@ contract Economy is ERC1155, IEconomy, IMetaverseOwned, SafeExchange {
      * Burns many tokens from the metaverse (actually: from plugins).
      */
     function burnBatch(address _from, uint256[] memory _tokenIds, uint256[] memory _amounts) external onlyMetaverse {
+        for(uint256 i = 0; i < _tokenIds.length; i++) {
+            _requireNonBrandTokenToBurn(_tokenIds[i]);
+        }
         _burnBatch(_from, _tokenIds, _amounts);
     }
 

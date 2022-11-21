@@ -125,7 +125,7 @@ contract("Metaverse", function (accounts) {
         accounts[3], sampleTokenTransferTracker.address, new BN(brand1), 1, "0x00",
         {from: accounts[3]}
       ),
-      "Metaverse: only non-brand tokens can be burned this way"
+      "Economy: only non-brand tokens can be burned this way"
     );
   });
 
@@ -135,7 +135,7 @@ contract("Metaverse", function (accounts) {
         accounts[4], sampleTokenTransferTracker.address, [new BN(brand2)], [1], "0x00",
         {from: accounts[4]}
       ),
-      "Metaverse: only non-brand tokens can be burned this way"
+      "Economy: only non-brand tokens can be burned this way"
     );
   });
 
