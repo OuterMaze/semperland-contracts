@@ -439,7 +439,7 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
       {from: accounts[0]}
     );
     let tx = await contract.dealBreak(new BN("4"), {from: accounts[0]});
-    expectEvent(tx, "DealBroken", [new BN("4"), accounts[0]]);
+    expectEvent(tx, "DealBroken", [new BN("4"), accounts[0], accounts[1], true]);
     console.log("2. Break by receiver, after creation (deal: 5)");
     await contract.dealStart(
       accounts[0], accounts[1], [new BN("1"), new BN("2")],
@@ -447,7 +447,7 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
       {from: accounts[0]}
     );
     tx = await contract.dealBreak(new BN("5"), {from: accounts[1]});
-    expectEvent(tx, "DealBroken", [new BN("5"), accounts[1]]);
+    expectEvent(tx, "DealBroken", [new BN("5"), accounts[0], accounts[1], false]);
     console.log("3. Break-attempt by third party, after creation (deal: 6)");
     await contract.dealStart(
       accounts[0], accounts[1], [new BN("1"), new BN("2")],
@@ -466,7 +466,7 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
     );
     await contract.dealAccept(new BN("7"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[1]});
     tx = await contract.dealBreak(new BN("7"), {from: accounts[0]});
-    expectEvent(tx, "DealBroken", [new BN("7"), accounts[0]]);
+    expectEvent(tx, "DealBroken", [new BN("7"), accounts[0], accounts[1], true]);
     console.log("5. Break by receiver, after acceptance (deal: 8)");
     await contract.dealStart(
       accounts[0], accounts[1], [new BN("1"), new BN("2")],
@@ -475,7 +475,7 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
     );
     await contract.dealAccept(new BN("8"), [new BN("3")], [new BN("150000000000000000")], {from: accounts[1]});
     tx = await contract.dealBreak(new BN("8"), {from: accounts[1]});
-    expectEvent(tx, "DealBroken", [new BN("8"), accounts[1]]);
+    expectEvent(tx, "DealBroken", [new BN("8"), accounts[0], accounts[1], false]);
     console.log("6. Break-attempt by third party, after acceptance (deal: 9)");
     await contract.dealStart(
       accounts[0], accounts[1], [new BN("1"), new BN("2")],

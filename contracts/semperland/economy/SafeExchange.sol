@@ -36,7 +36,9 @@ abstract contract SafeExchange is Context {
      * This event is raised when a deal is broken by its emitter, the
      * receiver, or an operator on behalf of any of them.
      */
-    event DealBroken(uint256 indexed dealId, address indexed breaker);
+    event DealBroken(
+        uint256 indexed dealId, address indexed emitter, address indexed receiver, bool isEmitter
+    );
 
     /**
      * Each deal knows what is being exchanged, the current state,
@@ -209,14 +211,14 @@ abstract contract SafeExchange is Context {
             emitter != address(0),
             "SafeExchange: invalid deal"
         );
+        bool isEmitter = emitter == sender || _isApproved(emitter, sender);
         require(
-            emitter == sender || _isApproved(emitter, sender) ||
-            receiver == sender || _isApproved(receiver, sender),
+            isEmitter || receiver == sender || _isApproved(receiver, sender),
             "SafeExchange: caller is not emitter/receiver nor approved"
         );
 
         // Now, trigger the event and clear the deal.
-        emit DealBroken(_dealIndex, sender);
+        emit DealBroken(_dealIndex, emitter, receiver, isEmitter);
         delete deals[_dealIndex];
     }
 
