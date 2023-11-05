@@ -212,7 +212,7 @@ contract CurrencyDefinitionPlugin is NativePayable, FTDefiningPlugin, FTTypeChec
      */
     function _initialize() internal override {
         WMATICType = _defineSystemCurrency(address(this), CurrencyMetadata({
-            registered: true, name: "WMATIC", description: "Wrapped MATIC in this world",
+            registered: true, name: "WMATIC", description: "Wrapped MATIC",
             color: "#ffd700", image: wmaticImage, icon16x16: wmaticIcon16x16,
             icon32x32: wmaticIcon32x32, icon64x64: wmaticIcon64x64
         }));
