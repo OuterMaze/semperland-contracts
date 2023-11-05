@@ -5,7 +5,9 @@ const CurrencyDefinitionPlugin = artifacts.require("CurrencyDefinitionPlugin");
 const CurrencyMintingPlugin = artifacts.require("CurrencyMintingPlugin");
 
 module.exports = async function(_deployer, network, accounts) {
-    let metaverseAddress = (await Metaverse.deployed()).address;
+    let metaverse = await Metaverse.deployed();
+    let metaverseAddress = metaverse.address;
+    // Adding the currency definition plugin with default arguments.
     // We can change these later.
     await _deployer.deploy(
         CurrencyDefinitionPlugin, metaverseAddress, accounts[0],
@@ -16,8 +18,13 @@ module.exports = async function(_deployer, network, accounts) {
         // Sponsor timeout (7m30s minutes).
         450
     );
-    let definitionPluginAddress = (await CurrencyDefinitionPlugin.deployed()).address;
+    let currencyDefinitionPlugin = await CurrencyDefinitionPlugin.deployed();
+    let currencyDefinitionPluginAddress = currencyDefinitionPlugin.address;
+    await metaverse.addPlugin(currencyDefinitionPluginAddress);
     await _deployer.deploy(
-        CurrencyMintingPlugin, metaverseAddress, definitionPluginAddress, accounts[0], 450
+        CurrencyMintingPlugin, metaverseAddress, currencyDefinitionPluginAddress, accounts[0], 450
     );
+    let currencyMintingPlugin = await CurrencyMintingPlugin.deployed();
+    let currencyMintingPluginAddress = currencyMintingPlugin.address;
+    await metaverse.addPlugin(currencyMintingPluginAddress);
 };
