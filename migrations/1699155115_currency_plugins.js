@@ -27,4 +27,9 @@ module.exports = async function(_deployer, network, accounts) {
     let currencyMintingPlugin = await CurrencyMintingPlugin.deployed();
     let currencyMintingPluginAddress = currencyMintingPlugin.address;
     await metaverse.addPlugin(currencyMintingPluginAddress);
+    // FURTHER MIGRATIONS MUST SET:
+    // - Images for WMATIC and BEAT.
+    // - Currency definition cost.
+    // - Currency minting cost.
+    // - Currency minting amount.
 };

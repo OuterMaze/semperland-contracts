@@ -13,4 +13,6 @@ module.exports = async function(_deployer, network, accounts) {
     await metaverse.setBrandRegistry((await BrandRegistry.deployed()).address);
     await metaverse.setEconomy((await Economy.deployed()).address);
     await metaverse.setSponsorRegistry((await SponsorRegistry.deployed()).address);
+    // FURTHER MIGRATIONS MUST SET:
+    // - Brand registration costs.
 };
