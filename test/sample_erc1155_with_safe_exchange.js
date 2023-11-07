@@ -102,6 +102,16 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
       newDeal.state.cmp(new BN("0")) === 0,
       "The new deal must have a state of 0, not " + newDeal.state
     );
+    let dealData1 = await contract.dealContents(new BN("1"), {from: accounts[0]});
+    assert.isTrue(
+      dealData1[0].length === 2 && dealData1[0][0].cmp(new BN("1")) === 0 && dealData1[0][1].cmp(new BN("2")) === 0 &&
+      dealData1[1].length === 2 && dealData1[1][0].cmp(new BN("50000000000000000")) === 0 && dealData1[1][1].cmp(new BN("100000000000000000")) === 0,
+      "The new deal must have the exact offered items in the emitter's contents"
+    );
+    assert.isTrue(
+      dealData1[2].length === 0 && dealData1[3].length === 0,
+      "The new deal must have no items in the receiver side"
+    );
     // 4. Then, the deal must be accepted by the receiver.
     console.log("4. Then, the deal must be accepted by the receiver");
     await expectRevert(
@@ -137,7 +147,18 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
       newDeal.state.cmp(new BN("1")) === 0,
       "The new deal must have a state of 1, not " + newDeal.state
     );
-    // 8. Them, the deal must be confirmed by the emitter.
+    let dealData2 = await contract.dealContents(new BN("1"), {from: accounts[0]});
+    assert.isTrue(
+      dealData2[0].length === 2 && dealData2[0][0].cmp(new BN("1")) === 0 && dealData2[0][1].cmp(new BN("2")) === 0 &&
+      dealData2[1].length === 2 && dealData2[1][0].cmp(new BN("50000000000000000")) === 0 && dealData2[1][1].cmp(new BN("100000000000000000")) === 0,
+      "The new deal must have the exact offered items in the emitter's contents"
+    );
+    assert.isTrue(
+      dealData2[2].length === 1 && dealData2[2][0].cmp(new BN("3")) === 0 &&
+      dealData2[3].length === 1 && dealData2[3][0].cmp(new BN("150000000000000000")) === 0,
+      "The new deal must have the exact offered items in the receiver's contents"
+    );
+    // 8. Then, the deal must be confirmed by the emitter.
     console.log("8. Them, the deal must be confirmed by the emitter");
     tx = await contract.dealConfirm(new BN("1"), {from: accounts[0]});
     // 9. An event must have been triggered.
