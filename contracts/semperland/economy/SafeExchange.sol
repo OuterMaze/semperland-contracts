@@ -63,6 +63,17 @@ abstract contract SafeExchange is Context {
     mapping(uint256 => Deal) public deals;
 
     /**
+     * The contents for all the ACTIVE / PENDING deals instantiated so far.
+     */
+    function dealContents(uint256 index) public view returns (
+        uint256[] memory, uint256[] memory, uint256[] memory, uint256[] memory
+    ) {
+        Deal storage deal = deals[index];
+        return (deal.emitterTokenIds, deal.emitterTokenAmounts,
+                deal.receiverTokenIds,deal.receiverTokenAmounts);
+    }
+
+    /**
      * Checks whether a deal can be started with some data.
      */
     function _checkDealStart(
