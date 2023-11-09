@@ -306,6 +306,9 @@ contract BrandRegistry is DelegableContext, NativePayable, IBrandRegistry, IMeta
         string memory _icon16x16, string memory _icon32x32, string memory _icon64x64
     ) public payable delegable(_delegation, _delegation.length == 0 ? bytes32(0) : keccak256(abi.encodePacked(_name, _description, _image)))  {
         if (IMetaverse(metaverse).isAllowed(METAVERSE_MINT_BRAND_FOR, msg.sender)) {
+            // Those allowed to MINT_BRAND_FOR can do both things:
+            // 1. Mint, for free, a brand for a delegator.
+            // 2. Mint, for free, a brand for themselves.
             _requireNoPrice("BrandRegistry: brand registration");
         } else {
             _requireNativeTokenPrice("BrandRegistry: brand registration", brandRegistrationCost, 1);
