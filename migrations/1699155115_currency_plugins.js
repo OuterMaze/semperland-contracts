@@ -34,4 +34,6 @@ module.exports = async function(_deployer, network, accounts) {
     await currencyDefinitionPlugin.setCurrencyDefinitionCost("10000000000000000000");
     await currencyMintingPlugin.setCurrencyMintCost("5000000000000000000");
     await currencyMintingPlugin.setCurrencyMintAmount("100000000000000000000");
+    // Finally, link the minting plug-in to the definition plug-in.
+    await currencyDefinitionPlugin.setMintingPlugin(currencyMintingPlugin.address);
 };
