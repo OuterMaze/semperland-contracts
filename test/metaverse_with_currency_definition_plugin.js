@@ -145,7 +145,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
     let posteriorMetadata = await economy.uri(posterior);
 
     let expectedWMATICMetadata = jsonUrl({
-      name: "WMATIC", description: "Wrapped MATIC in this world",
+      name: "WMATIC", description: "Wrapped MATIC",
       image: "http://example.org/images/wmatic-image.png",
       decimals: 18,
       properties: {
@@ -700,7 +700,7 @@ contract("CurrencyDefinitionPlugin", function (accounts) {
         type: "currency"
       },
       currentMetadata: {
-        name: "WMATIC", description: "Wrapped MATIC in this world",
+        name: "WMATIC", description: "Wrapped MATIC",
         image: "http://example.org/images/wmatic-image.png",
         decimals: 18,
         properties: {

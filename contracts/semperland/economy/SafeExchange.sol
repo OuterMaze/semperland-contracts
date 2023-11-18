@@ -19,12 +19,18 @@ abstract contract SafeExchange is Context {
     /**
      * This event is raised when a new deal is created.
      */
-    event DealStarted(uint256 indexed dealId, address indexed emitter, address indexed receiver);
+    event DealStarted(
+        uint256 indexed dealId, address indexed emitter, address indexed receiver,
+        uint256[] emitterTokenIds, uint256[] emitterTokenAmounts
+    );
 
     /**
      * This event is raised when a deal is accepted by the receiver.
      */
-    event DealAccepted(uint256 indexed dealId, address indexed emitter, address indexed receiver);
+    event DealAccepted(
+        uint256 indexed dealId, address indexed emitter, address indexed receiver,
+        uint256[] receiverTokenIds, uint256[] receiverTokenAmounts
+    );
 
     /**
      * This event is raised when a deal is confirmed by its creator,
@@ -117,7 +123,7 @@ abstract contract SafeExchange is Context {
             state: DealState.CREATED, receiverTokenIds: new uint256[](0), receiverTokenAmounts: new uint256[](0)
         });
         // Then, emit the event.
-        emit DealStarted(currentDealIndex, _emitter, _receiver);
+        emit DealStarted(currentDealIndex, _emitter, _receiver, _tokenIds, _tokenAmounts);
     }
 
     /**
@@ -169,7 +175,7 @@ abstract contract SafeExchange is Context {
         deal.receiverTokenIds = _tokenIds;
         deal.receiverTokenAmounts = _tokenAmounts;
         // Then, emit the event.
-        emit DealAccepted(_dealIndex, deal.emitter, receiver);
+        emit DealAccepted(_dealIndex, deal.emitter, receiver, _tokenIds, _tokenAmounts);
     }
 
     /**

@@ -31,6 +31,12 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
     }
   }
 
+  function sameBNArray(array1, array2) {
+    return array1.length === array2.length && array1.every((e, i) => {
+      return e.cmp(array2[i]) === 0
+    })
+  }
+
   function revertReason(message) {
     return message + " -- Reason given: " + message;
   }
@@ -84,9 +90,14 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
     await expectBalances(ids, amounts, accounts[1]);
     // 2. An event must have been triggered.
     console.log("2. An event must have been triggered");
-    expectEvent(tx, "DealStarted", {
+    const es = expectEvent(tx, "DealStarted", {
       dealId: new BN("1"), emitter: accounts[0], receiver: accounts[1]
     });
+    assert.isTrue(
+      sameBNArray(es.args.emitterTokenIds, [new BN("1"), new BN("2")]) &&
+      sameBNArray(es.args.emitterTokenAmounts, [new BN("50000000000000000"), new BN("100000000000000000")]),
+      "The deal's emitter tokens must match"
+    );
     // 3. Also, the deal must be valid.
     console.log("3. Also, the deal must be valid");
     let newDeal = await contract.deals(new BN("1"), {from: accounts[0]});
@@ -129,9 +140,14 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
     await expectBalances(ids, amounts, accounts[1]);
     // 6. An event must have been triggered.
     console.log("6. An event must have been triggered");
-    expectEvent(tx, "DealAccepted", {
+    const ea = expectEvent(tx, "DealAccepted", {
       dealId: new BN("1"), emitter: accounts[0], receiver: accounts[1]
     });
+    assert.isTrue(
+      sameBNArray(ea.args.receiverTokenIds, [new BN("3")]) &&
+      sameBNArray(ea.args.receiverTokenAmounts, [new BN("150000000000000000")]),
+      "The deal's receiver tokens must match"
+    );
     // 7. Also, the deal must be valid.
     console.log("7. Also, the deal must be valid");
     newDeal = await contract.deals(new BN("1"), {from: accounts[1]});
@@ -210,9 +226,14 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
     await expectBalances(ids, amounts, accounts[1]);
     // 2. An event must have been triggered.
     console.log("2. An event must have been triggered");
-    expectEvent(tx, "DealStarted", {
+    const es = expectEvent(tx, "DealStarted", {
       dealId: new BN("2"), emitter: accounts[0], receiver: accounts[1]
     });
+    assert.isTrue(
+      sameBNArray(es.args.emitterTokenIds, [new BN("1"), new BN("2")]) &&
+      sameBNArray(es.args.emitterTokenAmounts, [new BN("50000000000000000"), new BN("100000000000000000")]),
+      "The deal's emitter tokens must match"
+    );
     // 3. Also, the deal must be valid.
     console.log("3. Also, the deal must be valid");
     let newDeal = await contract.deals(new BN("2"), {from: accounts[0]});
@@ -247,9 +268,14 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
     await expectBalances(ids, amounts, accounts[1]);
     // 6. An event must have been triggered.
     console.log("6. An event must have been triggered");
-    expectEvent(tx, "DealAccepted", {
+    const ea = expectEvent(tx, "DealAccepted", {
       dealId: new BN("2"), emitter: accounts[0], receiver: accounts[1]
     });
+    assert.isTrue(
+      sameBNArray(ea.args.receiverTokenIds, [new BN("3")]) &&
+      sameBNArray(ea.args.receiverTokenAmounts, [new BN("150000000000000000")]),
+      "The deal's receiver tokens must match"
+    );
     // 7. Also, the deal must be valid.
     console.log("7. Also, the deal must be valid");
     newDeal = await contract.deals(new BN("2"), {from: accounts[1]});
@@ -335,9 +361,14 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
     await expectBalances(ids, amounts, accounts[1]);
     // 2. An event must have been triggered.
     console.log("2. An event must have been triggered");
-    expectEvent(tx, "DealStarted", {
+    const es = expectEvent(tx, "DealStarted", {
       dealId: new BN("3"), emitter: accounts[0], receiver: accounts[1]
     });
+    assert.isTrue(
+      sameBNArray(es.args.emitterTokenIds, [new BN("1"), new BN("2")]) &&
+      sameBNArray(es.args.emitterTokenAmounts, [new BN("50000000000000000"), new BN("100000000000000000")]),
+      "The deal's emitter tokens must match"
+    );
     // 3. Also, the deal must be valid.
     console.log("3. Also, the deal must be valid");
     let newDeal = await contract.deals(new BN("4"), {from: accounts[0]});
@@ -393,9 +424,14 @@ contract("SampleERC1155WithSafeExchange", function (accounts) {
     await expectBalances(ids, amounts, accounts[1]);
     // 6. An event must have been triggered.
     console.log("6. An event must have been triggered");
-    expectEvent(tx, "DealAccepted", {
+    const ea = expectEvent(tx, "DealAccepted", {
       dealId: new BN("3"), emitter: accounts[0], receiver: accounts[1]
     });
+    assert.isTrue(
+      sameBNArray(ea.args.receiverTokenIds, [new BN("3")]) &&
+      sameBNArray(ea.args.receiverTokenAmounts, [new BN("150000000000000000")]),
+      "The deal's receiver tokens must match"
+    );
     // 7. Also, the deal must be valid.
     console.log("7. Also, the deal must be valid");
     newDeal = await contract.deals(new BN("3"), {from: accounts[1]});

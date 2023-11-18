@@ -11,7 +11,7 @@ contract("IdUtils", function(accounts) {
   let lib = null;
 
   before(async function() {
-    lib = await IdUtils.deployed();
+    lib = await IdUtils.new();
   });
 
   it("should appropriately build a generic NFT id", async function () {
