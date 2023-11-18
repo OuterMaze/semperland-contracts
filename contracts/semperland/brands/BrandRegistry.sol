@@ -331,7 +331,7 @@ contract BrandRegistry is DelegableContext, NativePayable, IBrandRegistry, IMeta
      * benefits (in particular, with respect to assets loading on
      * customers) are given in clients to socially committed brands.
      */
-    event BrandSocialCommitmentUpdated(address indexed updatedBy, address indexed brand, bool committed);
+    event BrandSocialCommitmentUpdated(address indexed updatedBy, address indexed brandId, bool committed);
 
     /**
      * Updates whether a brand is socially committed or not.

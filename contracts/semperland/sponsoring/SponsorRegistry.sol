@@ -57,7 +57,7 @@ contract SponsorRegistry is ERC165, ISponsorRegistry, IMetaverseOwned {
     /**
      * This event is triggered when a sponsoring setting changes.
      */
-    event Sponsored(address indexed _sponsor, address indexed _brandId, bool _sponsored);
+    event Sponsored(address indexed sponsor, address indexed brandId, bool sponsored);
 
     /**
      * Changes a sponsoring setting on a brand.
