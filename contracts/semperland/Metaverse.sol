@@ -550,8 +550,8 @@ contract Metaverse is Ownable, IMetaverse {
      * Tells whether a user has a specific permission on the metaverse, or
      * is its owner.
      */
-    function isAllowed(bytes32 _permission, address _sender) public view returns (bool) {
-        return _sender == owner() || permissions[SUPERUSER][_sender] || permissions[_permission][_sender];
+    function isAllowed(bytes32 _permission, address _user) public view returns (bool) {
+        return _user == owner() || permissions[SUPERUSER][_user] || permissions[_permission][_user];
     }
 
     /**
