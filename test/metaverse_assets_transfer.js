@@ -83,6 +83,7 @@ contract("Metaverse", function (accounts) {
     await expectEvent(
       await brandRegistry.registerBrand(
         await delegates.makeDelegate(web3, accounts[2], [
+          {type: "string", value: "registerBrand"},
           {type: "string", value: "My Brand 2"},
           {type: "string", value: "My awesome brand 2"},
           {type: "string", value: "http://example.com/brand2.png"}

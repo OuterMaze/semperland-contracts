@@ -838,6 +838,7 @@ contract("Metaverse", function (accounts) {
     await expectRevert(
       brandRegistry.registerBrand(
         await delegates.makeDelegate(web3, accounts[1], [
+          {type: "string", value: "registerBrand"},
           {type: "string", value: "My Brand 5"},
           {type: "string", value: "My awesome brand 5"},
           {type: "string", value: "http://example.com/brand5.png"}
@@ -859,6 +860,7 @@ contract("Metaverse", function (accounts) {
     await expectEvent(
       await brandRegistry.registerBrand(
         await delegates.makeDelegate(web3, accounts[1], [
+          {type: "string", value: "registerBrand"},
           {type: "string", value: "My Brand 5"},
           {type: "string", value: "My awesome brand 5"},
           {type: "string", value: "http://example.com/brand5.png"}
@@ -892,6 +894,7 @@ contract("Metaverse", function (accounts) {
     await expectEvent(
       await brandRegistry.registerBrand(
           await delegates.makeDelegate(web3, accounts[2], [
+            {type: "string", value: "registerBrand"},
             {type: "string", value: "My Brand 6"},
             {type: "string", value: "My awesome brand 6"},
             {type: "string", value: "http://example.com/brand6.png"}
@@ -920,6 +923,7 @@ contract("Metaverse", function (accounts) {
     await expectRevert(
       brandRegistry.registerBrand(
         await delegates.makeDelegate(web3, accounts[2], [
+          {type: "string", value: "registerBrand"},
           {type: "string", value: "My Brand 7"},
           {type: "string", value: "My awesome brand 7"},
           {type: "string", value: "http://example.com/brand7.png"}
