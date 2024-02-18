@@ -1,1 +1,3 @@
 node_modules/
+# This pattern is intended to use: ganache ... --database.dbPath ./foo.ganache.db
+*.ganache.db
