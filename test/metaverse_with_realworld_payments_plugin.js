@@ -57,9 +57,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
 
   before(async function () {
     // Set up the metaverse and two plug-ins.
-    metaverse = await Metaverse.new({ from: accounts[0] });
-    economy = await Economy.new(metaverse.address, { from: accounts[0] });
-    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[8], 300, { from: accounts[0] });
+    metaverse = await Metaverse.new({ from: accounts[0], gas: new BN(6000000) });
+    economy = await Economy.new(metaverse.address, { from: accounts[0], gas: new BN(6000000) });
+    brandRegistry = await BrandRegistry.new(metaverse.address, accounts[8], 300, { from: accounts[0], gas: new BN(6000000) });
     definitionPlugin = await CurrencyDefinitionPlugin.new(
       metaverse.address, accounts[8],
       "http://example.org/images/wmatic-image.png",
@@ -71,53 +71,53 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "http://example.org/images/beat-32x32.png",
       "http://example.org/images/beat-64x64.png",
       300,
-      { from: accounts[0] }
+      { from: accounts[0], gas: new BN(6000000)  }
     );
     mintingPlugin = await CurrencyMintingPlugin.new(
-      metaverse.address, definitionPlugin.address, accounts[8], 300, { from: accounts[0] }
+      metaverse.address, definitionPlugin.address, accounts[8], 300, { from: accounts[0], gas: new BN(6000000) }
     );
     signatureVerifier = await MetaverseSignatureVerifier.new(
       metaverse.address, ["ECDSA"], [
         (await SimpleECDSASignatureVerifier.new({ from: accounts[0] })).address
-      ], { from: accounts[0] }
+      ], { from: accounts[0], gas: new BN(6000000)  }
     );
 
     // Is this right? This call takes gas: 5286902
     realWorldPaymentsPlugin = await RealWorldPaymentsPlugin.new(
-      metaverse.address, 30, accounts[8], { from: accounts[0], gas: 5400000 }
+      metaverse.address, 30, accounts[8], { from: accounts[0], gas: new BN(6000000) }
     );
-    await metaverse.setEconomy(economy.address, { from: accounts[0] });
-    await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0] });
-    await metaverse.setSignatureVerifier(signatureVerifier.address, { from: accounts[0] });
-    await metaverse.addPlugin(definitionPlugin.address, { from: accounts[0] });
-    await metaverse.addPlugin(mintingPlugin.address, { from: accounts[0] });
-    await definitionPlugin.setMintingPlugin(mintingPlugin.address, { from: accounts[0] });
-    await metaverse.addPlugin(realWorldPaymentsPlugin.address, { from: accounts[0] });
-    await signatureVerifier.setSignatureMethodAllowance(0, true, {from: accounts[1]});
-    await signatureVerifier.setSignatureMethodAllowance(0, true, {from: accounts[2]});
+    await metaverse.setEconomy(economy.address, { from: accounts[0], gas: new BN(6000000) });
+    await metaverse.setBrandRegistry(brandRegistry.address, { from: accounts[0], gas: new BN(6000000) });
+    await metaverse.setSignatureVerifier(signatureVerifier.address, { from: accounts[0], gas: new BN(6000000) });
+    await metaverse.addPlugin(definitionPlugin.address, { from: accounts[0], gas: new BN(6000000) });
+    await metaverse.addPlugin(mintingPlugin.address, { from: accounts[0], gas: new BN(6000000) });
+    await definitionPlugin.setMintingPlugin(mintingPlugin.address, { from: accounts[0], gas: new BN(6000000) });
+    await metaverse.addPlugin(realWorldPaymentsPlugin.address, { from: accounts[0], gas: new BN(6000000) });
+    await signatureVerifier.setSignatureMethodAllowance(0, true, { from: accounts[1], gas: new BN(6000000) });
+    await signatureVerifier.setSignatureMethodAllowance(0, true, { from: accounts[2], gas: new BN(6000000) });
 
     // Mint some brands (define cost, and mint 2 brands).
-    await brandRegistry.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[0] });
+    await brandRegistry.setBrandRegistrationCost(new BN("10000000000000000000"), { from: accounts[0], gas: new BN(6000000) });
 
     await brandRegistry.registerBrand(
       delegates.NO_DELEGATE,
       "My Brand 1", "My awesome brand 1", "http://example.com/brand1.png", "http://example.com/icon1-16x16.png",
       "http://example.com/icon1-32x32.png", "http://example.com/icon1-64x64.png",
-      {from: accounts[1], value: new BN("10000000000000000000")}
+      { from: accounts[1], value: new BN("10000000000000000000"), gas: new BN(6000000) }
     );
     brand1 = web3.utils.toChecksumAddress('0x' + web3.utils.soliditySha3(
         "0xd6", "0x94", brandRegistry.address, accounts[1], 1
-    ).substr(26));
+    ).substring(26));
 
     await brandRegistry.registerBrand(
       delegates.NO_DELEGATE,
       "My Brand 2", "My awesome brand 2", "http://example.com/brand2.png", "http://example.com/icon2-16x16.png",
       "http://example.com/icon2-32x32.png", "http://example.com/icon2-64x64.png",
-      {from: accounts[2], value: new BN("10000000000000000000")}
+      { from: accounts[2], value: new BN("10000000000000000000"), gas: new BN(6000000) }
     );
     brand2 = web3.utils.toChecksumAddress('0x' + web3.utils.soliditySha3(
         "0xd6", "0x94", brandRegistry.address, accounts[2], 2
-    ).substr(26));
+    ).substring(26));
 
     // Define 1 brand currency (in brand #1).
     await definitionPlugin.defineBrandCurrency(
@@ -128,7 +128,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
         {type: "string", value: "http://example.org/images/brand1-1-image.png"},
       ]),
       brand1, "Brand #1 Curr #1", "Currency #1 of Brand #1",
-      "http://example.org/images/brand1-1-image.png", { from: accounts[0] }
+      "http://example.org/images/brand1-1-image.png", { from: accounts[0], gas: new BN(6000000) }
     );
 
     // Define 1 brand currency (in brand #2).
@@ -140,7 +140,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
         {type: "string", value: "http://example.org/images/brand2-1-image.png"},
       ]),
       brand2, "Brand #2 Curr #1", "Currency #1 of Brand #2",
-      "http://example.org/images/brand2-1-image.png", { from: accounts[0] }
+      "http://example.org/images/brand2-1-image.png", { from: accounts[0], gas: new BN(6000000) }
     );
 
     // Foresee the brand ids and currency ids.
@@ -154,7 +154,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     BEAT = await definitionPlugin.BEATType();
     // And wrap some MATIC for accounts[9]
     let amount = new BN("20000000000000000000");
-    await web3.eth.sendTransaction({from: accounts[9], to: mintingPlugin.address, value: amount});
+    await web3.eth.sendTransaction({ from: accounts[9], to: mintingPlugin.address, value: amount, gas: new BN(6000000) });
     // Also: mint some brand1currency1 to account 0 (also brand2currency1).
     let cost = new BN("1000000000000000000");
     amount = new BN("100000000000000000000");
@@ -209,6 +209,23 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "The expected Brand #2 Currency #1 funds must be 100 full tokens, not: " + rewardFunds.toString()
     );
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   it("must have the expected title", async function() {
     let realWorldPaymentsTitle = await realWorldPaymentsPlugin.title();
