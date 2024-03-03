@@ -40,7 +40,7 @@ async function txGasDetails(web3, response) {
  * @returns {string} The full reason
  */
 function revertReason(message, reasonGiven) {
-    return message + " -- Reason given: " + (reasonGiven === undefined ? message : reasonGiven);
+    return "Reason given: " + (reasonGiven === undefined ? message : reasonGiven);
 }
 
 /**
