@@ -383,7 +383,23 @@ async function executePaymentOrderConfirmationCall(
         gas = gas || {};
         if (gas.amount) sendArgs.gas = gas.amount;
         if (gas.price) sendArgs.gasPrice = gas.price;
-        return await method.send(sendArgs);
+        try
+        {
+            return await method.send(sendArgs);
+        }
+        catch(e)
+        {
+            let hash = e.receipt && e.receipt.transactionHash;
+            const tx = await web3.eth.getTransaction(hash)
+            var result = await web3.eth.call(tx, tx.blockNumber)
+            result = result.startsWith('0x') ? result : `0x${result}`
+            if (result && result.substring(138)) {
+                let error = web3.utils.toAscii(result.substring(138))
+                throw new Error("Revert: " + error + "\n" + JSON.stringify(e.receipt));
+            } else {
+                throw e;
+            }
+        }
     }
 }
 
