@@ -934,7 +934,10 @@ contract("CurrencyMintingPlugin", function (accounts) {
 
   it("must succeed in wrapping 16 MATIC", async function() {
     let amount = new BN("16000000000000000000");
-    await web3.eth.sendTransaction({ from: accounts[4], to: mintingPlugin.address, value: amount });
+    let currentBalance = new BN(await web3.eth.getBalance(accounts[4]));
+    console.log("Current balance is:", currentBalance.toString());
+    console.log("Amount to send is:", amount.toString());
+    await web3.eth.sendTransaction({ from: accounts[4], to: mintingPlugin.address, value: amount, gas: new BN("100000") });
     let balance = await economy.balanceOf(accounts[4], WMATIC);
     assert.isTrue(
       balance.cmp(amount) === 0,
@@ -944,8 +947,11 @@ contract("CurrencyMintingPlugin", function (accounts) {
 
   it("must succeed in wrapping 3 more MATIC", async function() {
     let amount = new BN("3000000000000000000");
+    let currentBalance = new BN(await web3.eth.getBalance(accounts[4]));
+    console.log("Current balance is:", currentBalance.toString());
+    console.log("Amount to send is:", amount.toString());
     let expectedBalance = new BN("19000000000000000000");
-    await web3.eth.sendTransaction({ from: accounts[4], to: mintingPlugin.address, value: amount });
+    await web3.eth.sendTransaction({ from: accounts[4], to: mintingPlugin.address, value: amount, gas: new BN("100000")  });
     let balance = await economy.balanceOf(accounts[4], WMATIC);
     assert.isTrue(
       balance.cmp(expectedBalance) === 0,
