@@ -494,7 +494,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       "tokens", [WMATIC], [new web3.utils.BN("2000000000000000000")],
       null, economy.address, economy.abi, realWorldPaymentsPlugin.address,
       realWorldPaymentsPlugin.abi, accounts[9]
-    )).to.be.rejectedWith(Error, "Returned error: cannot sign data; no private key");
+    )).to.be.rejectedWith(Error, "cannot sign data; no private key");
   });
 
   it("must fail: the toAddress is not an address", async function() {
