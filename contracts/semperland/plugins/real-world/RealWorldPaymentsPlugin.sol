@@ -39,6 +39,11 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
     bytes32 constant BRAND_SIGN_PAYMENTS = keccak256("Plugins::RealWorldPayments::Brand::Payments::Sign");
 
     /**
+     * The remainder of the transaction.
+     */
+    uint256 constant REMAINDER = 10000000;
+
+    /**
      * Instantiating this plug-in requires the metaverse,
      * a set of allowed payment order signers and a global
      * fee (which will nevertheless be overridable by a
@@ -135,10 +140,10 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
         bool committed = IBrandRegistry(IMetaverse(metaverse).brandRegistry()).isCommitted(brandId);
         if (committed) {
             if (paidData.matic != 0) {
-                _sendNative(paidData.matic, 1000000, to, "the target address");
+                _sendNative(paidData.matic, REMAINDER, to, "the target address");
             } else if (paidData.ids.length > 0) {
                 uint256[] memory amounts = new uint256[](paidData.ids.length);
-                _sendTokens(paidData.ids, paidData.values, 1000000, to, amounts);
+                _sendTokens(paidData.ids, paidData.values, REMAINDER, to, amounts);
             }
         } else {
             uint256 length = paidData.ids.length;
@@ -151,14 +156,14 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
                     // The agent will be nonzero.
                     sentNative += _sendNative(paidData.matic, agentFee, agent, "the agent address");
                 }
-                _sendNative(paidData.matic - sentNative, 1000000, to, "the target address");
+                _sendNative(paidData.matic - sentNative, REMAINDER, to, "the target address");
             } else if (length > 0) {
                 uint256[] memory amounts = new uint256[](paidData.ids.length);
                 _sendTokens(paidData.ids, paidData.values, receiverFee, paymentFeeEarningsReceiver, amounts);
                 if (agentFee != 0) {
                     _sendTokens(paidData.ids, paidData.values, agentFee, agent, amounts);
                 }
-                _sendTokens(paidData.ids, paidData.values, 1000000, to, amounts);
+                _sendTokens(paidData.ids, paidData.values, REMAINDER, to, amounts);
             }
         }
         if (rewardIds.length != 0) {
@@ -178,7 +183,7 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
      * Sends native tokens by using a fractional multiplier.
      */
     function _sendNative(uint256 _value, uint256 _fee, address _to, string memory _text) private returns (uint256) {
-        uint256 fraction = _fee == 1000000 ? _value : _value * _fee / 1000000;
+        uint256 fraction = _fee == REMAINDER ? _value : _value * _fee / 1000000;
         (bool success,) = _to.call{value: fraction}("");
         require(
             success,
@@ -198,7 +203,7 @@ contract RealWorldPaymentsPlugin is RealWorldPaymentsRewardAddressBoxesMixin, Re
         uint256 length = _values.length;
         uint256[] memory fractionalValues = new uint256[](length);
         for(uint256 index = 0; index < length; index++) {
-            uint256 amount = _fee == 1000000 ? _values[index] - amounts[index] : _values[index] * _fee / 1000000;
+            uint256 amount = _fee == REMAINDER ? _values[index] - amounts[index] : _values[index] * _fee / 1000000;
             fractionalValues[index] = amount;
             amounts[index] += amount;
         }
