@@ -210,23 +210,6 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
     );
   });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   it("must have the expected title", async function() {
     let realWorldPaymentsTitle = await realWorldPaymentsPlugin.title();
     assert.isTrue(
@@ -2022,7 +2005,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       );
     });
 
-    function testAppropriateFees() {
+    function testAppropriateFees(debug) {
       let rewardsTypes = ["no-rewards", "with-rewards"];
       let paymentTypes = ["native", "token", "tokens"];
       let brandTypes = ["no-brand", "non-committed-brand", "committed-brand"];
@@ -2033,10 +2016,9 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
             let rewardsType = rewardsTypes[idxRewardsType];
             let paymentType = paymentTypes[idxPaymentType];
             let brandType = brandTypes[idxBrandType];
+            let settingsCaption = "[rewards:" + rewardsType + "; payment:" + paymentType + "; brand:" + brandType + "; debug:" + debug + "]";
 
-            let settingsCaption = "[rewards:" + rewardsType + "; payment:" + paymentType + "; brand:" + brandType + "]";
-
-            it("must pass 18 tests, expecting different fees for agent", async function() {
+            it("must pass one of the 18 tests, expecting different fees for agent " + settingsCaption, async function() {
               let obj = await buildTestPaymentObj(rewardsType, paymentType, brandType, settingsCaption, {
                 tokenValue: new web3.utils.BN("10")
               });
@@ -2213,7 +2195,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       }
     }
 
-    testAppropriateFees();
+    testAppropriateFees("account 2 choosing account 7 as agent");
 
     it("must have proper PoS settings", async function() {
       let pos1 = await realWorldPaymentsPlugin.posSponsorships(accounts[1]);
@@ -2250,7 +2232,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       );
     });
 
-    it("must allow changing the fee for account 1 to 30", async function() {
+    it("must allow changing the fee for account 1 to 26", async function() {
       await realWorldPaymentsPlugin.setFee(accounts[2], new BN(26), {from: accounts[7]});
     });
 
@@ -2276,7 +2258,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       );
     });
 
-    testAppropriateFees();
+    testAppropriateFees("account 2 choosing account 7 as agent, with fee 2.6%");
 
     it("must have proper PoS settings", async function() {
       let pos1 = await realWorldPaymentsPlugin.posSponsorships(accounts[1]);
@@ -2312,7 +2294,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       await realWorldPaymentsPlugin.updatePaymentFeeAgent(accounts[7], new BN(0), {from: accounts[0]});
     });
 
-    it("must now allow account 1 to [re-]set account 7 as agent", async function() {
+    it("must not allow account 1 to [re-]set account 7 as agent", async function() {
       await expectRevert(
         realWorldPaymentsPlugin.setAgent(accounts[7], {from: accounts[1]}),
         revertReason("RealWorldPaymentsPlugin: the chosen address is not an active agent")
@@ -2323,11 +2305,11 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       let result1 = await realWorldPaymentsPlugin.paymentFee(accounts[1]);
       // The fraction is (600 * min(27, 30)) / 1000000
       assert.isTrue(
-          result1['0'].cmp(new BN(27 * 300)) === 0 &&
-          result1['1'].cmp(new BN(27 * 700)) === 0 &&
-          result1['2'] === accounts[7],
-          "The expected fee settings for account 1 must be (27 * 400, 27 * 600, account 7), not " +
-          "(" + result1['0'].toString() + ", " + result1['1'].toString() + ", " + result1['2'] + ")"
+        result1['0'].cmp(new BN(27 * 300)) === 0 &&
+        result1['1'].cmp(new BN(27 * 700)) === 0 &&
+        result1['2'] === accounts[7],
+        "The expected fee settings for account 1 must be (27 * 400, 27 * 600, account 7), not " +
+        "(" + result1['0'].toString() + ", " + result1['1'].toString() + ", " + result1['2'] + ")"
       );
 
       let result2 = await realWorldPaymentsPlugin.paymentFee(accounts[2]);
@@ -2341,7 +2323,7 @@ contract("RealWorldPaymentsPlugin", function (accounts) {
       );
     });
 
-    testAppropriateFees();
+    testAppropriateFees("account 2 choosing account 6 as agent, with fee 2.7%");
 
     it("must have proper PoS settings", async function() {
       let pos1 = await realWorldPaymentsPlugin.posSponsorships(accounts[1]);
